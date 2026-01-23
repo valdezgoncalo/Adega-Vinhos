@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Adega Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        h1 { font-family: 'Playfair Display', serif; }
+        .wine-card img { object-fit: cover; height: 180px; width: 100%; }
+        .star-rating { color: #fbbf24; }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800 pb-20">
+
+    <div class="max-w-6xl mx-auto px-4 py-10">
+        <header class="text-center mb-10">
+            <h1 class="text-5xl text-red-900 mb-2">Garrafeira Pessoal</h1>
+            <p class="text-stone-500 italic">Guarda e partilha as tuas descobertas</p>
+        </header>
+
+        <div class="grid lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-1">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200 sticky top-6">
+                    <h2 id="formTitle" class="text-lg font-bold mb-4 text-red-800 uppercase tracking-wider">Novo Registo</h2>
+                    <form id="vinhoForm" class="space-y-3">
+                        <input type="hidden" id="editIndex" value="-1">
+                        <input type="text" id="nome" required placeholder="Nome do Vinho" class="w-full p-2 text-sm bg-stone-50 border rounded-lg outline-none focus:ring-1 focus:ring-red-800">
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="tipo" class="p-2 text-sm bg-stone-50 border rounded-lg outline-none">
+                                <option>Tinto</option>
+                                <option>Branco</option>
+                                <option>Verde</option>
+                                <option>Rosé</option>
+                            </select>
+                            <input type="number" id="ano" placeholder="Ano" class="p-2 text-sm bg-stone-50 border rounded-lg outline-none">
+                        </div>
+
+                        <select id="estrelas" class="w-full p-2 text-sm bg-stone-50 border rounded-lg outline-none text-amber-500 font-bold">
+                            <option value="5">⭐⭐⭐⭐⭐</option>
+                            <option value="4">⭐⭐⭐⭐</option>
+                            <option value="3" selected>⭐⭐⭐</option>
+                            <option value="2">⭐⭐</option>
+                            <option value="1">⭐</option>
+                        </select>
+
+                        <div class="border-2 border-dashed border-stone-200 p-2 rounded-lg">
+                            <input type="file" id="foto" accept="image/*" class="w-full text-[10px] text-stone-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-red-50 file:text-red-700">
+                        </div>
+                        <input type="hidden" id="fotoBase64">
+
+                        <input type="text" id="regiao" placeholder="Região" class="w-full p-2 text-sm bg-stone-50 border rounded-lg outline-none">
+                        <input type="text" id="castas" placeholder="Castas" class="w-full p-2 text-sm bg-stone-50 border rounded-lg outline-none">
+                        <textarea id="notas" rows="2" placeholder="Notas de prova..." class="w-full p-2 text-sm bg-stone-50 border rounded-lg outline-none"></textarea>
+
+                        <div class="flex gap-2">
+                            <button type="submit" id="btnSubmit" class="flex-1 bg-red-900 text-white font-bold py-2 rounded-lg hover:bg-red-950 transition shadow-md">Guardar</button>
+                            <button type="button" id="btnCancelar" class="hidden px-3 bg-stone-200 rounded-lg text-stone-600" onclick="resetForm()">✕</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 mb-6 flex flex-wrap gap-4 items-center">
+                    <input type="text" id="searchBar" onkeyup="atualizarLista()" placeholder="Procurar nome, região ou casta..." class="flex-grow p-2 border rounded-lg outline-none focus:ring-1 focus:ring-red-800 text-sm">
+                    <select id="filterTipo" onchange="atualizarLista()" class="p-2 border rounded-lg outline-none bg-stone-50 text-xs font-semibold">
+                        <option value="Todos">Todos os Tipos</option>
+                        <option value="Tinto">Tintos</option>
+                        <option value="Branco">Brancos</option>
+                        <option value="Verde">Verdes</option>
+                        <option value="Rosé">Rosés</option>
+                    </select>
+                </div>
+
+                <div id="listaVinhos" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('vinhoForm');
+        const lista = document.getElementById('listaVinhos');
+        const searchBar = document.getElementById('searchBar');
+        const filterTipo = document.getElementById('filterTipo');
+        const fotoInput = document.getElementById('foto');
+        const fotoBase64 = document.getElementById('fotoBase64');
+        
+        let vinhos = JSON.parse(localStorage.getItem('minhaAdega')) || [];
+
+        fotoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => fotoBase64.value = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function gerarEstrelas(num) {
+            return '★'.repeat(num) + '☆'.repeat(5-num);
+        }
+
+        async function partilharVinho(idx) {
+            const v = vinhos[idx];
+            const texto = `🍷 *Recomendação de Vinho* \n\n*Nome:* ${v.nome}\n*Tipo:* ${v.tipo}\n*Região:* ${v.regiao}\n*Avaliação:* ${gerarEstrelas(v.estrelas)}\n*Notas:* ${v.notas || 'Sem notas.'}`;
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'A Minha Adega', text: texto });
+                } catch (err) { console.log("Erro ao partilhar"); }
+            } else {
+                alert("O teu navegador não suporta partilha automática. Copia o texto:\n\n" + texto);
+            }
+        }
+
+        function atualizarLista() {
+            const busca = searchBar.value.toLowerCase();
+            const tipoFiltro = filterTipo.value;
+
+            const filtrados = vinhos.filter(v => {
+                const matchesSearch = v.nome.toLowerCase().includes(busca) || v.regiao.toLowerCase().includes(busca);
+                const matchesTipo = tipoFiltro === "Todos" || v.tipo === tipoFiltro;
+                return matchesSearch && matchesTipo;
+            });
+
+            lista.innerHTML = '';
+            filtrados.forEach((v) => {
+                const originalIdx = vinhos.indexOf(v);
+                const card = document.createElement('div');
+                card.className = "wine-card bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col";
+                card.innerHTML = `
+                    <div class="relative">
+                        ${v.foto ? `<img src="${v.foto}">` : `<div class="bg-stone-200 h-[180px] flex items-center justify-center text-stone-400 italic text-xs">Sem Foto</div>`}
+                        <button onclick="partilharVinho(${originalIdx})" class="absolute top-2 right-2 bg-white/90 p-2 rounded-full shadow-md hover:bg-red-50 transition text-sm">📤</button>
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-red-100 text-red-800">${v.tipo}</span>
+                            <div class="flex gap-2">
+                                <button onclick="editarVinho(${originalIdx})" class="text-blue-600 text-[10px] font-bold">EDITAR</button>
+                                <button onclick="removerVinho(${originalIdx})" class="text-stone-300 hover:text-red-600 text-[10px]">APAGAR</button>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-stone-800 truncate">${v.nome}</h3>
+                        <div class="text-amber-500 text-xs mb-2">${gerarEstrelas(v.estrelas)}</div>
+                        <p class="text-[10px] text-stone-500 mb-2 italic">📍 ${v.regiao} ${v.ano ? ' • ' + v.ano : ''}</p>
+                        <div class="mt-auto bg-stone-50 p-2 rounded text-[11px] text-stone-600 border-l-2 border-red-800 italic">"${v.notas}"</div>
+                    </div>
+                `;
+                lista.appendChild(card);
+            });
+            localStorage.setItem('minhaAdega', JSON.stringify(vinhos));
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const idx = document.getElementById('editIndex').value;
+            const data = {
+                nome: document.getElementById('nome').value,
+                tipo: document.getElementById('tipo').value,
+                ano: document.getElementById('ano').value,
+                regiao: document.getElementById('regiao').value,
+                castas: document.getElementById('castas').value,
+                notas: document.getElementById('notas').value,
+                estrelas: parseInt(document.getElementById('estrelas').value),
+                foto: fotoBase64.value
+            };
+            if (idx === "-1") vinhos.unshift(data); else vinhos[idx] = data;
+            resetForm(); atualizarLista();
+        });
+
+        function editarVinho(idx) {
+            const v = vinhos[idx];
+            document.getElementById('nome').value = v.nome;
+            document.getElementById('tipo').value = v.tipo;
+            document.getElementById('ano').value = v.ano;
+            document.getElementById('regiao').value = v.regiao;
+            document.getElementById('castas').value = v.castas;
+            document.getElementById('notas').value = v.notas;
+            document.getElementById('estrelas').value = v.estrelas;
+            document.getElementById('fotoBase64').value = v.foto || '';
+            document.getElementById('editIndex').value = idx;
+            document.getElementById('formTitle').innerText = "Editar Registo";
+            document.getElementById('btnCancelar').classList.remove('hidden');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function resetForm() {
+            form.reset();
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('fotoBase64').value = "";
+            document.getElementById('formTitle').innerText = "Novo Registo";
+            document.getElementById('btnCancelar').classList.add('hidden');
+        }
+
+        function removerVinho(idx) {
+            if(confirm('Remover vinho?')) { vinhos.splice(idx, 1); atualizarLista(); }
+        }
+
+        atualizarLista();
+    </script>
+</body>
+</html>
