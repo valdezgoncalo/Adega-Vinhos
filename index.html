@@ -3,113 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minha Adega Digital</title>
+    <title>Meu Diário Gourmet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600;900&display=swap');
         
-        :root {
-            --wine-dark: #2d0a0a;
-            --wine-red: #7f1d1d;
-            --stone-bg: #f5f5f4;
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            -webkit-tap-highlight-color: transparent;
-            background-color: var(--stone-bg);
-            color: var(--wine-dark);
-        }
-        
+        :root { --wine-red: #7f1d1d; --stone-bg: #f5f5f4; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--stone-bg); -webkit-tap-highlight-color: transparent; }
         h1, h2 { font-family: 'Playfair Display', serif; }
 
-        /* Splash Screen */
-        #splash {
-            position: fixed;
-            inset: 0;
-            background: var(--wine-dark);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s ease-out;
-        }
-
-        /* Otimização Android */
-        input, select, textarea, button {
-            font-size: 16px !important; 
-            min-height: 52px;
-            border-radius: 1rem !important;
-        }
-
-        .wine-card {
-            background: white;
-            border-radius: 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-
-        .wine-card:active { transform: scale(0.98); }
-
-        .wine-card img {
-            width: 100%;
-            height: 240px;
-            object-fit: cover;
-        }
-
-        /* Esconder scrollbar mas manter funcionalidade */
+        input, select, textarea, button { font-size: 16px !important; min-height: 50px; border-radius: 1rem !important; }
+        
+        .tab-active { border-bottom: 4px solid var(--wine-red); color: var(--wine-red); font-weight: 900; }
+        .card { background: white; border-radius: 2rem; overflow: hidden; shadow: lg; transition: transform 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="pb-10">
-
-    <div id="splash">
-       <img src="adega-icon.jpg.png" alt="Logo" class="w-64 h-64 object-cover rounded-3xl mb-4 shadow-2xl border-2 border-stone-800">
-        <h2 class="text-stone-200 text-2xl tracking-widest uppercase opacity-80">A Minha Adega</h2>
-        <div class="mt-8 w-12 h-1 w-12 bg-red-900 animate-pulse"></div>
-    </div>
+<body class="pb-20">
 
     <nav class="bg-stone-900 text-stone-400 p-3 flex justify-between px-6 items-center text-[10px] font-black uppercase tracking-widest">
-        <span class="text-red-500">● Local Storage Ativo</span>
-        <div class="flex gap-6">
-            <button onclick="exportarBackup()" class="hover:text-white transition flex items-center gap-1">💾 Backup</button>
-            <button onclick="document.getElementById('importFile').click()" class="hover:text-white transition flex items-center gap-1">📂 Importar</button>
-            <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarBackup(event)">
+        <span>💾 Backup Automático Ativo</span>
+        <div class="flex gap-4">
+            <button onclick="exportarTudo()" class="text-red-500">📥 Exportar Tudo</button>
+            <button onclick="document.getElementById('importFile').click()" class="text-red-500">📤 Importar</button>
+            <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarTudo(event)">
         </div>
     </nav>
 
+    <div class="flex justify-center bg-white shadow-sm sticky top-0 z-50">
+        <button onclick="mudarAba('vinhos')" id="tab-vinhos" class="flex-1 py-4 uppercase text-xs tracking-widest tab-active">🍷 Adega</button>
+        <button onclick="mudarAba('restaurantes')" id="tab-restaurantes" class="flex-1 py-4 uppercase text-xs tracking-widest text-stone-400">🍴 Restaurantes</button>
+    </div>
+
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <header class="text-center mb-12">
-            <h1 class="text-6xl text-red-900 mb-2 drop-shadow-sm">A Minha Adega</h1>
-            <p class="text-stone-400 font-medium tracking-wide">REPOSITÓRIO PESSOAL DE VINHOS</p>
+        <header class="text-center mb-8">
+            <h1 id="mainTitle" class="text-4xl text-red-900 mb-1">A Minha Adega</h1>
+            <p id="mainSub" class="text-stone-400 text-[10px] font-bold uppercase tracking-widest">Repositório Pessoal</p>
         </header>
 
-        <div class="grid lg:grid-cols-12 gap-10">
-            
+        <div class="grid lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4">
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-stone-100 sticky top-6">
-                    <h2 id="formTitle" class="text-3xl font-bold mb-8 text-stone-900">Novo Registo</h2>
-                    
-                    <form id="vinhoForm" class="space-y-5">
+                <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-stone-100">
+                    <form id="mainForm" class="space-y-4">
                         <input type="hidden" id="editIndex" value="-1">
                         
                         <div>
-                            <input type="text" id="nome" required placeholder="Nome do Vinho" class="w-full p-4 bg-stone-50 border border-stone-200 outline-none focus:border-red-900 focus:bg-white transition-all font-semibold">
+                            <label id="labelNome" class="block text-[10px] font-black text-stone-400 mb-1 ml-1 uppercase">Nome do Vinho</label>
+                            <input type="text" id="nome" required class="w-full p-3 bg-stone-50 border border-stone-100 outline-none focus:ring-2 focus:ring-red-900 transition-all font-semibold">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <select id="tipo" class="w-full p-4 bg-stone-50 border border-stone-200 outline-none font-bold text-red-900">
-                                <option>Tinto</option>
-                                <option>Branco</option>
-                                <option>Verde</option>
-                                <option>Rosé</option>
-                            </select>
-                            <input type="number" id="ano" placeholder="Ano" class="w-full p-4 bg-stone-50 border border-stone-200 outline-none">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label id="labelTipo" class="block text-[10px] font-black text-stone-400 mb-1 ml-1 uppercase">Tipo</label>
+                                <select id="tipo" class="w-full p-3 bg-stone-50 border border-stone-100 outline-none font-bold text-red-900"></select>
+                            </div>
+                            <div>
+                                <label id="labelAno" class="block text-[10px] font-black text-stone-400 mb-1 ml-1 uppercase">Ano / Data</label>
+                                <input type="text" id="ano" class="w-full p-3 bg-stone-50 border border-stone-100 outline-none">
+                            </div>
                         </div>
 
-                        <select id="estrelas" class="w-full p-4 bg-stone-50 border border-stone-200 outline-none text-amber-500 font-black text-center">
+                        <select id="estrelas" class="w-full p-3 bg-stone-50 text-amber-500 font-black text-center">
                             <option value="5">★★★★★ Excelente</option>
                             <option value="4">★★★★ Muito Bom</option>
                             <option value="3" selected>★★★ Bom</option>
@@ -117,132 +74,119 @@
                             <option value="1">★ Fraco</option>
                         </select>
 
-                        <div class="bg-stone-100 p-4 rounded-2xl border-2 border-dashed border-stone-200">
-                            <input type="file" id="foto" accept="image/*" capture="environment" class="w-full text-xs text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-red-900 file:text-white file:font-bold">
+                        <div class="bg-stone-50 p-3 rounded-2xl border-2 border-dashed border-stone-200">
+                            <input type="file" id="foto" accept="image/*" capture="environment" class="w-full text-[10px] file:bg-red-900 file:text-white file:border-0 file:px-3 file:py-1 file:rounded-lg file:font-bold">
                             <input type="hidden" id="fotoBase64">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="regiao" placeholder="Região" class="p-4 bg-stone-50 border border-stone-200 outline-none">
-                            <input type="text" id="castas" placeholder="Castas" class="p-4 bg-stone-50 border border-stone-200 outline-none">
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="extra1" placeholder="Região" class="p-3 bg-stone-50 border border-stone-100 outline-none">
+                            <input type="text" id="extra2" placeholder="Castas" class="p-3 bg-stone-50 border border-stone-100 outline-none">
                         </div>
 
-                        <textarea id="notas" rows="3" placeholder="Notas de prova..." class="w-full p-4 bg-stone-50 border border-stone-200 outline-none"></textarea>
+                        <textarea id="notas" rows="3" placeholder="Notas e observações..." class="w-full p-3 bg-stone-50 border border-stone-100 outline-none"></textarea>
 
-                        <div class="flex gap-3 pt-4">
-                            <button type="submit" id="btnSubmit" class="flex-1 bg-red-900 text-white font-black py-5 rounded-2xl shadow-xl active:bg-red-950 transition-all uppercase tracking-widest">Guardar</button>
-                            <button type="button" id="btnCancelar" class="hidden px-6 bg-stone-200 rounded-2xl text-stone-600 font-bold" onclick="resetForm()">✕</button>
-                        </div>
-                        <p id="saveStatus" class="hidden text-center text-red-900 text-[10px] font-black uppercase tracking-widest animate-pulse">✓ Gravado com sucesso</p>
+                        <button type="submit" class="w-full bg-red-900 text-white font-black py-4 rounded-2xl shadow-lg active:bg-black transition-all uppercase tracking-widest text-sm">Guardar Registo</button>
                     </form>
                 </div>
             </div>
 
             <div class="lg:col-span-8">
-                <div class="flex flex-col md:flex-row gap-4 mb-10">
-                    <input type="text" id="searchBar" onkeyup="atualizarLista()" placeholder="Procurar vinho, região ou uva..." class="flex-grow p-5 rounded-3xl shadow-lg border-none outline-none focus:ring-2 focus:ring-red-900 font-medium">
-                    <select id="filterTipo" onchange="atualizarLista()" class="p-5 rounded-3xl shadow-lg border-none font-black text-red-900 outline-none bg-white">
-                        <option value="Todos">Todos</option>
-                        <option value="Tinto">Tintos</option>
-                        <option value="Branco">Brancos</option>
-                        <option value="Verde">Verdes</option>
-                        <option value="Rosé">Rosés</option>
-                    </select>
-                </div>
-
-                <div id="listaVinhos" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8"></div>
-                
-                <div id="emptyState" class="hidden text-center py-32 opacity-20">
-                    <span class="text-8xl">🍷</span>
-                    <p class="mt-4 font-bold uppercase tracking-tighter text-2xl">Garrafeira Vazia</p>
-                </div>
+                <div id="listaItems" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Lógica de Splash Screen
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash');
-                splash.style.opacity = '0';
-                setTimeout(() => splash.style.display = 'none', 500);
-            }, 1500);
-        });
+        let abaAtual = 'vinhos';
+        let dados = JSON.parse(localStorage.getItem('diarioGourmet')) || { vinhos: [], restaurantes: [] };
 
-        let vinhos = JSON.parse(localStorage.getItem('minhaAdega')) || [];
-        const form = document.getElementById('vinhoForm');
-        const lista = document.getElementById('listaVinhos');
-        const fotoInput = document.getElementById('foto');
-        const fotoBase64 = document.getElementById('fotoBase64');
-        const statusMsg = document.getElementById('saveStatus');
+        const config = {
+            vinhos: {
+                titulo: "A Minha Adega", sub: "Repositório Pessoal", nome: "Nome do Vinho", tipo: "Tipo", 
+                opcoes: ["Tinto", "Branco", "Verde", "Rosé", "Espumante"], extra1: "Região", extra2: "Castas"
+            },
+            restaurantes: {
+                titulo: "Roteiro Gourmet", sub: "Guia de Restaurantes", nome: "Nome do Restaurante", tipo: "Cozinha", 
+                opcoes: ["Tradicional", "Italiano", "Japonês", "Marisco", "Churrasco", "Outro"], extra1: "Zona / Cidade", extra2: "Prato Favorito"
+            }
+        };
 
-        fotoInput.addEventListener('change', function() {
+        function mudarAba(aba) {
+            abaAtual = aba;
+            document.getElementById('tab-vinhos').className = aba === 'vinhos' ? "flex-1 py-4 uppercase text-xs tracking-widest tab-active" : "flex-1 py-4 uppercase text-xs tracking-widest text-stone-400";
+            document.getElementById('tab-restaurantes').className = aba === 'restaurantes' ? "flex-1 py-4 uppercase text-xs tracking-widest tab-active" : "flex-1 py-4 uppercase text-xs tracking-widest text-stone-400";
+            
+            const c = config[aba];
+            document.getElementById('mainTitle').innerText = c.titulo;
+            document.getElementById('mainSub').innerText = c.sub;
+            document.getElementById('labelNome').innerText = c.nome;
+            document.getElementById('nome').placeholder = c.nome;
+            document.getElementById('extra1').placeholder = c.extra1;
+            document.getElementById('extra2').placeholder = c.extra2;
+            
+            const selectTipo = document.getElementById('tipo');
+            selectTipo.innerHTML = c.opcoes.map(o => `<option>${o}</option>`).join('');
+            
+            atualizarLista();
+        }
+
+        // Conversão de Foto
+        document.getElementById('foto').addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => fotoBase64.value = e.target.result;
+                reader.onload = (e) => document.getElementById('fotoBase64').value = e.target.result;
                 reader.readAsDataURL(file);
             }
         });
 
-        function exportarBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vinhos));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", "adega_backup.json");
-            dl.click();
-        }
-
-        function importarBackup(event) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                vinhos = JSON.parse(e.target.result);
-                atualizarLista();
+        document.getElementById('mainForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const idx = document.getElementById('editIndex').value;
+            const registro = {
+                nome: document.getElementById('nome').value,
+                tipo: document.getElementById('tipo').value,
+                ano: document.getElementById('ano').value,
+                extra1: document.getElementById('extra1').value,
+                extra2: document.getElementById('extra2').value,
+                notas: document.getElementById('notas').value,
+                estrelas: parseInt(document.getElementById('estrelas').value),
+                foto: document.getElementById('fotoBase64').value
             };
-            reader.readAsText(event.target.files[0]);
-        }
 
-        async function partilhar(idx) {
-            const v = vinhos[idx];
-            const txt = `🍷 *${v.nome.toUpperCase()}*\nTipo: ${v.tipo}\nRegião: ${v.regiao}\nNota: ${'★'.repeat(v.estrelas)}\n\n_"${v.notas}"_`;
-            if (navigator.share) await navigator.share({ text: txt });
-        }
+            if (idx === "-1") dados[abaAtual].unshift(registro);
+            else dados[abaAtual][idx] = registro;
+
+            localStorage.setItem('diarioGourmet', JSON.stringify(dados));
+            e.target.reset();
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('fotoBase64').value = "";
+            atualizarLista();
+        });
 
         function atualizarLista() {
-            const busca = document.getElementById('searchBar').value.toLowerCase();
-            const tipoFiltro = document.getElementById('filterTipo').value;
-
-            const filtrados = vinhos.filter(v => {
-                const mSearch = v.nome.toLowerCase().includes(busca) || v.regiao.toLowerCase().includes(busca);
-                const mTipo = tipoFiltro === "Todos" || v.tipo === tipoFiltro;
-                return mSearch && mTipo;
-            });
-
-            localStorage.setItem('minhaAdega', JSON.stringify(vinhos));
+            const lista = document.getElementById('listaItems');
             lista.innerHTML = '';
-            document.getElementById('emptyState').classList.toggle('hidden', filtrados.length > 0);
-
-            filtrados.forEach((v) => {
-                const idx = vinhos.indexOf(v);
+            
+            dados[abaAtual].forEach((item, idx) => {
                 const card = document.createElement('div');
-                card.className = "wine-card flex flex-col";
+                card.className = "card flex flex-col shadow-md";
                 card.innerHTML = `
                     <div class="relative">
-                        ${v.foto ? `<img src="${v.foto}">` : `<div class="bg-stone-200 h-[240px] flex items-center justify-center text-stone-400 font-black uppercase text-xs tracking-widest">Sem Foto</div>`}
-                        <button onclick="partilhar(${idx})" class="absolute top-4 right-4 bg-white/90 p-3 rounded-full shadow-xl">📤</button>
+                        ${item.foto ? `<img src="${item.foto}">` : `<div class="bg-stone-200 h-[200px] flex items-center justify-center text-[10px] font-black uppercase text-stone-400 tracking-widest">Sem Imagem</div>`}
+                        <div class="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-lg text-[10px] font-black text-red-900 shadow-sm">${item.tipo}</div>
                     </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-[9px] font-black bg-stone-900 text-white px-3 py-1 rounded-md uppercase tracking-widest">${v.tipo}</span>
-                            <span class="text-amber-500 font-bold text-sm">${'★'.repeat(v.estrelas)}</span>
+                    <div class="p-5 flex-grow flex flex-col">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-black text-lg text-stone-900 leading-tight uppercase tracking-tighter">${item.nome}</h3>
+                            <span class="text-amber-500 font-bold text-xs">${'★'.repeat(item.estrelas)}</span>
                         </div>
-                        <h3 class="font-black text-xl text-stone-900 leading-tight mb-1 uppercase tracking-tighter">${v.nome}</h3>
-                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">${v.regiao} ${v.ano ? '• ' + v.ano : ''}</p>
-                        <p class="text-xs text-stone-600 mb-6 flex-grow italic leading-relaxed border-l-2 border-red-900 pl-3">"${v.notas || '...'}"</p>
-                        <div class="flex justify-between items-center pt-4 border-t border-stone-50">
-                            <button onclick="editarVinho(${idx})" class="text-red-900 text-[10px] font-black uppercase tracking-widest hover:underline">Editar</button>
-                            <button onclick="removerVinho(${idx})" class="text-stone-300 text-[10px] font-black uppercase tracking-widest hover:text-red-600 transition">Remover</button>
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">${item.extra1} ${item.ano ? '• ' + item.ano : ''}</p>
+                        <p class="text-xs text-stone-600 mb-4 flex-grow italic leading-relaxed border-l-2 border-red-900 pl-3">"${item.notas || '...'}"</p>
+                        <div class="flex justify-between items-center pt-3 border-t border-stone-50">
+                            <button onclick="remover(${idx})" class="text-stone-300 text-[10px] font-black uppercase tracking-widest hover:text-red-600 transition">Apagar</button>
+                            <button onclick="prepararEdicao(${idx})" class="text-red-900 text-[10px] font-black uppercase tracking-widest">Editar</button>
                         </div>
                     </div>
                 `;
@@ -250,54 +194,48 @@
             });
         }
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const idx = document.getElementById('editIndex').value;
-            const data = {
-                nome: document.getElementById('nome').value,
-                tipo: document.getElementById('tipo').value,
-                ano: document.getElementById('ano').value,
-                regiao: document.getElementById('regiao').value,
-                castas: document.getElementById('castas').value,
-                notas: document.getElementById('notas').value,
-                estrelas: parseInt(document.getElementById('estrelas').value),
-                foto: fotoBase64.value
-            };
-            if (idx === "-1") vinhos.unshift(data); else vinhos[idx] = data;
-            statusMsg.classList.remove('hidden');
-            setTimeout(() => statusMsg.classList.add('hidden'), 2000);
-            resetForm(); atualizarLista();
-        });
+        function remover(idx) {
+            if(confirm('Apagar este registo permanentemente?')) {
+                dados[abaAtual].splice(idx, 1);
+                localStorage.setItem('diarioGourmet', JSON.stringify(dados));
+                atualizarLista();
+            }
+        }
 
-        function editarVinho(idx) {
-            const v = vinhos[idx];
-            document.getElementById('nome').value = v.nome;
-            document.getElementById('tipo').value = v.tipo;
-            document.getElementById('ano').value = v.ano;
-            document.getElementById('regiao').value = v.regiao;
-            document.getElementById('castas').value = v.castas;
-            document.getElementById('notas').value = v.notas;
-            document.getElementById('estrelas').value = v.estrelas;
-            document.getElementById('fotoBase64').value = v.foto || '';
+        function prepararEdicao(idx) {
+            const item = dados[abaAtual][idx];
+            document.getElementById('nome').value = item.nome;
+            document.getElementById('tipo').value = item.tipo;
+            document.getElementById('ano').value = item.ano;
+            document.getElementById('extra1').value = item.extra1;
+            document.getElementById('extra2').value = item.extra2;
+            document.getElementById('notas').value = item.notas;
+            document.getElementById('estrelas').value = item.estrelas;
+            document.getElementById('fotoBase64').value = item.foto;
             document.getElementById('editIndex').value = idx;
-            document.getElementById('formTitle').innerText = "Editar";
-            document.getElementById('btnCancelar').classList.remove('hidden');
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function resetForm() {
-            form.reset();
-            document.getElementById('editIndex').value = "-1";
-            document.getElementById('fotoBase64').value = "";
-            document.getElementById('formTitle').innerText = "Novo Registo";
-            document.getElementById('btnCancelar').classList.add('hidden');
+        function exportarTudo() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "backup_gourmet.json");
+            dl.click();
         }
 
-        function removerVinho(idx) {
-            if(confirm('Apagar da adega?')) { vinhos.splice(idx, 1); atualizarLista(); }
+        function importarTudo(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                dados = JSON.parse(e.target.result);
+                localStorage.setItem('diarioGourmet', JSON.stringify(dados));
+                atualizarLista();
+            };
+            reader.readAsText(event.target.files[0]);
         }
 
-        atualizarLista();
+        // Inicializar
+        mudarAba('vinhos');
     </script>
 </body>
 </html>
