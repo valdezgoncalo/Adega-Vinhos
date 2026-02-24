@@ -5,25 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gourmet Pro Journal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
-        
-        :root { 
-            --wine: #831843; 
-            --gold: #92400e;
-            --soft-bg: #fdfcfb; 
-        }
 
-        body { 
-            font-family: 'Outfit', sans-serif; 
+        :root {
+            --wine: #831843;
+            --gold: #92400e;
+            --soft-bg: #fdfcfb;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
             background-color: var(--soft-bg);
             color: #1e293b;
             -webkit-tap-highlight-color: transparent;
         }
-
         h1, h2, .font-serif { font-family: 'Playfair Display', serif; }
 
-        /* Estética Minimalista de Luxo */
         .premium-card {
             background: white;
             border-radius: 32px;
@@ -31,40 +29,29 @@
             box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
         .premium-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 50px -12px rgba(131, 24, 67, 0.08);
+            box-shadow: 0 20px 50px -12px rgba(131,24,67,0.08);
         }
-
-        /* Inputs Estilo Soft */
         input, select, textarea {
             background: #f8fafc !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 18px !important;
             padding: 12px 16px !important;
             transition: all 0.3s ease;
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
         }
-
-        input:focus {
+        input:focus, textarea:focus {
             background: white !important;
             border-color: var(--wine) !important;
-            box-shadow: 0 0 0 4px rgba(131, 24, 67, 0.05);
+            box-shadow: 0 0 0 4px rgba(131,24,67,0.05);
             outline: none;
         }
+        select:focus { outline: none; }
 
-        /* Tabs Modernas */
-        .tab-btn {
-            position: relative;
-            transition: all 0.3s ease;
-            color: #94a3b8;
-        }
-
-        .tab-active {
-            color: var(--wine);
-            font-weight: 800;
-        }
-
+        .tab-btn { position: relative; transition: all 0.3s ease; color: #94a3b8; }
+        .tab-active { color: var(--wine); font-weight: 800; }
         .tab-active::after {
             content: '';
             position: absolute;
@@ -75,37 +62,101 @@
         .undo-toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             z-index: 1000; display: none;
-            animation: springUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: springUp 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
+        }
+        @keyframes springUp { from { transform: translate(-50%,100px); opacity:0; } to { transform: translate(-50%,0); opacity:1; } }
+
+        /* Loading overlay */
+        #loadingOverlay {
+            position: fixed; inset: 0; background: var(--soft-bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.4s ease;
+        }
+        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+
+        /* Stats */
+        #statsPanel { max-height: 0; overflow: hidden; transition: max-height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease; opacity: 0; }
+        #statsPanel.open { max-height: 700px; opacity: 1; }
+        .stat-bubble {
+            background: white; border-radius: 24px; padding: 20px 16px; text-align: center;
+            border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 20px -6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .stat-bubble:hover { transform: translateY(-3px); }
+
+        /* Notas de prova */
+        .nota-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 99px;
+            font-size: 9px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        .nota-chip button { all: unset; cursor: pointer; font-size: 12px; opacity: 0.6; padding: 0 0 0 2px; }
+        .nota-chip button:hover { opacity: 1; }
+        .nota-card-chip {
+            display: inline-block; padding: 2px 8px; border-radius: 99px;
+            font-size: 8px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
         }
 
-        @keyframes springUp { from { transform: translate(-50%, 100px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-        
+        .price-pill {
+            background: linear-gradient(135deg,#92400e,#d97706); color: white;
+            font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 99px; display: inline-block;
+        }
+
+        .sugestao-btn {
+            padding: 3px 10px; border-radius: 99px; font-size: 9px; font-weight: 700;
+            cursor: pointer; border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .sugestao-btn:hover { border-color: var(--wine); color: var(--wine); background: #fff0f6; }
+
+        .chart-wrap { position: relative; height: 190px; }
         ::-webkit-scrollbar { display: none; }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .card-anim { animation: fadeInUp 0.35s ease both; }
+
+        /* Save indicator */
+        #saveIndicator {
+            position: fixed; top: 16px; right: 16px; z-index: 200;
+            background: #059669; color: white; font-size: 10px; font-weight: 800;
+            padding: 6px 14px; border-radius: 99px; opacity: 0;
+            transition: opacity 0.3s ease; pointer-events: none;
+        }
+        #saveIndicator.show { opacity: 1; }
     </style>
 </head>
-<body class="pb-12">
+<body class="pb-16">
 
+    <!-- Loading -->
+    <div id="loadingOverlay">
+        <div class="text-5xl mb-4">🍷</div>
+        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">A carregar a adega...</p>
+    </div>
+
+    <!-- Save indicator -->
+    <div id="saveIndicator">✓ Guardado</div>
+
+    <!-- Undo toast -->
     <div id="undoContainer" class="undo-toast">
         <button onclick="undo()" class="bg-slate-900 text-white px-8 py-4 rounded-3xl shadow-2xl font-bold flex items-center gap-3 active:scale-95 transition-transform">
-            <span>↩️ Desfazer erro</span>
+            ↩️ Desfazer erro
         </button>
     </div>
 
+    <!-- NAV -->
     <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
         <div class="flex gap-4">
             <button onclick="exportarTudo()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📦 Backup</button>
             <button onclick="document.getElementById('importFile').click()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📥 Import</button>
+            <button onclick="toggleStats()" id="btnStats" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📊 Stats</button>
         </div>
-
         <div class="flex items-center gap-3">
-            <div class="relative">
-                <input type="text" id="filtroTag" oninput="atualizarLista()" placeholder="Procurar etiquetas..." class="!py-2 !px-4 !rounded-full !text-xs w-48 border-none bg-slate-100 focus:bg-white shadow-inner">
-            </div>
+            <input type="text" id="filtroTag" oninput="atualizarLista()" placeholder="Procurar..." class="!py-2 !px-4 !rounded-full !text-xs !w-44">
             <button id="filtroFavoritos" onclick="toggleFiltroFavoritos()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-red-50 transition-colors border border-slate-100">❤️</button>
         </div>
         <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarTudo(event)">
     </nav>
 
+    <!-- HEADER -->
     <header class="max-w-7xl mx-auto px-6 pt-12 text-center">
         <h1 class="text-5xl md:text-6xl mb-4 font-serif text-slate-900">Meu Diário Gourmet</h1>
         <div class="flex justify-center gap-8 mt-8 border-b border-slate-100 pb-4">
@@ -114,28 +165,42 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-12">
+    <!-- STATS -->
+    <div id="statsPanel" class="max-w-7xl mx-auto px-6">
+        <div class="bg-white rounded-[40px] p-8 border border-slate-50 shadow-xl mt-8 mb-2">
+            <h2 class="font-serif text-2xl text-slate-800 mb-6" id="statsPanelTitle">Resumo da Adega</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-bubble"><div class="text-4xl font-black text-pink-900" id="statTotal">0</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total</div></div>
+                <div class="stat-bubble"><div class="text-4xl font-black text-amber-700" id="statMedia">—</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Média ★</div></div>
+                <div class="stat-bubble"><div class="text-4xl font-black text-pink-900" id="statFavoritos">0</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Favoritos</div></div>
+                <div class="stat-bubble"><div class="text-2xl font-black text-amber-700" id="statMediaPreco">—</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Preço Médio</div></div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo</p><div class="chart-wrap"><canvas id="chartTipos"></canvas></div></div>
+                <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Avaliações</p><div class="chart-wrap"><canvas id="chartEstrelas"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="max-w-7xl mx-auto px-6 py-10">
         <div class="grid lg:grid-cols-12 gap-12">
-            
+
+            <!-- FORM -->
             <aside class="lg:col-span-4">
                 <div class="bg-white p-8 rounded-[40px] shadow-2xl border border-slate-50 sticky top-28">
-                    <form id="mainForm" class="space-y-6">
+                    <form id="mainForm" class="space-y-5">
                         <input type="hidden" id="editIndex" value="-1">
-                        
-                        <input type="text" id="nome" required placeholder="Nome do Vinho ou Local" class="w-full !text-lg font-semibold">
+
+                        <input type="text" id="nome" required placeholder="Nome do Vinho ou Local" class="!text-lg font-semibold">
 
                         <div class="grid grid-cols-2 gap-3">
                             <select id="tipo" class="font-bold text-pink-900"></select>
-                            <input type="text" id="ano" placeholder="Ano/Data">
+                            <input type="text" id="ano" placeholder="Ano / Vindima">
                         </div>
 
-                        <div class="space-y-3">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Etiquetas</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="inputTag" placeholder="Ex: Picante, Reserva..." class="flex-1 !py-2">
-                                <button type="button" onclick="addTag()" class="bg-pink-900 text-white w-12 rounded-2xl font-bold">+</button>
-                            </div>
-                            <div id="tagsList" class="flex flex-wrap gap-2"></div>
+                        <div id="produtorWrap">
+                            <input type="text" id="produtor" placeholder="Produtor / Quinta">
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -143,21 +208,45 @@
                             <input type="text" id="extra2" class="text-sm">
                         </div>
 
+                        <div id="precoWrap" class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none z-10">€</span>
+                            <input type="number" id="preco" placeholder="Preço (opcional)" class="!pl-8" min="0" step="0.01">
+                        </div>
+
+                        <div id="notasProvaWrap" class="space-y-3">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Notas de Prova</label>
+                            <div class="flex flex-wrap gap-1.5" id="sugestoesNotasProva"></div>
+                            <div class="flex gap-2">
+                                <input type="text" id="inputNotaProva" placeholder="Outra nota..." class="flex-1 !py-2 !text-xs" onkeydown="if(event.key==='Enter'){event.preventDefault();addNotaProva();}">
+                                <button type="button" onclick="addNotaProva()" class="bg-amber-700 text-white w-12 rounded-2xl font-bold text-xl flex-shrink-0">+</button>
+                            </div>
+                            <div id="notasProvaList" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Etiquetas</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="inputTag" placeholder="Ex: Picante, Reserva..." class="flex-1 !py-2 !text-xs" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag();}">
+                                <button type="button" onclick="addTag()" class="bg-pink-900 text-white w-12 rounded-2xl font-bold text-xl flex-shrink-0">+</button>
+                            </div>
+                            <div id="tagsList" class="flex flex-wrap gap-2"></div>
+                        </div>
+
                         <div class="space-y-2">
                             <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Avaliação & Notas</label>
-                            <select id="estrelas" class="w-full text-amber-500 font-bold text-center">
-                                <option value="5">★★★★★</option>
-                                <option value="4">★★★★</option>
-                                <option value="3" selected>★★★</option>
-                                <option value="2">★★</option>
-                                <option value="1">★</option>
+                            <select id="estrelas" class="text-amber-500 font-bold text-center">
+                                <option value="5">★★★★★ Excepcional</option>
+                                <option value="4">★★★★ Muito Bom</option>
+                                <option value="3" selected>★★★ Bom</option>
+                                <option value="2">★★ Razoável</option>
+                                <option value="1">★ Fraco</option>
                             </select>
-                            <textarea id="notas" rows="3" placeholder="O que achou desta experiência?..." class="w-full text-sm italic"></textarea>
+                            <textarea id="notas" rows="3" placeholder="O que achou desta experiência?..." class="text-sm italic"></textarea>
                         </div>
 
                         <div class="bg-slate-50 border-2 border-dashed border-slate-200 p-4 rounded-3xl text-center relative hover:bg-slate-100 transition-colors">
-                            <input type="file" id="foto" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
-                            <span class="text-xs font-bold text-slate-400">🖼️ CARREGAR FOTO</span>
+                            <input type="file" id="foto" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer !rounded-3xl !border-none !bg-transparent !p-0">
+                            <span class="text-xs font-bold text-slate-400" id="fotoLabel">🖼️ CARREGAR FOTO</span>
                             <input type="hidden" id="fotoBase64">
                         </div>
 
@@ -168,6 +257,7 @@
                 </div>
             </aside>
 
+            <!-- LISTA -->
             <section class="lg:col-span-8">
                 <div id="listaItems" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
             </section>
@@ -175,215 +265,467 @@
     </main>
 
     <script>
-        // Lógica permanece idêntica à anterior para manter todas as funcionalidades pedidas
-        let abaAtual = 'vinhos';
-        let dados = JSON.parse(localStorage.getItem('diarioGourmet')) || { vinhos: [], restaurantes: [] };
-        let currentTags = [];
-        let historicoBackup = null;
-        let apenasFavoritos = false;
+    // ════════════════════════════════════════════════════════════════
+    //  IndexedDB — camada de persistência robusta (suporta fotos grandes)
+    // ════════════════════════════════════════════════════════════════
+    const DB_NAME    = 'DiarioGourmet';
+    const DB_VERSION = 1;
+    const STORE      = 'dados';
+    let db = null;
 
-        const config = {
-            vinhos: { opcoes: ["Tinto", "Branco", "Verde", "Rosé", "Espumante", "Porto"], extra1: "Região", extra2: "Castas" },
-            restaurantes: { opcoes: ["Tradicional", "Gourmet", "Italiano", "Japonês", "Marisqueira"], extra1: "Localização", extra2: "Prato Favorito" }
+    function abrirDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = e => {
+                const db = e.target.result;
+                if(!db.objectStoreNames.contains(STORE)) {
+                    db.createObjectStore(STORE, { keyPath: 'id' });
+                }
+            };
+            req.onsuccess = e => { db = e.target.result; resolve(db); };
+            req.onerror   = e => reject(e.target.error);
+        });
+    }
+
+    function dbGet(id) {
+        return new Promise((resolve, reject) => {
+            const tx  = db.transaction(STORE, 'readonly');
+            const req = tx.objectStore(STORE).get(id);
+            req.onsuccess = e => resolve(e.target.result ? e.target.result.value : null);
+            req.onerror   = e => reject(e.target.error);
+        });
+    }
+
+    function dbSet(id, value) {
+        return new Promise((resolve, reject) => {
+            const tx  = db.transaction(STORE, 'readwrite');
+            const req = tx.objectStore(STORE).put({ id, value });
+            req.onsuccess = () => resolve();
+            req.onerror   = e => reject(e.target.error);
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Estado global
+    // ════════════════════════════════════════════════════════════════
+    let abaAtual      = 'vinhos';
+    let dados         = { vinhos: [], restaurantes: [] };
+    let currentTags        = [];
+    let currentNotasProva  = [];
+    let historicoBackup    = null;
+    let apenasFavoritos    = false;
+    let statsAberto        = false;
+    let chartTipos         = null;
+    let chartEstrelas      = null;
+
+    const config = {
+        vinhos:       { opcoes: ['Tinto','Branco','Verde','Rosé','Espumante','Porto','Licoroso'], extra1:'Região',     extra2:'Castas'        },
+        restaurantes: { opcoes: ['Tradicional','Gourmet','Italiano','Japonês','Marisqueira'],     extra1:'Localização', extra2:'Prato Favorito' }
+    };
+
+    const NOTAS_SUGESTOES = [
+        { nome:'Frutos Vermelhos', cor:'#be185d' }, { nome:'Frutos Negros', cor:'#1e293b' },
+        { nome:'Floral',           cor:'#a855f7' }, { nome:'Especiarias',   cor:'#d97706' },
+        { nome:'Tabaco',           cor:'#78716c' }, { nome:'Terra',         cor:'#92400e' },
+        { nome:'Carvalho',         cor:'#b45309' }, { nome:'Frutos Secos',  cor:'#ca8a04' },
+        { nome:'Mineral',          cor:'#0891b2' }, { nome:'Baunilha',      cor:'#c2410c' },
+        { nome:'Chocolate',        cor:'#7c3aed' }, { nome:'Mel',           cor:'#f59e0b' },
+    ];
+
+    function getCorNota(n) { return (NOTAS_SUGESTOES.find(x => x.nome === n) || {}).cor || '#831843'; }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Persistência
+    // ════════════════════════════════════════════════════════════════
+    async function carregarDados() {
+        const saved = await dbGet('main');
+        if(saved) dados = saved;
+    }
+
+    async function guardarDados() {
+        await dbSet('main', dados);
+        mostrarSaveIndicator();
+    }
+
+    function mostrarSaveIndicator() {
+        const el = document.getElementById('saveIndicator');
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Undo
+    // ════════════════════════════════════════════════════════════════
+    async function salvarComHistorico() {
+        historicoBackup = JSON.parse(JSON.stringify(dados)); // deep copy em memória
+        await guardarDados();
+        const toast = document.getElementById('undoContainer');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 8000);
+        atualizarLista();
+        if(statsAberto) atualizarStats();
+    }
+
+    async function undo() {
+        if(historicoBackup) {
+            dados = historicoBackup;
+            historicoBackup = null;
+            await guardarDados();
+            document.getElementById('undoContainer').style.display = 'none';
+            atualizarLista();
+            if(statsAberto) atualizarStats();
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Notas de Prova
+    // ════════════════════════════════════════════════════════════════
+    function renderSugestoes() {
+        document.getElementById('sugestoesNotasProva').innerHTML = NOTAS_SUGESTOES.map(s => {
+            const sel = currentNotasProva.includes(s.nome);
+            return `<button type="button" onclick="toggleSugestao('${s.nome}')"
+                style="${sel ? `background:${s.cor};color:white;border-color:${s.cor}` : ''}"
+                class="sugestao-btn">${s.nome}</button>`;
+        }).join('');
+    }
+    function toggleSugestao(nome) {
+        currentNotasProva.includes(nome)
+            ? currentNotasProva = currentNotasProva.filter(n => n !== nome)
+            : currentNotasProva.push(nome);
+        renderNotasProvaForm(); renderSugestoes();
+    }
+    function addNotaProva() {
+        const val = document.getElementById('inputNotaProva').value.trim();
+        if(val && !currentNotasProva.includes(val)) {
+            currentNotasProva.push(val);
+            renderNotasProvaForm(); renderSugestoes();
+            document.getElementById('inputNotaProva').value = '';
+        }
+    }
+    function removeNotaProva(nome) {
+        currentNotasProva = currentNotasProva.filter(n => n !== nome);
+        renderNotasProvaForm(); renderSugestoes();
+    }
+    function renderNotasProvaForm() {
+        document.getElementById('notasProvaList').innerHTML = currentNotasProva.map(n => {
+            const cor = getCorNota(n);
+            return `<span class="nota-chip" style="background:${cor}18;color:${cor};border:1.5px solid ${cor}30">
+                ${n}<button type="button" onclick="removeNotaProva('${n.replace(/'/g,"\\'")}')">×</button></span>`;
+        }).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Tags
+    // ════════════════════════════════════════════════════════════════
+    function addTag() {
+        const val = document.getElementById('inputTag').value.trim();
+        if(val && !currentTags.includes(val)) { currentTags.push(val); renderTagsForm(); document.getElementById('inputTag').value = ''; }
+    }
+    function removeTag(tag) { currentTags = currentTags.filter(t => t !== tag); renderTagsForm(); }
+    function renderTagsForm() {
+        document.getElementById('tagsList').innerHTML = currentTags.map(t =>
+            `<span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-2">
+                ${t}<button type="button" onclick="removeTag('${t.replace(/'/g,"\\'")}')">×</button></span>`
+        ).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Abas
+    // ════════════════════════════════════════════════════════════════
+    function mudarAba(aba) {
+        abaAtual = aba;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+        document.getElementById(`tab-${aba}`).classList.add('tab-active');
+        const c = config[aba];
+        document.getElementById('tipo').innerHTML = c.opcoes.map(o => `<option>${o}</option>`).join('');
+        document.getElementById('extra1').placeholder = c.extra1;
+        document.getElementById('extra2').placeholder = c.extra2;
+        ['produtorWrap','precoWrap','notasProvaWrap'].forEach(id =>
+            document.getElementById(id).style.display = aba === 'vinhos' ? '' : 'none'
+        );
+        document.getElementById('statsPanelTitle').textContent =
+            aba === 'vinhos' ? 'Resumo da Adega' : 'Resumo das Experiências';
+        resetForm();
+        atualizarLista();
+        if(statsAberto) atualizarStats();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Favoritos
+    // ════════════════════════════════════════════════════════════════
+    async function toggleFavorito(idx) {
+        dados[abaAtual][idx].favorito = !dados[abaAtual][idx].favorito;
+        await guardarDados();
+        atualizarLista();
+        if(statsAberto) atualizarStats();
+    }
+    function toggleFiltroFavoritos() {
+        apenasFavoritos = !apenasFavoritos;
+        document.getElementById('filtroFavoritos').classList.toggle('bg-red-500');
+        document.getElementById('filtroFavoritos').classList.toggle('text-white');
+        atualizarLista();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Submit
+    // ════════════════════════════════════════════════════════════════
+    document.getElementById('mainForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const idx     = parseInt(document.getElementById('editIndex').value);
+        const precoV  = document.getElementById('preco').value;
+        const registro = {
+            nome:       document.getElementById('nome').value,
+            tipo:       document.getElementById('tipo').value,
+            ano:        document.getElementById('ano').value,
+            produtor:   document.getElementById('produtor').value,
+            tags:       [...currentTags],
+            notasProva: [...currentNotasProva],
+            extra1:     document.getElementById('extra1').value,
+            extra2:     document.getElementById('extra2').value,
+            preco:      precoV !== '' ? parseFloat(precoV) : null,
+            notas:      document.getElementById('notas').value,
+            estrelas:   parseInt(document.getElementById('estrelas').value),
+            foto:       document.getElementById('fotoBase64').value,
+            favorito:   idx !== -1 ? dados[abaAtual][idx].favorito : false
         };
+        if(idx === -1) dados[abaAtual].unshift(registro);
+        else           dados[abaAtual][idx] = registro;
+        await salvarComHistorico();
+        resetForm();
+    });
 
-        function addTag() {
-            const val = document.getElementById('inputTag').value.trim();
-            if(val && !currentTags.includes(val)) {
-                currentTags.push(val);
-                renderTagsForm();
-                document.getElementById('inputTag').value = '';
-            }
+    // ════════════════════════════════════════════════════════════════
+    //  Lista
+    // ════════════════════════════════════════════════════════════════
+    function atualizarLista() {
+        const lista    = document.getElementById('listaItems');
+        const filtroTag = document.getElementById('filtroTag').value.toLowerCase();
+        lista.innerHTML = '';
+
+        let filtrados = dados[abaAtual].map((item, originalIdx) => ({...item, originalIdx}));
+        if(apenasFavoritos) filtrados = filtrados.filter(i => i.favorito);
+        if(filtroTag)       filtrados = filtrados.filter(i =>
+            (i.tags||[]).some(t => t.toLowerCase().includes(filtroTag)) ||
+            i.nome.toLowerCase().includes(filtroTag) ||
+            (i.produtor||'').toLowerCase().includes(filtroTag)
+        );
+
+        if(filtrados.length === 0) {
+            lista.innerHTML = `<div class="col-span-2 text-center py-24 text-slate-300">
+                <div class="text-5xl mb-4">🍷</div>
+                <p class="text-sm font-bold uppercase tracking-widest">Adega vazia — adiciona o teu primeiro vinho!</p>
+            </div>`;
+            return;
         }
 
-        function removeTag(tag) {
-            currentTags = currentTags.filter(t => t !== tag);
-            renderTagsForm();
-        }
+        filtrados.forEach((item, i) => {
+            const card = document.createElement('div');
+            card.className = 'card-anim premium-card overflow-hidden flex flex-col';
+            card.style.animationDelay = `${i * 45}ms`;
 
-        function renderTagsForm() {
-            const container = document.getElementById('tagsList');
-            container.innerHTML = currentTags.map(t => `
-                <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-2">${t} <button type="button" onclick="removeTag('${t}')">×</button></span>
-            `).join('');
-        }
+            const notasProvaHTML = (item.notasProva||[]).map(n => {
+                const cor = getCorNota(n);
+                return `<span class="nota-card-chip" style="background:${cor}18;color:${cor}">${n}</span>`;
+            }).join('');
 
-        function mudarAba(aba) {
-            abaAtual = aba;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-            document.getElementById(`tab-${aba}`).classList.add('tab-active');
-            const c = config[aba];
-            document.getElementById('tipo').innerHTML = c.opcoes.map(o => `<option>${o}</option>`).join('');
-            document.getElementById('extra1').placeholder = c.extra1;
-            document.getElementById('extra2').placeholder = c.extra2;
-            resetForm();
-            atualizarLista();
-        }
+            const precoHTML = item.preco != null
+                ? `<span class="price-pill">€${item.preco.toFixed(2)}</span>` : '';
 
-        function toggleFavorito(idx) {
-            dados[abaAtual][idx].favorito = !dados[abaAtual][idx].favorito;
-            localStorage.setItem('diarioGourmet', JSON.stringify(dados));
-            atualizarLista();
-        }
+            card.innerHTML = `
+                <div class="relative h-56 overflow-hidden flex-shrink-0">
+                    ${item.foto
+                        ? `<img src="${item.foto}" class="w-full h-full object-cover" loading="lazy">`
+                        : `<div class="w-full h-full bg-gradient-to-br from-pink-50 to-rose-100 flex items-center justify-center text-7xl">🍷</div>`}
+                    <button onclick="toggleFavorito(${item.originalIdx})"
+                        class="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-110 transition-transform">
+                        ${item.favorito ? '❤️' : '🤍'}
+                    </button>
+                    <div class="absolute top-4 right-4 flex flex-col items-end gap-2">
+                        <div class="bg-black/70 backdrop-blur-md text-white text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-tight">${item.tipo}</div>
+                        ${precoHTML}
+                    </div>
+                </div>
+                <div class="p-7 flex-grow flex flex-col">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-bold text-slate-800 leading-tight">${item.nome}</h3>
+                        <div class="text-amber-400 text-[11px] ml-2 flex-shrink-0">${'★'.repeat(item.estrelas)}</div>
+                    </div>
+                    ${item.produtor ? `<p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">${item.produtor}</p>` : ''}
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                        ${[item.extra1, item.ano].filter(Boolean).join(' · ')}
+                    </p>
+                    ${notasProvaHTML ? `<div class="flex flex-wrap gap-1.5 mb-3">${notasProvaHTML}</div>` : ''}
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        ${(item.tags||[]).map(t => `<span class="text-[9px] bg-pink-50 text-pink-900 px-2 py-0.5 rounded-md font-bold uppercase">${t}</span>`).join('')}
+                    </div>
+                    ${item.notas
+                        ? `<p class="text-sm text-slate-500 italic mb-5 border-l-2 border-pink-100 pl-4 leading-relaxed flex-grow">"${item.notas}"</p>`
+                        : `<div class="flex-grow"></div>`}
+                    <div class="flex justify-between items-center pt-5 border-t border-slate-50 mt-2">
+                        <button onclick="remover(${item.originalIdx})"
+                            class="text-[10px] font-bold text-slate-300 hover:text-red-400 uppercase tracking-widest transition-colors">Apagar</button>
+                        <button onclick="prepararEdicao(${item.originalIdx})"
+                            class="text-[10px] font-bold text-pink-900 hover:underline uppercase tracking-widest">Editar</button>
+                    </div>
+                </div>`;
+            lista.appendChild(card);
+        });
+    }
 
-        function toggleFiltroFavoritos() {
-            apenasFavoritos = !apenasFavoritos;
-            document.getElementById('filtroFavoritos').classList.toggle('bg-red-500');
-            document.getElementById('filtroFavoritos').classList.toggle('text-white');
-            atualizarLista();
+    // ════════════════════════════════════════════════════════════════
+    //  Remover / Editar / Reset
+    // ════════════════════════════════════════════════════════════════
+    async function remover(idx) {
+        if(confirm('Apagar este registo?')) {
+            dados[abaAtual].splice(idx, 1);
+            await salvarComHistorico();
         }
+    }
 
-        function salvarComHistorico() {
-            historicoBackup = JSON.parse(localStorage.getItem('diarioGourmet'));
-            localStorage.setItem('diarioGourmet', JSON.stringify(dados));
-            const toast = document.getElementById('undoContainer');
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 8000);
-            atualizarLista();
-        }
+    function prepararEdicao(idx) {
+        const item = dados[abaAtual][idx];
+        document.getElementById('nome').value    = item.nome;
+        document.getElementById('tipo').value    = item.tipo;
+        document.getElementById('ano').value     = item.ano || '';
+        document.getElementById('produtor').value = item.produtor || '';
+        document.getElementById('extra1').value  = item.extra1 || '';
+        document.getElementById('extra2').value  = item.extra2 || '';
+        document.getElementById('preco').value   = item.preco != null ? item.preco : '';
+        document.getElementById('notas').value   = item.notas || '';
+        document.getElementById('estrelas').value = item.estrelas;
+        document.getElementById('fotoBase64').value = item.foto || '';
+        document.getElementById('fotoLabel').textContent = item.foto ? '✅ Foto carregada' : '🖼️ CARREGAR FOTO';
+        document.getElementById('editIndex').value = idx;
+        currentTags = [...(item.tags || [])];
+        currentNotasProva = [...(item.notasProva || [])];
+        renderTagsForm(); renderNotasProvaForm(); renderSugestoes();
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
 
-        function undo() {
-            if (historicoBackup) {
-                dados = historicoBackup;
-                localStorage.setItem('diarioGourmet', JSON.stringify(dados));
-                historicoBackup = null;
-                document.getElementById('undoContainer').style.display = 'none';
-                atualizarLista();
-            }
-        }
+    function resetForm() {
+        document.getElementById('mainForm').reset();
+        document.getElementById('editIndex').value  = '-1';
+        document.getElementById('fotoBase64').value = '';
+        document.getElementById('fotoLabel').textContent = '🖼️ CARREGAR FOTO';
+        currentTags = []; currentNotasProva = [];
+        renderTagsForm(); renderNotasProvaForm(); renderSugestoes();
+    }
 
-        document.getElementById('mainForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const idx = document.getElementById('editIndex').value;
-            const registro = {
-                nome: document.getElementById('nome').value,
-                tipo: document.getElementById('tipo').value,
-                ano: document.getElementById('ano').value,
-                tags: [...currentTags],
-                extra1: document.getElementById('extra1').value,
-                extra2: document.getElementById('extra2').value,
-                notas: document.getElementById('notas').value,
-                estrelas: parseInt(document.getElementById('estrelas').value),
-                foto: document.getElementById('fotoBase64').value,
-                favorito: (idx !== "-1") ? dados[abaAtual][idx].favorito : false
+    // ════════════════════════════════════════════════════════════════
+    //  Foto — compressão adequada, sem perda visível
+    // ════════════════════════════════════════════════════════════════
+    document.getElementById('foto').addEventListener('change', function() {
+        const file = this.files[0];
+        if(!file) return;
+        const label = document.getElementById('fotoLabel');
+        label.textContent = '⏳ A comprimir...';
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const maxW = 600; // bom equilíbrio qualidade/tamanho para cards
+                const scale = Math.min(1, maxW / img.width);
+                canvas.width  = Math.round(img.width  * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                const b64 = canvas.toDataURL('image/jpeg', 0.7);
+                const kb  = Math.round(b64.length * 0.75 / 1024);
+                document.getElementById('fotoBase64').value = b64;
+                label.textContent = `✅ ${file.name} (${kb} KB)`;
             };
-            if (idx === "-1") dados[abaAtual].unshift(registro); else dados[abaAtual][idx] = registro;
-            salvarComHistorico();
-            resetForm();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ════════════════════════════════════════════════════════════════
+    //  Stats
+    // ════════════════════════════════════════════════════════════════
+    function toggleStats() {
+        statsAberto = !statsAberto;
+        document.getElementById('statsPanel').classList.toggle('open', statsAberto);
+        document.getElementById('btnStats').style.color = statsAberto ? 'var(--wine)' : '';
+        if(statsAberto) atualizarStats();
+    }
+
+    function atualizarStats() {
+        const items = dados[abaAtual];
+        document.getElementById('statTotal').textContent     = items.length;
+        document.getElementById('statFavoritos').textContent = items.filter(v => v.favorito).length;
+        document.getElementById('statMedia').textContent     = items.length
+            ? (items.reduce((s,v) => s + v.estrelas, 0) / items.length).toFixed(1) + ' ★' : '—';
+        const comPreco = items.filter(v => v.preco != null);
+        document.getElementById('statMediaPreco').textContent = comPreco.length
+            ? '€' + (comPreco.reduce((s,v) => s + v.preco, 0) / comPreco.length).toFixed(2) : '—';
+
+        const tipoCount = {};
+        items.forEach(v => { tipoCount[v.tipo] = (tipoCount[v.tipo]||0) + 1; });
+        const tipoLabels = Object.keys(tipoCount);
+        const paletaTipos = ['#831843','#be185d','#92400e','#d97706','#1e293b','#475569','#0891b2','#a855f7'];
+
+        if(chartTipos) chartTipos.destroy();
+        chartTipos = new Chart(document.getElementById('chartTipos'), {
+            type: 'doughnut',
+            data: { labels: tipoLabels, datasets: [{ data: Object.values(tipoCount), backgroundColor: paletaTipos.slice(0,tipoLabels.length), borderWidth: 0, hoverOffset: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
+                plugins: { legend: { position: 'right', labels: { font: { size: 11, family: 'Outfit' }, padding: 14, usePointStyle: true } } } }
         });
 
-        function atualizarLista() {
-            const lista = document.getElementById('listaItems');
-            const filtroTag = document.getElementById('filtroTag').value.toLowerCase();
-            lista.innerHTML = '';
-            
-            let filtrados = dados[abaAtual].map((item, originalIdx) => ({...item, originalIdx}));
-
-            if (apenasFavoritos) filtrados = filtrados.filter(item => item.favorito);
-            if (filtroTag) filtrados = filtrados.filter(item => item.tags.some(tag => tag.toLowerCase().includes(filtroTag)));
-
-            filtrados.forEach((item) => {
-                const card = document.createElement('div');
-                card.className = "premium-card overflow-hidden flex flex-col";
-                card.innerHTML = `
-                    <div class="relative h-60 overflow-hidden">
-                        ${item.foto ? `<img src="${item.foto}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300 font-bold text-[10px] tracking-widest">SEM FOTO</div>`}
-                        <button onclick="toggleFavorito(${item.originalIdx})" class="absolute top-5 left-5 w-10 h-10 bg-white/90 backdrop-blur rounded-full shadow-lg flex items-center justify-center text-lg">${item.favorito ? '❤️' : '🤍'}</button>
-                        <div class="absolute bottom-5 right-5 bg-black/70 backdrop-blur-md text-white text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-tighter">${item.tipo}</div>
-                    </div>
-                    <div class="p-8 flex-grow flex flex-col">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-xl font-bold text-slate-800 leading-tight">${item.nome}</h3>
-                            <div class="flex text-amber-400 text-[10px]">${'★'.repeat(item.estrelas)}</div>
-                        </div>
-                        <div class="flex flex-wrap gap-1 mb-4">
-                            ${(item.tags || []).map(t => `<span class="text-[9px] bg-pink-50 text-pink-900 px-2 py-0.5 rounded-md font-bold uppercase">${t}</span>`).join('')}
-                        </div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-4">${item.extra1} • ${item.ano || 'S/D'}</p>
-                        <p class="text-sm text-slate-500 italic mb-8 border-l-2 border-pink-100 pl-4 leading-relaxed">"${item.notas || '...'}"</p>
-                        <div class="flex justify-between items-center pt-6 border-t border-slate-50 mt-auto">
-                            <button onclick="remover(${item.originalIdx})" class="text-[10px] font-bold text-slate-300 hover:text-red-500 uppercase tracking-widest">Apagar</button>
-                            <button onclick="prepararEdicao(${item.originalIdx})" class="text-[10px] font-bold text-pink-900 hover:underline uppercase tracking-widest">Editar</button>
-                        </div>
-                    </div>
-                `;
-                lista.appendChild(card);
-            });
-        }
-
-        function remover(idx) {
-            if(confirm('Apagar este registo?')) {
-                historicoBackup = JSON.parse(localStorage.getItem('diarioGourmet'));
-                dados[abaAtual].splice(idx, 1);
-                salvarComHistorico();
-            }
-        }
-
-        function prepararEdicao(idx) {
-            const item = dados[abaAtual][idx];
-            document.getElementById('nome').value = item.nome;
-            document.getElementById('tipo').value = item.tipo;
-            document.getElementById('ano').value = item.ano;
-            document.getElementById('extra1').value = item.extra1;
-            document.getElementById('extra2').value = item.extra2;
-            document.getElementById('notas').value = item.notas;
-            document.getElementById('estrelas').value = item.estrelas;
-            document.getElementById('fotoBase64').value = item.foto || "";
-            document.getElementById('editIndex').value = idx;
-            currentTags = [...(item.tags || [])];
-            renderTagsForm();
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        function resetForm() {
-            document.getElementById('mainForm').reset();
-            document.getElementById('editIndex').value = "-1";
-            document.getElementById('fotoBase64').value = "";
-            currentTags = [];
-            renderTagsForm();
-        }
-
-        document.getElementById('foto').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const maxW = 800;
-                        const scale = maxW / img.width;
-                        canvas.width = maxW;
-                        canvas.height = img.height * scale;
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        document.getElementById('fotoBase64').value = canvas.toDataURL('image/jpeg', 0.8);
-                    };
-                };
-                reader.readAsDataURL(file);
-            }
+        const estCount = [0,0,0,0,0];
+        items.forEach(v => { if(v.estrelas >= 1 && v.estrelas <= 5) estCount[v.estrelas-1]++; });
+        if(chartEstrelas) chartEstrelas.destroy();
+        chartEstrelas = new Chart(document.getElementById('chartEstrelas'), {
+            type: 'bar',
+            data: { labels: ['★','★★','★★★','★★★★','★★★★★'],
+                datasets: [{ data: estCount, backgroundColor: ['#fca5a5','#fbbf24','#86efac','#34d399','#059669'], borderRadius: 10, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Outfit' } }, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false }, ticks: { font: { size: 13, family: 'Outfit' } } } } }
         });
+    }
 
-        function exportarTudo() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", `gourmet_journal_backup.json`);
-            dl.click();
-        }
+    // ════════════════════════════════════════════════════════════════
+    //  Backup / Import (inclui fotos, tudo num único JSON)
+    // ════════════════════════════════════════════════════════════════
+    function exportarTudo() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
+        const dl = document.createElement('a');
+        dl.setAttribute("href", dataStr);
+        dl.setAttribute("download", "gourmet_journal_backup.json");
+        dl.click();
+    }
 
-        function importarTudo(event) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
+    async function importarTudo(event) {
+        const reader = new FileReader();
+        reader.onload = async e => {
+            try {
                 dados = JSON.parse(e.target.result);
-                localStorage.setItem('diarioGourmet', JSON.stringify(dados));
+                await guardarDados();
                 atualizarLista();
-            };
-            reader.readAsText(event.target.files[0]);
-        }
+                if(statsAberto) atualizarStats();
+                alert('✅ Dados importados com sucesso!');
+            } catch(err) {
+                alert('❌ Ficheiro inválido.');
+            }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
 
+    // ════════════════════════════════════════════════════════════════
+    //  Init
+    // ════════════════════════════════════════════════════════════════
+    async function init() {
+        await abrirDB();
+        await carregarDados();
         mudarAba('vinhos');
+        // Esconder loading com fade
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.classList.add('hidden');
+        setTimeout(() => overlay.remove(), 400);
+    }
+
+    init();
     </script>
 </body>
 </html>
