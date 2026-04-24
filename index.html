@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-     <title>Adega Vinhos • Edição Prestige</title>
+    <title>Adega Vinhos • Edição Prestige</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
@@ -13,6 +13,7 @@
             --wine: #831843;
             --gold: #92400e;
             --soft-bg: #fdfcfb;
+            --ink: #0f172a;
         }
         body {
             font-family: 'Outfit', sans-serif;
@@ -149,8 +150,16 @@
             <button onclick="document.getElementById('importFile').click()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📥 Import</button>
             <button onclick="toggleStats()" id="btnStats" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📊 Stats</button>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap justify-end">
             <input type="text" id="filtroTag" oninput="atualizarLista()" placeholder="Procurar..." class="!py-2 !px-4 !rounded-full !text-xs !w-44">
+            <select id="ordenacao" onchange="atualizarLista()" class="!py-2 !px-3 !rounded-full !text-xs !w-36 !font-bold !bg-white">
+                <option value="recentes">Mais recentes</option>
+                <option value="rating">Melhor nota</option>
+                <option value="preco-desc">Preço ↓</option>
+                <option value="preco-asc">Preço ↑</option>
+                <option value="nome">Nome A-Z</option>
+            </select>
+            <button onclick="limparFiltros()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">Limpar</button>
             <button id="filtroFavoritos" onclick="toggleFiltroFavoritos()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-red-50 transition-colors border border-slate-100">❤️</button>
         </div>
         <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarTudo(event)">
@@ -158,7 +167,13 @@
 
     <!-- HEADER -->
     <header class="max-w-7xl mx-auto px-6 pt-12 text-center">
-        <h1 class="text-5xl md:text-6xl mb-4 font-serif text-slate-900">Meu Diário Gourmet</h1>
+        <h1 class="text-5xl md:text-6xl mb-4 font-serif text-slate-900">Adega Vinhos • Nível Prestige</h1>
+        <p class="text-slate-500 max-w-2xl mx-auto">Organiza vinhos e experiências com uma vista premium, estatísticas acionáveis e fluxo de registo ultra-rápido.</p>
+        <div class="grid md:grid-cols-3 gap-4 mt-8 text-left" id="insightCards">
+            <div class="premium-card p-5"><p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Valor de Garrafeira</p><p id="insightValor" class="text-2xl font-black text-amber-700 mt-2">€0.00</p></div>
+            <div class="premium-card p-5"><p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Categoria Top</p><p id="insightTipo" class="text-2xl font-black text-pink-900 mt-2">—</p></div>
+            <div class="premium-card p-5"><p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Último Registo</p><p id="insightUltimo" class="text-lg font-black text-slate-800 mt-2">Ainda sem registos</p></div>
+        </div>
         <div class="flex justify-center gap-8 mt-8 border-b border-slate-100 pb-4">
             <button onclick="mudarAba('vinhos')" id="tab-vinhos" class="tab-btn tab-active uppercase text-[11px] tracking-[0.3em]">Adega Privada</button>
             <button onclick="mudarAba('restaurantes')" id="tab-restaurantes" class="tab-btn uppercase text-[11px] tracking-[0.3em]">Experiências</button>
@@ -169,11 +184,12 @@
     <div id="statsPanel" class="max-w-7xl mx-auto px-6">
         <div class="bg-white rounded-[40px] p-8 border border-slate-50 shadow-xl mt-8 mb-2">
             <h2 class="font-serif text-2xl text-slate-800 mb-6" id="statsPanelTitle">Resumo da Adega</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                 <div class="stat-bubble"><div class="text-4xl font-black text-pink-900" id="statTotal">0</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total</div></div>
                 <div class="stat-bubble"><div class="text-4xl font-black text-amber-700" id="statMedia">—</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Média ★</div></div>
                 <div class="stat-bubble"><div class="text-4xl font-black text-pink-900" id="statFavoritos">0</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Favoritos</div></div>
                 <div class="stat-bubble"><div class="text-2xl font-black text-amber-700" id="statMediaPreco">—</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Preço Médio</div></div>
+                <div class="stat-bubble"><div class="text-2xl font-black text-pink-900" id="statValorTotal">€0.00</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Valor Total</div></div>
             </div>
             <div class="grid md:grid-cols-2 gap-8">
                 <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo</p><div class="chart-wrap"><canvas id="chartTipos"></canvas></div></div>
@@ -265,9 +281,6 @@
     </main>
 
     <script>
-    // ════════════════════════════════════════════════════════════════
-    //  IndexedDB — camada de persistência robusta (suporta fotos grandes)
-    // ════════════════════════════════════════════════════════════════
     const DB_NAME    = 'DiarioGourmet';
     const DB_VERSION = 1;
     const STORE      = 'dados';
@@ -305,9 +318,6 @@
         });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Estado global
-    // ════════════════════════════════════════════════════════════════
     let abaAtual      = 'vinhos';
     let dados         = { vinhos: [], restaurantes: [] };
     let currentTags        = [];
@@ -317,6 +327,14 @@
     let statsAberto        = false;
     let chartTipos         = null;
     let chartEstrelas      = null;
+
+    const ordenarComparators = {
+        recentes: (a,b) => (b.dataRegisto||"").localeCompare(a.dataRegisto||""),
+        rating: (a,b) => (b.estrelas||0) - (a.estrelas||0),
+        "preco-desc": (a,b) => (b.preco??-1) - (a.preco??-1),
+        "preco-asc": (a,b) => (a.preco??Number.MAX_SAFE_INTEGER) - (b.preco??Number.MAX_SAFE_INTEGER),
+        nome: (a,b) => (a.nome||"").localeCompare(b.nome||"", "pt")
+    };
 
     const config = {
         vinhos:       { opcoes: ['Tinto','Branco','Verde','Rosé','Espumante','Porto','Licoroso'], extra1:'Região',     extra2:'Castas'        },
@@ -334,12 +352,12 @@
 
     function getCorNota(n) { return (NOTAS_SUGESTOES.find(x => x.nome === n) || {}).cor || '#831843'; }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Persistência
-    // ════════════════════════════════════════════════════════════════
     async function carregarDados() {
         const saved = await dbGet('main');
         if(saved) dados = saved;
+        ['vinhos','restaurantes'].forEach(k => {
+            dados[k] = (dados[k] || []).map(item => ({ ...item, dataRegisto: item.dataRegisto || new Date().toISOString() }));
+        });
     }
 
     async function guardarDados() {
@@ -353,17 +371,14 @@
         setTimeout(() => el.classList.remove('show'), 2000);
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Undo
-    // ════════════════════════════════════════════════════════════════
     async function salvarComHistorico() {
-        historicoBackup = JSON.parse(JSON.stringify(dados)); // deep copy em memória
+        historicoBackup = JSON.parse(JSON.stringify(dados));
         await guardarDados();
         const toast = document.getElementById('undoContainer');
         toast.style.display = 'block';
         setTimeout(() => { toast.style.display = 'none'; }, 8000);
         atualizarLista();
-        if(statsAberto) atualizarStats();
+        atualizarStats();
     }
 
     async function undo() {
@@ -373,13 +388,10 @@
             await guardarDados();
             document.getElementById('undoContainer').style.display = 'none';
             atualizarLista();
-            if(statsAberto) atualizarStats();
+            atualizarStats();
         }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Notas de Prova
-    // ════════════════════════════════════════════════════════════════
     function renderSugestoes() {
         document.getElementById('sugestoesNotasProva').innerHTML = NOTAS_SUGESTOES.map(s => {
             const sel = currentNotasProva.includes(s.nome);
@@ -414,9 +426,6 @@
         }).join('');
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Tags
-    // ════════════════════════════════════════════════════════════════
     function addTag() {
         const val = document.getElementById('inputTag').value.trim();
         if(val && !currentTags.includes(val)) { currentTags.push(val); renderTagsForm(); document.getElementById('inputTag').value = ''; }
@@ -429,9 +438,6 @@
         ).join('');
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Abas
-    // ════════════════════════════════════════════════════════════════
     function mudarAba(aba) {
         abaAtual = aba;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
@@ -447,17 +453,14 @@
             aba === 'vinhos' ? 'Resumo da Adega' : 'Resumo das Experiências';
         resetForm();
         atualizarLista();
-        if(statsAberto) atualizarStats();
+        atualizarStats();
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Favoritos
-    // ════════════════════════════════════════════════════════════════
     async function toggleFavorito(idx) {
         dados[abaAtual][idx].favorito = !dados[abaAtual][idx].favorito;
         await guardarDados();
         atualizarLista();
-        if(statsAberto) atualizarStats();
+        atualizarStats();
     }
     function toggleFiltroFavoritos() {
         apenasFavoritos = !apenasFavoritos;
@@ -466,9 +469,13 @@
         atualizarLista();
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Submit
-    // ════════════════════════════════════════════════════════════════
+    function limparFiltros() {
+        document.getElementById('filtroTag').value = '';
+        document.getElementById('ordenacao').value = 'recentes';
+        if(apenasFavoritos) toggleFiltroFavoritos();
+        atualizarLista();
+    }
+
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const idx     = parseInt(document.getElementById('editIndex').value);
@@ -486,7 +493,8 @@
             notas:      document.getElementById('notas').value,
             estrelas:   parseInt(document.getElementById('estrelas').value),
             foto:       document.getElementById('fotoBase64').value,
-            favorito:   idx !== -1 ? dados[abaAtual][idx].favorito : false
+            favorito:   idx !== -1 ? dados[abaAtual][idx].favorito : false,
+            dataRegisto: idx !== -1 ? (dados[abaAtual][idx].dataRegisto || new Date().toISOString()) : new Date().toISOString()
         };
         if(idx === -1) dados[abaAtual].unshift(registro);
         else           dados[abaAtual][idx] = registro;
@@ -494,9 +502,12 @@
         resetForm();
     });
 
-    // ════════════════════════════════════════════════════════════════
-    //  Lista
-    // ════════════════════════════════════════════════════════════════
+    function formatarData(iso) {
+        if(!iso) return '—';
+        try { return new Date(iso).toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' }); }
+        catch(_) { return '—'; }
+    }
+
     function atualizarLista() {
         const lista    = document.getElementById('listaItems');
         const filtroTag = document.getElementById('filtroTag').value.toLowerCase();
@@ -510,10 +521,13 @@
             (i.produtor||'').toLowerCase().includes(filtroTag)
         );
 
+        const ordem = document.getElementById('ordenacao')?.value || 'recentes';
+        filtrados.sort(ordenarComparators[ordem] || ordenarComparators.recentes);
+
         if(filtrados.length === 0) {
             lista.innerHTML = `<div class="col-span-2 text-center py-24 text-slate-300">
                 <div class="text-5xl mb-4">🍷</div>
-                <p class="text-sm font-bold uppercase tracking-widest">Adega vazia — adiciona o teu primeiro vinho!</p>
+                <p class="text-sm font-bold uppercase tracking-widest">${abaAtual === 'vinhos' ? 'Adega vazia — adiciona o teu primeiro vinho!' : 'Sem experiências — regista o teu próximo jantar memorável!'}</p>
             </div>`;
             return;
         }
@@ -551,6 +565,7 @@
                         <div class="text-amber-400 text-[11px] ml-2 flex-shrink-0">${'★'.repeat(item.estrelas)}</div>
                     </div>
                     ${item.produtor ? `<p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">${item.produtor}</p>` : ''}
+                    <p class="text-[10px] text-slate-400 mb-2">Registado em ${formatarData(item.dataRegisto)}</p>
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                         ${[item.extra1, item.ano].filter(Boolean).join(' · ')}
                     </p>
@@ -572,9 +587,6 @@
         });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Remover / Editar / Reset
-    // ════════════════════════════════════════════════════════════════
     async function remover(idx) {
         if(confirm('Apagar este registo?')) {
             dados[abaAtual].splice(idx, 1);
@@ -611,9 +623,6 @@
         renderTagsForm(); renderNotasProvaForm(); renderSugestoes();
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Foto — compressão adequada, sem perda visível
-    // ════════════════════════════════════════════════════════════════
     document.getElementById('foto').addEventListener('change', function() {
         const file = this.files[0];
         if(!file) return;
@@ -625,7 +634,7 @@
             img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const maxW = 600; // bom equilíbrio qualidade/tamanho para cards
+                const maxW = 600;
                 const scale = Math.min(1, maxW / img.width);
                 canvas.width  = Math.round(img.width  * scale);
                 canvas.height = Math.round(img.height * scale);
@@ -639,14 +648,20 @@
         reader.readAsDataURL(file);
     });
 
-    // ════════════════════════════════════════════════════════════════
-    //  Stats
-    // ════════════════════════════════════════════════════════════════
+    function atualizarInsights(items, valorTotal, tipoCount) {
+        const labels = Object.keys(tipoCount);
+        const topTipo = [...labels].sort((a,b)=>tipoCount[b]-tipoCount[a])[0] || '—';
+        const ultimo = [...items].sort((a,b)=>(b.dataRegisto||'').localeCompare(a.dataRegisto||''))[0];
+        document.getElementById('insightValor').textContent = '€' + valorTotal.toFixed(2);
+        document.getElementById('insightTipo').textContent = topTipo;
+        document.getElementById('insightUltimo').textContent = ultimo ? `${ultimo.nome} · ${formatarData(ultimo.dataRegisto)}` : 'Ainda sem registos';
+    }
+
     function toggleStats() {
         statsAberto = !statsAberto;
         document.getElementById('statsPanel').classList.toggle('open', statsAberto);
         document.getElementById('btnStats').style.color = statsAberto ? 'var(--wine)' : '';
-        if(statsAberto) atualizarStats();
+        atualizarStats();
     }
 
     function atualizarStats() {
@@ -658,10 +673,16 @@
         const comPreco = items.filter(v => v.preco != null);
         document.getElementById('statMediaPreco').textContent = comPreco.length
             ? '€' + (comPreco.reduce((s,v) => s + v.preco, 0) / comPreco.length).toFixed(2) : '—';
+        const valorTotal = comPreco.reduce((s,v) => s + v.preco, 0);
+        document.getElementById('statValorTotal').textContent = '€' + valorTotal.toFixed(2);
 
         const tipoCount = {};
         items.forEach(v => { tipoCount[v.tipo] = (tipoCount[v.tipo]||0) + 1; });
         const tipoLabels = Object.keys(tipoCount);
+        atualizarInsights(items, valorTotal, tipoCount);
+
+        if(!statsAberto) return;
+
         const paletaTipos = ['#831843','#be185d','#92400e','#d97706','#1e293b','#475569','#0891b2','#a855f7'];
 
         if(chartTipos) chartTipos.destroy();
@@ -685,9 +706,6 @@
         });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Backup / Import (inclui fotos, tudo num único JSON)
-    // ════════════════════════════════════════════════════════════════
     function exportarTudo() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
         const dl = document.createElement('a');
@@ -703,7 +721,7 @@
                 dados = JSON.parse(e.target.result);
                 await guardarDados();
                 atualizarLista();
-                if(statsAberto) atualizarStats();
+                atualizarStats();
                 alert('✅ Dados importados com sucesso!');
             } catch(err) {
                 alert('❌ Ficheiro inválido.');
@@ -712,14 +730,10 @@
         reader.readAsText(event.target.files[0]);
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Init
-    // ════════════════════════════════════════════════════════════════
     async function init() {
         await abrirDB();
         await carregarDados();
         mudarAba('vinhos');
-        // Esconder loading com fade
         const overlay = document.getElementById('loadingOverlay');
         overlay.classList.add('hidden');
         setTimeout(() => overlay.remove(), 400);
