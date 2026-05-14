@@ -70,28 +70,34 @@ input,select,textarea{font-family:'DM Sans',sans-serif;color:var(--ink);}
 .sbs-l{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-top:.15rem;}
 
 /* ══════════════════ MOBILE NAV ══════════════════ */
-#mobileNav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar);border-top:1px solid rgba(255,255,255,.06);z-index:100;padding:.35rem 0 max(.35rem,env(safe-area-inset-bottom));}
+#mobileNav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar);border-top:1px solid rgba(255,255,255,.06);z-index:100;padding:.3rem 0 max(.3rem,env(safe-area-inset-bottom));}
 @media(max-width:900px){#mobileNav{display:flex;}}
-.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.4rem .2rem;color:rgba(255,255,255,.3);font-size:.5rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:color .2s;}
+.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.4rem .15rem;color:rgba(255,255,255,.3);font-size:.48rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:color .2s;}
 .mn-item.active{color:var(--gold2);}
-.mn-icon{font-size:1rem;line-height:1;}
-.mn-add{width:40px;height:40px;background:var(--wine);border-radius:99px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.3rem;margin-bottom:.1rem;}
+.mn-icon{font-size:.95rem;line-height:1;}
+.mn-add{width:38px;height:38px;background:var(--wine);border-radius:99px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;margin-bottom:.05rem;}
+/* hide search icon on desktop */
+#searchBtn{display:none;}
+@media(max-width:900px){#searchBtn{display:flex;}}
 
 /* ══════════════════ TOPBAR ══════════════════ */
 #main{display:flex;flex-direction:column;min-height:100vh;}
 @media(max-width:900px){#main{padding-bottom:calc(var(--nav-h) + .5rem);}}
-#topbar{background:rgba(var(--bg-rgb,250,246,240),.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.85rem 1.75rem;display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;background:var(--surface);}
-[data-theme="dark"] #topbar{background:rgba(28,18,24,.93);}
-@media(max-width:900px){#topbar{padding:.55rem .9rem;gap:.45rem;flex-wrap:wrap;}
-  #topbar .search-wrap{order:3;flex:1 1 100%;}
-  .tb-title{font-size:1.05rem !important;}
+#topbar{background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.75rem 1.75rem;display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:50;}
+[data-theme="dark"] #topbar{background:rgba(28,18,24,.96);}
+@media(max-width:900px){
+  #topbar{padding:.5rem .85rem;gap:.4rem;}
+  #topbar .search-wrap{display:none;}
+  #topbar .search-wrap.open{display:flex;position:fixed;top:0;left:0;right:0;z-index:200;padding:.5rem .85rem;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.15);}
+  #topbar .search-wrap.open input{flex:1;}
 }
-.tb-title{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;flex:1;white-space:nowrap;}
-.search-wrap{position:relative;flex:1;max-width:300px;}
-.search-wrap input{width:100%;padding:.55rem .9rem .55rem 2.2rem;border-radius:99px;border:1.5px solid var(--border);background:var(--surface2);font-size:.82rem;color:var(--ink);transition:all .2s;}
+.tb-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media(max-width:900px){.tb-title{font-size:1rem;}}
+.search-wrap{position:relative;flex:1;max-width:280px;}
+.search-wrap input{width:100%;padding:.5rem .85rem .5rem 2.1rem;border-radius:99px;border:1.5px solid var(--border);background:var(--surface2);font-size:.82rem;color:var(--ink);transition:all .2s;}
 .search-wrap input:focus{outline:none;border-color:var(--wine);background:var(--surface);box-shadow:0 0 0 3px rgba(107,26,42,.06);}
-@media(max-width:900px){.search-wrap input{font-size:16px;}}
-.si{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;pointer-events:none;}
+@media(max-width:900px){.search-wrap input{font-size:16px;border-radius:99px;}}
+.si{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.78rem;pointer-events:none;}
 .tb-btn{width:38px;height:38px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .2s;color:var(--muted);flex-shrink:0;}
 .tb-btn:hover,.tb-btn:active{border-color:var(--wine);color:var(--wine);}
 .tb-btn.on{background:var(--wine);color:#fff;border-color:var(--wine);}
@@ -99,6 +105,9 @@ input,select,textarea{font-family:'DM Sans',sans-serif;color:var(--ink);}
 .vt button{padding:.45rem .7rem;font-size:.72rem;border:none;background:transparent;cursor:pointer;color:var(--muted);transition:all .2s;}
 .vt button.active{background:var(--wine);color:white;}
 @media(max-width:900px){.vt{display:none;}}
+/* mobile search overlay close btn */
+.search-close{display:none;background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--muted);padding:.25rem;flex-shrink:0;}
+@media(max-width:900px){.search-wrap.open .search-close{display:block;}}
 
 /* ══════════════════ FILTER BAR ══════════════════ */
 #filterBar{padding:.55rem 1.75rem;border-bottom:1px solid var(--border);background:var(--surface);display:flex;gap:.4rem;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -152,18 +161,24 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 .ctags{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem;}
 .ctag{font-size:.58rem;font-weight:600;padding:.12rem .45rem;border-radius:4px;background:rgba(107,26,42,.07);color:var(--wine);}
 .cnotes{font-size:.72rem;color:var(--muted);font-style:italic;margin-top:.4rem;border-left:2px solid var(--border2);padding-left:.6rem;line-height:1.5;}
-.cfoot{display:flex;justify-content:space-between;align-items:center;padding:.55rem 1rem;border-top:1px solid var(--border);background:var(--surface2);gap:.35rem;}
-.cdate{font-size:.57rem;color:var(--muted);font-weight:500;flex-shrink:0;}
-.cactions{display:flex;gap:.28rem;flex-wrap:nowrap;}
-.ca{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.35rem .55rem;border-radius:7px;border:none;cursor:pointer;transition:all .18s;min-height:30px;display:flex;align-items:center;background:var(--surface2);color:var(--muted);}
-.ca:hover,.ca:active{opacity:.85;}
+.cfoot{display:flex;justify-content:space-between;align-items:center;padding:.5rem .9rem;border-top:1px solid var(--border);background:var(--surface2);gap:.3rem;min-height:44px;}
+.cdate{font-size:.56rem;color:var(--muted);font-weight:500;flex-shrink:0;display:none;}
+@media(min-width:901px){.cdate{display:block;}}
+.cactions{display:flex;gap:.25rem;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
+.cactions::-webkit-scrollbar{display:none;}
+.ca{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.38rem .55rem;border-radius:7px;border:none;cursor:pointer;transition:all .18s;min-height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted);flex-shrink:0;white-space:nowrap;}
+.ca:hover,.ca:active{opacity:.8;}
 .ca-edit{background:rgba(107,26,42,.09);color:var(--wine);}
-.ca-del{background:transparent;color:rgba(107,26,42,.3);}
-.ca-del:hover{color:var(--red);}
+.ca-del{background:rgba(220,38,38,.07);color:rgba(220,38,38,.5);}
+.ca-del:hover,.ca-del:active{color:var(--red);background:rgba(220,38,38,.12);}
 .ca-cmp{background:rgba(181,131,42,.1);color:var(--gold);}
 .ca-ai{background:rgba(107,26,42,.07);color:var(--wine);}
 .ca-share{background:rgba(181,131,42,.09);color:var(--gold);}
 .ca-hist{background:rgba(2,132,199,.1);color:var(--blue);}
+@media(max-width:900px){
+  .ca{padding:.4rem .5rem;font-size:.56rem;min-height:34px;}
+  .ca-edit span,.ca-hist span{display:none;}
+}
 /* list view */
 #cardsGrid.lv .wine-card .card-inner{display:flex;flex-direction:row;}
 #cardsGrid.lv .card-photo{width:100px;height:auto;flex-shrink:0;}
@@ -329,10 +344,20 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 .map-leg-item{display:flex;align-items:center;gap:.35rem;font-size:.65rem;color:var(--muted);}
 .map-leg-dot{width:10px;height:10px;border-radius:99px;flex-shrink:0;}
 
+/* ══════════════════ STATS CHART GRID MOBILE ══════════════════ */
+@media(max-width:900px){
+  #statsView [style*="grid-template-columns:repeat(auto-fill,minmax(280px"]{
+    grid-template-columns:1fr !important;
+  }
+  .sg{grid-template-columns:repeat(2,1fr) !important;}
+  .cw{height:160px !important;}
+  .mbox{padding:1.1rem !important;}
+  .wish-card{flex-wrap:wrap;}
+  .wish-actions{width:100%;justify-content:flex-end;margin-top:.4rem;}
+}
+
 /* ══════════════════ SHARE CANVAS ══════════════════ */
 #shareCanvas{display:none;}
-
-/* ══════════════════ TOAST / UNDO ══════════════════ */
 #undoToast{position:fixed;bottom:calc(var(--nav-h) + .75rem);left:50%;transform:translateX(-50%);z-index:400;display:none;white-space:nowrap;}
 @media(min-width:901px){#undoToast{bottom:2rem;}}
 .toast-btn{background:var(--ink);color:white;border:none;border-radius:14px;padding:.8rem 1.6rem;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.76rem;cursor:pointer;display:flex;align-items:center;gap:.55rem;box-shadow:0 8px 32px rgba(0,0,0,.3);animation:ti .38s cubic-bezier(.68,-.55,.265,1.55);}
@@ -400,9 +425,14 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 <div id="main">
   <div id="topbar">
     <div class="tb-title" id="topbarTitle">Adega Privada</div>
-    <div class="search-wrap"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="Procurar..." oninput="renderList()"></div>
+    <div class="search-wrap" id="searchWrap">
+      <span class="si">🔍</span>
+      <input type="text" id="searchInput" placeholder="Procurar..." oninput="renderList()">
+      <button class="search-close" onclick="closeSearch()">✕</button>
+    </div>
     <div class="vt"><button class="active" onclick="setLV('grid')" id="vgrid">⊞</button><button onclick="setLV('list')" id="vlist">≡</button></div>
-    <button class="tb-btn" onclick="openForm()" title="Adicionar" style="font-size:1.1rem;font-weight:700;flex-shrink:0;">+</button>
+    <button class="tb-btn" onclick="openSearch()" title="Procurar" id="searchBtn">🔍</button>
+    <button class="tb-btn" onclick="openForm()" title="Adicionar" style="font-size:1.1rem;font-weight:700;">+</button>
     <button class="tb-btn" onclick="toggleDark()" title="Tema" id="darkBtn">🌙</button>
     <input type="file" id="importFile" accept=".json" onchange="importarTudo(event)" style="display:none;">
   </div>
@@ -513,12 +543,22 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
       <div class="fg"><label class="fl">Notas & Impressões</label><textarea class="fi" id="fNotas" rows="3" placeholder="O que achou..."></textarea></div>
       <div class="fg">
         <label class="fl">Fotografia</label>
-        <div class="pdrop" id="pdrop" ondragover="ev.preventDefault();this.classList.add('dov')" ondrop="dropPhoto(event)" ondragleave="this.classList.remove('dov')">
+        <div class="pdrop" id="pdrop" ondragover="event.preventDefault();this.classList.add('dov')" ondrop="dropPhoto(event)" ondragleave="this.classList.remove('dov')">
           <input type="file" accept="image/*" id="fFoto" onchange="handlePhoto(this)">
-          <div id="photoLbl" style="font-size:.72rem;color:var(--muted);font-weight:600;">📷 Arrasta ou clica</div>
+          <div id="photoLbl" style="font-size:.72rem;color:var(--muted);font-weight:600;">📷 Arrasta ou clica para carregar</div>
           <img id="photoPrev" class="pprev" style="display:none;">
         </div>
         <input type="hidden" id="fFotoB64">
+      </div>
+      <!-- AI LABEL SCANNER IN FORM -->
+      <div style="background:linear-gradient(135deg,rgba(107,26,42,.06),rgba(181,131,42,.04));border:1px solid rgba(107,26,42,.12);border-radius:var(--radius-sm);padding:.9rem;margin-bottom:1rem;">
+        <div style="font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--wine);margin-bottom:.6rem;">📷 Scanner de Etiqueta com IA</div>
+        <p style="font-size:.72rem;color:var(--muted);margin-bottom:.65rem;">Carrega uma foto da etiqueta e a IA preenche os campos automaticamente.</p>
+        <label style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.65rem;background:var(--wine);color:white;border-radius:9px;cursor:pointer;font-size:.78rem;font-weight:700;position:relative;">
+          <input type="file" accept="image/*" id="formScanFile" onchange="formScanPhoto(event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+          📷 Carregar foto da etiqueta
+        </label>
+        <div id="formScanStatus" style="display:none;margin-top:.6rem;font-size:.75rem;color:var(--muted);text-align:center;"></div>
       </div>
       <button class="sbtn" onclick="submitForm()">Guardar Registo</button>
     </div>
@@ -749,10 +789,10 @@ function renderList(){
           <div class="cdate">${fmtDate(item.dataRegisto)}</div>
           <div class="cactions">
             <button class="ca ca-cmp${isCmp?' on':''}" onclick="toggleCmp(${item._i},'${(item.nome||'').replace(/'/g,"\\'")}')">⚖</button>
-            <button class="ca ca-ai" onclick="openAI(${item._i})">✨</button>
-            <button class="ca ca-hist" onclick="openHist(${item._i})" title="Histórico">${hCount>0?`📋${hCount}`:'📋'}</button>
+            <button class="ca ca-ai" onclick="openAI(${item._i})">✨ <span>IA</span></button>
+            <button class="ca ca-hist" onclick="openHist(${item._i})">${hCount>0?`📋<span> ${hCount}</span>`:'📋'}</button>
             <button class="ca ca-share" onclick="shareCard(${item._i})">↑</button>
-            <button class="ca ca-edit" onclick="editItem(${item._i})">Editar</button>
+            <button class="ca ca-edit" onclick="editItem(${item._i})"><span>Editar</span></button>
             <button class="ca ca-del" onclick="delItem(${item._i})">×</button>
           </div>
         </div>
@@ -1262,6 +1302,51 @@ function moreMenu(){openModal('moreModal');}
 
 /* ═══════════ UTILS ═══════════ */
 function fmtDate(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric'});}catch{return'—';}}
+
+/* ═══════════ SEARCH TOGGLE (mobile) ═══════════ */
+function openSearch(){
+  const w=document.getElementById('searchWrap');
+  w.classList.add('open');
+  document.getElementById('searchBtn').style.display='none';
+  setTimeout(()=>document.getElementById('searchInput').focus(),100);
+}
+function closeSearch(){
+  const w=document.getElementById('searchWrap');
+  w.classList.remove('open');
+  document.getElementById('searchBtn').style.display='';
+  document.getElementById('searchInput').value='';
+  renderList();
+}
+
+/* ═══════════ FORM SCANNER (AI label in form) ═══════════ */
+async function formScanPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const st=document.getElementById('formScanStatus');
+  st.style.display='block';st.style.color='var(--muted)';
+  st.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;justify-content:center;"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div> A analisar etiqueta...</div>';
+  const r=new FileReader();
+  r.onload=async ev=>{
+    const b64=ev.target.result.split(',')[1];
+    try{
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. Responde APENAS em JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","nota_degustacao":""}\nSe não for etiqueta de vinho: {"nome":"NÃO RECONHECIDO"}'}]}]})});
+      const data=await resp.json();const raw=data.content?.map(c=>c.text||'').join('')||'';
+      let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
+      if(!p||p.nome==='NÃO RECONHECIDO'){st.style.color='var(--red)';st.textContent='❌ Etiqueta não reconhecida. Tenta outra imagem.';return;}
+      // fill form fields
+      if(p.nome)document.getElementById('fNome').value=p.nome;
+      if(p.produtor)document.getElementById('fProdutor').value=p.produtor;
+      if(p.ano)document.getElementById('fAno').value=p.ano;
+      if(p.regiao)document.getElementById('fRegiao').value=p.regiao;
+      if(p.castas)document.getElementById('fCastas').value=p.castas;
+      if(p.nota_degustacao)document.getElementById('fNotas').value=p.nota_degustacao;
+      if(p.tipo){const tipos=view==='vinhos'?TIPOS_V:TIPOS_R;document.getElementById('fTipo').innerHTML=tipos.map(t=>`<option${t===p.tipo?' selected':''}>${t}</option>`).join('');renderHarm(p.tipo);}
+      // also use photo
+      const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const mW=700,sc=Math.min(1,mW/img.width);c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const b=c.toDataURL('image/jpeg',.72);document.getElementById('fFotoB64').value=b;document.getElementById('photoPrev').src=b;document.getElementById('photoPrev').style.display='block';document.getElementById('photoLbl').textContent='✅ Foto da etiqueta';};img.src=ev.target.result;
+      st.style.color='var(--green)';st.innerHTML=`✅ <strong>${p.nome}</strong> identificado! Campos preenchidos.`;
+    }catch{st.style.color='var(--red)';st.textContent='❌ Erro na análise. Verifica ligação à internet.';}
+  };
+  r.readAsDataURL(f);
+}
 
 /* ═══════════ BOOT ═══════════ */
 init();
