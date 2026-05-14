@@ -785,6 +785,25 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 
 <script>
 /* ══ DB ══ */
+// ─────────────────────────────────────────────────────────────
+//  CONFIGURAÇÃO DO PROXY
+//  Depois de fazer deploy no Vercel, substitui pelo teu URL:
+//  ex: const PROXY_URL = 'https://adega-vinhos.vercel.app/api/proxy';
+// ─────────────────────────────────────────────────────────────
+const PROXY_URL = 'https://adega-vinhos.vercel.app/api/proxy';
+
+async function callProxy(body) {
+  const resp = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${resp.status}`);
+  }
+  return resp.json();
+}
 const DB='AdegaP4',DBV=4,ST='dados';let db=null;
 function openDB(){return new Promise((r,e)=>{const q=indexedDB.open(DB,DBV);q.onupgradeneeded=ev=>{const d=ev.target.result;if(!d.objectStoreNames.contains(ST))d.createObjectStore(ST,{keyPath:'id'});};q.onsuccess=ev=>{db=ev.target.result;r(db);};q.onerror=ev=>e(ev.target.error);});}
 function dbGet(id){return new Promise((r,e)=>{const q=db.transaction(ST,'readonly').objectStore(ST).get(id);q.onsuccess=ev=>r(ev.target.result?ev.target.result.value:null);q.onerror=ev=>e(ev.target.error);});}
@@ -1236,8 +1255,8 @@ async function doWineSearch(){
   document.getElementById('wsLoad').style.display='flex';
   document.getElementById('wsModalResults').innerHTML='';
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:`Pesquisa informação sobre o vinho: "${q}". Responde APENAS em JSON sem markdown:\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","preco_estimado":"","temperatura_servico":"","potencial_guarda":"","harmonizacao":["",""],"rating_estimado":3}]}\nDá até 3 resultados relevantes. Se não encontrares informação: {"resultados":[]}`}]})});
-    const data=await resp.json();const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:`Pesquisa informação sobre o vinho: "${q}". Responde APENAS em JSON sem markdown:\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","preco_estimado":"","temperatura_servico":"","potencial_guarda":"","harmonizacao":["",""],"rating_estimado":3}]}\nDá até 3 resultados relevantes. Se não encontrares informação: {"resultados":[]}`}]});
+    const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     document.getElementById('wsLoad').style.display='none';
     if(!p||!p.resultados?.length){document.getElementById('wsModalResults').innerHTML='<div style="color:var(--muted2);font-size:.8rem;padding:.5rem 0;">Nenhum resultado encontrado. Tenta outro nome.</div>';return;}
@@ -1279,8 +1298,8 @@ async function searchWineInForm(){
   const q=document.getElementById('wsInput').value.trim();if(!q)return;
   const res=document.getElementById('wsResults');res.innerHTML='<div style="color:var(--muted2);font-size:.72rem;">A pesquisar...</div>';
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:`Responde APENAS em JSON sobre o vinho "${q}":\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","rating_estimado":3}]}`}]})});
-    const data=await resp.json();const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:`Responde APENAS em JSON sobre o vinho "${q}":\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","rating_estimado":3}]}`}]});
+    const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     if(!p||!p.resultados?.length){res.innerHTML='<div style="color:var(--muted2);font-size:.72rem;">Sem resultados.</div>';return;}
     window._wsFormResults=p.resultados;
@@ -1341,8 +1360,7 @@ function openAI(idx){
 }
 async function callAI(item){
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Analisa em português de Portugal. APENAS JSON sem markdown:\n{"resumo":"2 frases","notas_aroma":["n1","n2","n3"],"harmonizacao":["f1","f2","f3","f4"],"temperatura":"ideal","potencial":"guarda","dica":"dica sommelier"}\n\nVinho:${item.nome}\nTipo:${item.tipo}\nRegião:${item.regiao||'?'}\nCastas:${item.castas||'?'}\nAno:${item.ano||'?'}\nNotas:${(item.notasProva||[]).join(',')||'—'}\nAvaliação:${item.estrelas}★`}]})});
-    const data=await resp.json();const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Analisa em português de Portugal. APENAS JSON sem markdown:\n{"resumo":"2 frases","notas_aroma":["n1","n2","n3"],"harmonizacao":["f1","f2","f3","f4"],"temperatura":"ideal","potencial":"guarda","dica":"dica sommelier"}\n\nVinho:${item.nome}\nTipo:${item.tipo}\nRegião:${item.regiao||'?'}\nCastas:${item.castas||'?'}\nAno:${item.ano||'?'}\nNotas:${(item.notasProva||[]).join(',')||'—'}\nAvaliação:${item.estrelas}★`}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     document.getElementById('aiLoad').style.display='none';
     if(!p){document.getElementById('aiContent').innerHTML=`<div class="ai-res">${raw}</div>`;return;}
@@ -1358,8 +1376,7 @@ async function scanFile(e){const f=e.target.files[0];if(!f)return;const r=new Fi
 async function analyseLabel(b64){
   const rd=document.getElementById('scanRes');rd.style.display='block';rd.innerHTML='<div style="color:rgba(255,255,255,.4);font-size:.76rem;">🔍 A analisar...</div>';document.getElementById('scanUseBtn').style.display='none';
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","notas":"","avaliacao_estimada":3}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]})});
-    const data=await resp.json();const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","notas":"","avaliacao_estimada":3}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     if(!p||p.nome==='NÃO RECONHECIDO'){rd.innerHTML='<div style="color:rgba(255,100,100,.8);font-size:.76rem;">❌ Não reconhecido.</div>';return;}
     scanData=p;
@@ -1383,8 +1400,8 @@ async function formScanPhoto(e){
   const r=new FileReader();r.onload=async ev=>{
     const b64=ev.target.result.split(',')[1];
     try{
-      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","nota_degustacao":""}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]})});
-      const data=await resp.json();const raw=data.content?.map(c=>c.text||'').join('')||'';
+      const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","nota_degustacao":""}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});
+      const raw=data.content?.map(c=>c.text||'').join('')||'';
       let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
       if(!p||p.nome==='NÃO RECONHECIDO'){st.style.color='var(--red)';st.textContent='❌ Não reconhecido.';return;}
       if(p.nome)document.getElementById('fNome').value=p.nome;if(p.produtor)document.getElementById('fProdutor').value=p.produtor;if(p.ano)document.getElementById('fAno').value=p.ano;if(p.regiao)document.getElementById('fRegiao').value=p.regiao;if(p.castas)document.getElementById('fCastas').value=p.castas;if(p.nota_degustacao)document.getElementById('fNotas').value=p.nota_degustacao;
