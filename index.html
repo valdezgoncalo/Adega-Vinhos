@@ -1255,7 +1255,7 @@ async function doWineSearch(){
   document.getElementById('wsLoad').style.display='flex';
   document.getElementById('wsModalResults').innerHTML='';
   try{
-    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:`Pesquisa informação sobre o vinho: "${q}". Responde APENAS em JSON sem markdown:\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","preco_estimado":"","temperatura_servico":"","potencial_guarda":"","harmonizacao":["",""],"rating_estimado":3}]}\nDá até 3 resultados relevantes. Se não encontrares informação: {"resultados":[]}`}]});
+    const data=await callProxy({model:'claude-3-5-sonnet-20241022',max_tokens:1200,messages:[{role:'user',content:`Pesquisa informação sobre o vinho: "${q}". Responde APENAS em JSON sem markdown:\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","preco_estimado":"","temperatura_servico":"","potencial_guarda":"","harmonizacao":["",""],"rating_estimado":3}]}\nDá até 3 resultados relevantes. Se não encontrares informação: {"resultados":[]}`}]});
     const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     document.getElementById('wsLoad').style.display='none';
@@ -1298,7 +1298,7 @@ async function searchWineInForm(){
   const q=document.getElementById('wsInput').value.trim();if(!q)return;
   const res=document.getElementById('wsResults');res.innerHTML='<div style="color:var(--muted2);font-size:.72rem;">A pesquisar...</div>';
   try{
-    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:`Responde APENAS em JSON sobre o vinho "${q}":\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","rating_estimado":3}]}`}]});
+    const data=await callProxy({model:'claude-3-5-sonnet-20241022',max_tokens:800,messages:[{role:'user',content:`Responde APENAS em JSON sobre o vinho "${q}":\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","rating_estimado":3}]}`}]});
     const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     if(!p||!p.resultados?.length){res.innerHTML='<div style="color:var(--muted2);font-size:.72rem;">Sem resultados.</div>';return;}
@@ -1360,7 +1360,7 @@ function openAI(idx){
 }
 async function callAI(item){
   try{
-    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Analisa em português de Portugal. APENAS JSON sem markdown:\n{"resumo":"2 frases","notas_aroma":["n1","n2","n3"],"harmonizacao":["f1","f2","f3","f4"],"temperatura":"ideal","potencial":"guarda","dica":"dica sommelier"}\n\nVinho:${item.nome}\nTipo:${item.tipo}\nRegião:${item.regiao||'?'}\nCastas:${item.castas||'?'}\nAno:${item.ano||'?'}\nNotas:${(item.notasProva||[]).join(',')||'—'}\nAvaliação:${item.estrelas}★`}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const data=await callProxy({model:'claude-3-5-sonnet-20241022',max_tokens:1000,messages:[{role:'user',content:`Analisa em português de Portugal. APENAS JSON sem markdown:\n{"resumo":"2 frases","notas_aroma":["n1","n2","n3"],"harmonizacao":["f1","f2","f3","f4"],"temperatura":"ideal","potencial":"guarda","dica":"dica sommelier"}\n\nVinho:${item.nome}\nTipo:${item.tipo}\nRegião:${item.regiao||'?'}\nCastas:${item.castas||'?'}\nAno:${item.ano||'?'}\nNotas:${(item.notasProva||[]).join(',')||'—'}\nAvaliação:${item.estrelas}★`}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     document.getElementById('aiLoad').style.display='none';
     if(!p){document.getElementById('aiContent').innerHTML=`<div class="ai-res">${raw}</div>`;return;}
@@ -1376,7 +1376,7 @@ async function scanFile(e){const f=e.target.files[0];if(!f)return;const r=new Fi
 async function analyseLabel(b64){
   const rd=document.getElementById('scanRes');rd.style.display='block';rd.innerHTML='<div style="color:rgba(255,255,255,.4);font-size:.76rem;">🔍 A analisar...</div>';document.getElementById('scanUseBtn').style.display='none';
   try{
-    const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","notas":"","avaliacao_estimada":3}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const data=await callProxy({model:'claude-3-5-sonnet-20241022',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","notas":"","avaliacao_estimada":3}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
     let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
     if(!p||p.nome==='NÃO RECONHECIDO'){rd.innerHTML='<div style="color:rgba(255,100,100,.8);font-size:.76rem;">❌ Não reconhecido.</div>';return;}
     scanData=p;
@@ -1400,7 +1400,7 @@ async function formScanPhoto(e){
   const r=new FileReader();r.onload=async ev=>{
     const b64=ev.target.result.split(',')[1];
     try{
-      const data=await callProxy({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","nota_degustacao":""}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});
+      const data=await callProxy({model:'claude-3-5-sonnet-20241022',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","nota_degustacao":""}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});
       const raw=data.content?.map(c=>c.text||'').join('')||'';
       let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
       if(!p||p.nome==='NÃO RECONHECIDO'){st.style.color='var(--red)';st.textContent='❌ Não reconhecido.';return;}
