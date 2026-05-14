@@ -1,745 +1,1510 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Adega Vinhos • Edição Prestige</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Adega Prestige</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --wine:    #6b1a2a;
+  --wine2:   #9b1d35;
+  --gold:    #b5832a;
+  --gold2:   #d4a94e;
+  --cream:   #faf6f0;
+  --ink:     #1a1015;
+  --muted:   #6b5e63;
+  --border:  rgba(107,26,42,0.10);
+  --card-bg: #ffffff;
+  --sidebar: #1a1015;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
+h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-        :root {
-            --wine: #831843;
-            --gold: #92400e;
-            --soft-bg: #fdfcfb;
-            --ink: #0f172a;
-        }
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--soft-bg);
-            color: #1e293b;
-            -webkit-tap-highlight-color: transparent;
-        }
-        h1, h2, .font-serif { font-family: 'Playfair Display', serif; }
+/* ── LOADING ── */
+#splash{position:fixed;inset:0;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s ease;}
+#splash.out{opacity:0;pointer-events:none;}
+.splash-logo{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,8vw,5rem);color:#fff;letter-spacing:.15em;font-weight:400;opacity:0;animation:fadeUp .8s .3s forwards;}
+.splash-sub{font-size:.65rem;letter-spacing:.45em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:1rem;opacity:0;animation:fadeUp .8s .6s forwards;}
+.splash-line{width:60px;height:1px;background:var(--gold);margin:1.5rem auto;opacity:0;animation:fadeUp .8s .9s forwards;}
 
-        .premium-card {
-            background: white;
-            border-radius: 32px;
-            border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .premium-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 50px -12px rgba(131,24,67,0.08);
-        }
-        input, select, textarea {
-            background: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 18px !important;
-            padding: 12px 16px !important;
-            transition: all 0.3s ease;
-            width: 100%;
-            font-family: 'Outfit', sans-serif;
-        }
-        input:focus, textarea:focus {
-            background: white !important;
-            border-color: var(--wine) !important;
-            box-shadow: 0 0 0 4px rgba(131,24,67,0.05);
-            outline: none;
-        }
-        select:focus { outline: none; }
+/* ── LAYOUT ── */
+#app{display:grid;grid-template-columns:280px 1fr;min-height:100vh;}
+@media(max-width:900px){#app{grid-template-columns:1fr;}}
 
-        .tab-btn { position: relative; transition: all 0.3s ease; color: #94a3b8; }
-        .tab-active { color: var(--wine); font-weight: 800; }
-        .tab-active::after {
-            content: '';
-            position: absolute;
-            bottom: -8px; left: 50%; transform: translateX(-50%);
-            width: 6px; height: 6px; background: var(--wine); border-radius: 50%;
-        }
+/* ── SIDEBAR ── */
+#sidebar{background:var(--sidebar);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;}
+@media(max-width:900px){#sidebar{display:none;}}
+.sidebar-logo{padding:2.5rem 2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.06);}
+.sidebar-logo h1{font-size:1.5rem;color:#fff;letter-spacing:.1em;font-weight:400;}
+.sidebar-logo p{font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:.25rem;}
+.nav-section{padding:1.5rem 1rem;flex:1;}
+.nav-label{font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:.5rem 1rem;margin-bottom:.25rem;}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:12px;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.55);font-size:.8rem;font-weight:500;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#fff;}
+.nav-item.active{background:var(--wine);color:#fff;}
+.nav-item .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;background:rgba(255,255,255,.06);}
+.nav-item.active .icon{background:rgba(255,255,255,.15);}
+.sidebar-stats{padding:1.5rem;border-top:1px solid rgba(255,255,255,.06);display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.sstat{background:rgba(255,255,255,.04);border-radius:12px;padding:.75rem;text-align:center;}
+.sstat-val{font-size:1.4rem;font-family:'Cormorant Garamond',serif;color:var(--gold2);}
+.sstat-label{font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:.2rem;}
 
-        .undo-toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: none;
-            animation: springUp 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
-        }
-        @keyframes springUp { from { transform: translate(-50%,100px); opacity:0; } to { transform: translate(-50%,0); opacity:1; } }
+/* ── MOBILE NAV ── */
+#mobileNav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--ink);border-top:1px solid rgba(255,255,255,.08);z-index:100;padding:.5rem 0 max(.5rem,env(safe-area-inset-bottom));}
+@media(max-width:900px){#mobileNav{display:flex;}}
+.mnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.5rem;color:rgba(255,255,255,.4);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .2s;}
+.mnav-item.active{color:var(--gold2);}
+.mnav-icon{font-size:1.1rem;}
 
-        /* Loading overlay */
-        #loadingOverlay {
-            position: fixed; inset: 0; background: var(--soft-bg);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999; transition: opacity 0.4s ease;
-        }
-        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+/* ── MAIN ── */
+#main{display:flex;flex-direction:column;min-height:100vh;}
+@media(max-width:900px){#main{padding-bottom:5rem;}}
 
-        /* Stats */
-        #statsPanel { max-height: 0; overflow: hidden; transition: max-height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease; opacity: 0; }
-        #statsPanel.open { max-height: 700px; opacity: 1; }
-        .stat-bubble {
-            background: white; border-radius: 24px; padding: 20px 16px; text-align: center;
-            border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 20px -6px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
-        .stat-bubble:hover { transform: translateY(-3px); }
+/* ── TOPBAR ── */
+#topbar{background:rgba(250,246,240,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;}
+@media(max-width:900px){#topbar{padding:.75rem 1rem;}}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;flex:1;}
+.search-wrap{position:relative;flex:1;max-width:320px;}
+.search-wrap input{width:100%;padding:.6rem 1rem .6rem 2.5rem;border-radius:99px;border:1px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--ink);}
+.search-wrap input:focus{outline:none;border-color:var(--wine);box-shadow:0 0 0 3px rgba(107,26,42,.06);}
+.search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
+.topbar-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .2s;color:var(--muted);}
+.topbar-btn:hover{border-color:var(--wine);color:var(--wine);background:rgba(107,26,42,.04);}
+.topbar-btn.active{background:var(--wine);color:white;border-color:var(--wine);}
 
-        /* Notas de prova */
-        .nota-chip {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 10px; border-radius: 99px;
-            font-size: 9px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
-        }
-        .nota-chip button { all: unset; cursor: pointer; font-size: 12px; opacity: 0.6; padding: 0 0 0 2px; }
-        .nota-chip button:hover { opacity: 1; }
-        .nota-card-chip {
-            display: inline-block; padding: 2px 8px; border-radius: 99px;
-            font-size: 8px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
-        }
+/* ── VIEW TOGGLE ── */
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:white;}
+.view-toggle button{padding:.5rem .75rem;font-size:.75rem;border:none;background:transparent;cursor:pointer;color:var(--muted);transition:all .2s;}
+.view-toggle button.active{background:var(--wine);color:white;}
 
-        .price-pill {
-            background: linear-gradient(135deg,#92400e,#d97706); color: white;
-            font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 99px; display: inline-block;
-        }
+/* ── FILTER BAR ── */
+#filterBar{padding:.75rem 2rem;border-bottom:1px solid var(--border);background:white;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
+@media(max-width:900px){#filterBar{padding:.75rem 1rem;}}
+.filter-chip{padding:.35rem .9rem;border-radius:99px;border:1.5px solid var(--border);background:transparent;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.filter-chip:hover{border-color:var(--wine);color:var(--wine);}
+.filter-chip.active{background:var(--wine);color:white;border-color:var(--wine);}
+.filter-chip.gold.active{background:var(--gold);border-color:var(--gold);}
+select.filter-select{padding:.35rem .9rem;border-radius:99px;border:1.5px solid var(--border);background:white;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;appearance:none;padding-right:1.5rem;}
+select.filter-select:focus{outline:none;border-color:var(--wine);}
 
-        .sugestao-btn {
-            padding: 3px 10px; border-radius: 99px; font-size: 9px; font-weight: 700;
-            cursor: pointer; border: 1.5px solid #e2e8f0; background: white; color: #64748b;
-            transition: all 0.2s; white-space: nowrap;
-        }
-        .sugestao-btn:hover { border-color: var(--wine); color: var(--wine); background: #fff0f6; }
+/* ── CONTENT ── */
+#content{padding:2rem;flex:1;}
+@media(max-width:900px){#content{padding:1rem;}}
 
-        .chart-wrap { position: relative; height: 190px; }
-        ::-webkit-scrollbar { display: none; }
-        @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        .card-anim { animation: fadeInUp 0.35s ease both; }
+/* ── CARDS GRID ── */
+#cardsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;}
+#cardsGrid.list-view{grid-template-columns:1fr;gap:.75rem;}
 
-        /* Save indicator */
-        #saveIndicator {
-            position: fixed; top: 16px; right: 16px; z-index: 200;
-            background: #059669; color: white; font-size: 10px; font-weight: 800;
-            padding: 6px 14px; border-radius: 99px; opacity: 0;
-            transition: opacity 0.3s ease; pointer-events: none;
-        }
-        #saveIndicator.show { opacity: 1; }
-    </style>
+/* ── WINE CARD ── */
+.wine-card{background:white;border-radius:20px;overflow:hidden;border:1px solid var(--border);transition:all .35s cubic-bezier(.175,.885,.32,1.275);animation:cardIn .4s ease both;}
+.wine-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px -12px rgba(107,26,42,.12);}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.card-photo{height:180px;overflow:hidden;position:relative;flex-shrink:0;}
+.card-photo img{width:100%;height:100%;object-fit:cover;}
+.card-photo-placeholder{width:100%;height:100%;background:linear-gradient(135deg,#f5ede8 0%,#ecddd6 50%,#e8d0c9 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;}
+.card-badge-type{position:absolute;top:.75rem;right:.75rem;background:rgba(26,16,21,.75);backdrop-filter:blur(8px);color:white;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .7rem;border-radius:99px;}
+.card-badge-price{position:absolute;bottom:.75rem;right:.75rem;background:linear-gradient(135deg,var(--gold),var(--gold2));color:white;font-size:.65rem;font-weight:800;padding:.2rem .7rem;border-radius:99px;}
+.card-badge-stock{position:absolute;bottom:.75rem;left:.75rem;background:rgba(26,16,21,.7);backdrop-filter:blur(8px);color:white;font-size:.6rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;}
+.card-fav{position:absolute;top:.75rem;left:.75rem;width:32px;height:32px;border-radius:99px;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .2s;border:none;}
+.card-fav:hover{transform:scale(1.15);}
+.card-body{padding:1.25rem;}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;line-height:1.2;color:var(--ink);}
+.card-producer{font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.2rem;}
+.card-meta{display:flex;align-items:center;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;}
+.card-stars{color:var(--gold);font-size:.8rem;}
+.card-region{font-size:.7rem;color:var(--muted);}
+.card-year{font-size:.7rem;font-weight:700;color:var(--wine);background:rgba(107,26,42,.06);padding:.1rem .5rem;border-radius:99px;}
+.card-notas{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.6rem;}
+.nota-chip-sm{font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:99px;}
+.card-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;}
+.tag-sm{font-size:.6rem;font-weight:600;padding:.15rem .5rem;border-radius:4px;background:rgba(107,26,42,.06);color:var(--wine);}
+.card-notes-text{font-size:.75rem;color:var(--muted);font-style:italic;margin-top:.6rem;border-left:2px solid rgba(107,26,42,.15);padding-left:.75rem;line-height:1.5;}
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.25rem;border-top:1px solid var(--border);background:#fdfaf8;}
+.card-date{font-size:.6rem;color:rgba(107,26,42,.4);font-weight:500;}
+.card-actions{display:flex;gap:.5rem;}
+.card-btn{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:.3rem .7rem;border-radius:6px;border:none;cursor:pointer;transition:all .2s;}
+.card-btn-edit{background:rgba(107,26,42,.08);color:var(--wine);}
+.card-btn-edit:hover{background:var(--wine);color:white;}
+.card-btn-del{background:transparent;color:rgba(107,26,42,.3);}
+.card-btn-del:hover{color:#dc2626;background:rgba(220,38,38,.08);}
+.card-btn-compare{background:rgba(181,131,42,.1);color:var(--gold);}
+.card-btn-compare:hover{background:var(--gold);color:white;}
+
+/* List view card */
+#cardsGrid.list-view .wine-card{display:flex;flex-direction:row;}
+#cardsGrid.list-view .card-photo{width:120px;height:auto;flex-shrink:0;}
+#cardsGrid.list-view .card-body{flex:1;}
+
+/* ── FORM PANEL ── */
+#formPanel{position:fixed;inset:0;z-index:200;display:flex;align-items:stretch;pointer-events:none;}
+#formPanel.open{pointer-events:all;}
+#formOverlay{position:absolute;inset:0;background:rgba(26,16,21,.5);backdrop-filter:blur(4px);opacity:0;transition:opacity .3s;}
+#formPanel.open #formOverlay{opacity:1;}
+#formDrawer{position:absolute;right:0;top:0;bottom:0;width:min(480px,100vw);background:white;overflow-y:auto;transform:translateX(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+#formPanel.open #formDrawer{transform:translateX(0);}
+.drawer-header{padding:1.5rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;background:white;z-index:10;}
+.drawer-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;}
+.drawer-close{width:36px;height:36px;border-radius:99px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;}
+.drawer-close:hover{background:var(--wine);color:white;border-color:var(--wine);}
+.drawer-body{padding:1.5rem 2rem;flex:1;}
+.field-label{font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;display:block;}
+.field-input{width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--ink);background:#fdfaf8;transition:all .25s;}
+.field-input:focus{outline:none;border-color:var(--wine);background:white;box-shadow:0 0 0 3px rgba(107,26,42,.05);}
+.field-group{margin-bottom:1.25rem;}
+.field-row{display:grid;gap:.75rem;margin-bottom:1.25rem;}
+.field-row.cols-2{grid-template-columns:1fr 1fr;}
+.field-row.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.sugestao-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem;}
+.sug-btn{padding:.3rem .75rem;border-radius:99px;font-size:.65rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);transition:all .2s;font-family:'DM Sans',sans-serif;}
+.sug-btn:hover{border-color:var(--wine);color:var(--wine);}
+.sug-btn.sel{color:white;}
+.nota-chip-form{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .6rem;border-radius:99px;font-size:.65rem;font-weight:700;}
+.nota-chip-form button{all:unset;cursor:pointer;opacity:.6;font-size:.9rem;}
+.nota-chip-form button:hover{opacity:1;}
+.tag-chip-form{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .6rem;border-radius:6px;font-size:.65rem;font-weight:700;background:rgba(107,26,42,.08);color:var(--wine);}
+.tag-chip-form button{all:unset;cursor:pointer;opacity:.5;font-size:.9rem;}
+.rating-select{display:flex;gap:.4rem;flex-wrap:wrap;}
+.rating-btn{padding:.4rem .8rem;border-radius:8px;border:1.5px solid var(--border);background:white;font-size:.75rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;color:var(--muted);}
+.rating-btn.active{background:var(--gold);color:white;border-color:var(--gold);}
+.photo-drop{border:2px dashed var(--border);border-radius:16px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:#fdfaf8;}
+.photo-drop:hover{border-color:var(--wine);background:rgba(107,26,42,.02);}
+.photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;border-radius:16px;}
+.photo-preview{width:100%;height:120px;object-fit:cover;border-radius:12px;margin-top:.75rem;}
+.submit-btn{width:100%;padding:1rem;background:var(--wine);color:white;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .2s;margin-top:1rem;}
+.submit-btn:hover{background:var(--wine2);}
+.submit-btn:active{transform:scale(.98);}
+.harmony-section{background:linear-gradient(135deg,rgba(181,131,42,.05),rgba(107,26,42,.05));border:1px solid rgba(181,131,42,.2);border-radius:14px;padding:1rem;margin-top:.5rem;}
+.harmony-title{font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+.harmony-chips{display:flex;flex-wrap:wrap;gap:.35rem;}
+.harmony-chip{padding:.25rem .65rem;border-radius:99px;font-size:.65rem;font-weight:600;background:rgba(181,131,42,.1);color:var(--gold);cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+.harmony-chip.sel{background:var(--gold);color:white;}
+
+/* ── STATS PANEL ── */
+#statsView{display:none;}
+#statsView.visible{display:block;}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat-card{background:white;border-radius:16px;border:1px solid var(--border);padding:1.25rem;text-align:center;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--wine);}
+.stat-lab{font-size:.6rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-top:.25rem;}
+.chart-card{background:white;border-radius:20px;border:1px solid var(--border);padding:1.5rem;}
+.chart-title{font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+.chart-wrap{position:relative;height:220px;}
+.top-list{display:flex;flex-direction:column;gap:.75rem;}
+.top-row{display:flex;align-items:center;gap.75rem;}
+.top-rank{width:28px;height:28px;border-radius:99px;background:var(--wine);color:white;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;}
+.top-bar-wrap{flex:1;background:rgba(107,26,42,.06);border-radius:99px;height:8px;overflow:hidden;}
+.top-bar{height:100%;background:linear-gradient(90deg,var(--wine),var(--gold));border-radius:99px;}
+.top-name{font-size:.8rem;font-weight:600;flex:1;}
+.top-val{font-size:.7rem;font-weight:700;color:var(--muted);}
+
+/* ── COMPARE MODAL ── */
+#compareModal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;}
+#compareModal.open{display:flex;}
+#compareOverlay{position:absolute;inset:0;background:rgba(26,16,21,.6);backdrop-filter:blur(6px);}
+#compareBox{position:relative;background:white;border-radius:24px;width:min(780px,96vw);max-height:90vh;overflow-y:auto;padding:2rem;}
+.compare-grid{display:grid;grid-template-columns:1fr 80px 1fr;gap:1rem;align-items:start;}
+.compare-col{display:flex;flex-direction:column;gap:.75rem;}
+.compare-mid{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:2rem;gap:.5rem;}
+.compare-vs{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--muted);}
+.compare-row-label{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.compare-val{font-size:.85rem;font-weight:600;color:var(--ink);}
+.compare-winner{background:rgba(181,131,42,.1);border-radius:8px;padding:.3rem .6rem;color:var(--gold);font-size:.75rem;font-weight:700;text-align:center;}
+@media(max-width:600px){.compare-grid{grid-template-columns:1fr;} .compare-mid{flex-direction:row;}}
+
+/* ── AI MODAL ── */
+#aiModal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;}
+#aiModal.open{display:flex;}
+#aiOverlay{position:absolute;inset:0;background:rgba(26,16,21,.6);backdrop-filter:blur(6px);}
+#aiBox{position:relative;background:white;border-radius:24px;width:min(520px,96vw);max-height:85vh;overflow-y:auto;padding:2rem;}
+.ai-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;margin-bottom:.25rem;}
+.ai-sub{font-size:.75rem;color:var(--muted);margin-bottom:1.25rem;}
+.ai-loading{display:flex;align-items:center;gap:.75rem;color:var(--muted);font-size:.8rem;padding:1rem 0;}
+.ai-dot{width:6px;height:6px;border-radius:99px;background:var(--wine);animation:pulse .9s ease infinite;}
+.ai-dot:nth-child(2){animation-delay:.2s;}
+.ai-dot:nth-child(3){animation-delay:.4s;}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(.8);}50%{opacity:1;transform:scale(1.2);}}
+.ai-result{font-size:.85rem;line-height:1.7;color:var(--ink);}
+.ai-section{margin-top:1rem;}
+.ai-section-title{font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+.ai-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem;}
+.ai-chip{padding:.3rem .75rem;border-radius:99px;background:rgba(181,131,42,.1);color:var(--gold);font-size:.7rem;font-weight:700;}
+.ai-chip.food{background:rgba(107,26,42,.08);color:var(--wine);}
+
+/* ── TOAST / UNDO ── */
+#undoToast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);z-index:400;display:none;}
+@media(min-width:901px){#undoToast{bottom:2rem;}}
+.toast-btn{background:var(--ink);color:white;border:none;border-radius:16px;padding:.9rem 2rem;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.25);animation:toastIn .4s cubic-bezier(.68,-.55,.265,1.55);}
+@keyframes toastIn{from{transform:translateY(60px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* ── SAVE INDICATOR ── */
+#saveIndicator{position:fixed;top:1rem;right:1rem;z-index:500;background:#059669;color:white;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.4rem 1rem;border-radius:99px;opacity:0;transition:opacity .3s;pointer-events:none;}
+#saveIndicator.show{opacity:1;}
+
+/* ── COMPARE SELECTION ── */
+#compareBar{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:white;padding:1rem 2rem;display:none;align-items:center;gap:1rem;z-index:150;}
+@media(max-width:900px){#compareBar{bottom:4.5rem;}}
+#compareBar.show{display:flex;}
+.compare-items{display:flex;gap:.5rem;flex:1;flex-wrap:wrap;}
+.compare-item-chip{background:rgba(255,255,255,.1);border-radius:8px;padding:.3rem .75rem;font-size:.75rem;}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:5rem 2rem;color:var(--muted);}
+.empty-icon{font-size:4rem;margin-bottom:1rem;opacity:.4;}
+.empty-text{font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:.5rem;color:var(--ink);}
+.empty-sub{font-size:.8rem;}
+
+/* ── SCANNER MODAL ── */
+#scanModal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;}
+#scanModal.open{display:flex;}
+#scanOverlay{position:absolute;inset:0;background:rgba(0,0,0,.85);}
+#scanBox{position:relative;background:var(--ink);border-radius:24px;width:min(480px,96vw);overflow:hidden;}
+#scanVideo{width:100%;display:block;background:#000;}
+.scan-ui{padding:1.5rem;color:white;}
+.scan-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:.5rem;}
+.scan-result{background:rgba(255,255,255,.08);border-radius:12px;padding:1rem;margin-top:1rem;font-size:.85rem;line-height:1.6;}
+
+/* ── ANIMATE ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.anim-fade-up{animation:fadeUp .5s ease both;}
+
+/* Drag-drop upload indicator */
+.photo-drop.drag-over{border-color:var(--wine);background:rgba(107,26,42,.04);}
+
+/* Scroll to top btn */
+#scrollTop{position:fixed;bottom:5rem;right:1.5rem;width:40px;height:40px;border-radius:99px;background:var(--wine);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 4px 16px rgba(107,26,42,.25);opacity:0;transition:opacity .25s;z-index:90;}
+#scrollTop.show{opacity:1;}
+@media(min-width:901px){#scrollTop{bottom:2rem;}}
+</style>
 </head>
-<body class="pb-16">
+<body>
 
-    <!-- Loading -->
-    <div id="loadingOverlay">
-        <div class="text-5xl mb-4">🍷</div>
-        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">A carregar a adega...</p>
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">Adega</div>
+  <div class="splash-line"></div>
+  <div class="splash-sub">Prestige Edition</div>
+</div>
+
+<!-- SAVE INDICATOR -->
+<div id="saveIndicator">✓ Guardado</div>
+
+<!-- UNDO TOAST -->
+<div id="undoToast"><button class="toast-btn" onclick="undo()">↩ Desfazer último registo</button></div>
+
+<!-- SCROLL TOP -->
+<button id="scrollTop" onclick="scrollToTop()" title="Topo">↑</button>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <h1>Adega</h1>
+      <p>Prestige Edition</p>
     </div>
-
-    <!-- Save indicator -->
-    <div id="saveIndicator">✓ Guardado</div>
-
-    <!-- Undo toast -->
-    <div id="undoContainer" class="undo-toast">
-        <button onclick="undo()" class="bg-slate-900 text-white px-8 py-4 rounded-3xl shadow-2xl font-bold flex items-center gap-3 active:scale-95 transition-transform">
-            ↩️ Desfazer erro
-        </button>
-    </div>
-
-    <!-- NAV -->
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
-        <div class="flex gap-4">
-            <button onclick="exportarTudo()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📦 Backup</button>
-            <button onclick="document.getElementById('importFile').click()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📥 Import</button>
-            <button onclick="toggleStats()" id="btnStats" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">📊 Stats</button>
-        </div>
-        <div class="flex items-center gap-3 flex-wrap justify-end">
-            <input type="text" id="filtroTag" oninput="atualizarLista()" placeholder="Procurar..." class="!py-2 !px-4 !rounded-full !text-xs !w-44">
-            <select id="ordenacao" onchange="atualizarLista()" class="!py-2 !px-3 !rounded-full !text-xs !w-36 !font-bold !bg-white">
-                <option value="recentes">Mais recentes</option>
-                <option value="rating">Melhor nota</option>
-                <option value="preco-desc">Preço ↓</option>
-                <option value="preco-asc">Preço ↑</option>
-                <option value="nome">Nome A-Z</option>
-            </select>
-            <button onclick="limparFiltros()" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-pink-900 transition-colors">Limpar</button>
-            <button id="filtroFavoritos" onclick="toggleFiltroFavoritos()" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-red-50 transition-colors border border-slate-100">❤️</button>
-        </div>
-        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarTudo(event)">
+    <nav class="nav-section">
+      <div class="nav-label">Colecção</div>
+      <div class="nav-item active" onclick="setView('vinhos')" id="nav-vinhos">
+        <div class="icon">🍷</div><span>Adega Privada</span>
+      </div>
+      <div class="nav-item" onclick="setView('restaurantes')" id="nav-restaurantes">
+        <div class="icon">🍽️</div><span>Experiências</span>
+      </div>
+      <div class="nav-label" style="margin-top:1rem;">Análise</div>
+      <div class="nav-item" onclick="setView('stats')" id="nav-stats">
+        <div class="icon">📊</div><span>Estatísticas</span>
+      </div>
+      <div class="nav-label" style="margin-top:1rem;">Ferramentas</div>
+      <div class="nav-item" onclick="exportarTudo()">
+        <div class="icon">📦</div><span>Backup</span>
+      </div>
+      <div class="nav-item" onclick="document.getElementById('importFile').click()">
+        <div class="icon">📥</div><span>Importar</span>
+      </div>
     </nav>
+    <div class="sidebar-stats" id="sidebarStats">
+      <div class="sstat"><div class="sstat-val" id="ss-total">0</div><div class="sstat-label">Garrafeira</div></div>
+      <div class="sstat"><div class="sstat-val" id="ss-favoritos">0</div><div class="sstat-label">Favoritos</div></div>
+      <div class="sstat"><div class="sstat-val" id="ss-rating">—</div><div class="sstat-label">Média ★</div></div>
+      <div class="sstat"><div class="sstat-val" id="ss-valor">€0</div><div class="sstat-label">Valor</div></div>
+    </div>
+  </aside>
 
-    <!-- HEADER -->
-    <header class="max-w-7xl mx-auto px-6 pt-12 text-center">
-        <h1 class="text-5xl md:text-6xl mb-4 font-serif text-slate-900">Adega Vinhos • Nível Prestige</h1>
-        <p class="text-slate-500 max-w-2xl mx-auto">Organiza vinhos e experiências com uma vista premium, estatísticas acionáveis e fluxo de registo ultra-rápido.</p>
-        <div class="grid md:grid-cols-3 gap-4 mt-8 text-left" id="insightCards">
-            <div class="premium-card p-5"><p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Valor de Garrafeira</p><p id="insightValor" class="text-2xl font-black text-amber-700 mt-2">€0.00</p></div>
-            <div class="premium-card p-5"><p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Categoria Top</p><p id="insightTipo" class="text-2xl font-black text-pink-900 mt-2">—</p></div>
-            <div class="premium-card p-5"><p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Último Registo</p><p id="insightUltimo" class="text-lg font-black text-slate-800 mt-2">Ainda sem registos</p></div>
-        </div>
-        <div class="flex justify-center gap-8 mt-8 border-b border-slate-100 pb-4">
-            <button onclick="mudarAba('vinhos')" id="tab-vinhos" class="tab-btn tab-active uppercase text-[11px] tracking-[0.3em]">Adega Privada</button>
-            <button onclick="mudarAba('restaurantes')" id="tab-restaurantes" class="tab-btn uppercase text-[11px] tracking-[0.3em]">Experiências</button>
-        </div>
-    </header>
+  <!-- MAIN -->
+  <div id="main">
 
-    <!-- STATS -->
-    <div id="statsPanel" class="max-w-7xl mx-auto px-6">
-        <div class="bg-white rounded-[40px] p-8 border border-slate-50 shadow-xl mt-8 mb-2">
-            <h2 class="font-serif text-2xl text-slate-800 mb-6" id="statsPanelTitle">Resumo da Adega</h2>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                <div class="stat-bubble"><div class="text-4xl font-black text-pink-900" id="statTotal">0</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total</div></div>
-                <div class="stat-bubble"><div class="text-4xl font-black text-amber-700" id="statMedia">—</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Média ★</div></div>
-                <div class="stat-bubble"><div class="text-4xl font-black text-pink-900" id="statFavoritos">0</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Favoritos</div></div>
-                <div class="stat-bubble"><div class="text-2xl font-black text-amber-700" id="statMediaPreco">—</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Preço Médio</div></div>
-                <div class="stat-bubble"><div class="text-2xl font-black text-pink-900" id="statValorTotal">€0.00</div><div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Valor Total</div></div>
-            </div>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribuição por Tipo</p><div class="chart-wrap"><canvas id="chartTipos"></canvas></div></div>
-                <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Avaliações</p><div class="chart-wrap"><canvas id="chartEstrelas"></canvas></div></div>
-            </div>
-        </div>
+    <!-- TOPBAR -->
+    <div id="topbar">
+      <div class="topbar-title" id="topbarTitle">Adega Privada</div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Procurar vinho, produtor, região..." oninput="renderList()">
+      </div>
+      <div class="view-toggle">
+        <button class="active" onclick="setListView('grid')" id="viewGrid" title="Grelha">⊞</button>
+        <button onclick="setListView('list')" id="viewList" title="Lista">≡</button>
+      </div>
+      <button class="topbar-btn" onclick="openForm()" title="Adicionar">+</button>
+      <button class="topbar-btn" id="btnCompare" onclick="openCompareModal()" title="Comparar">⚖</button>
+      <button class="topbar-btn" id="btnScan" onclick="openScanModal()" title="Scanner IA">📷</button>
+      <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarTudo(event)" style="display:none;">
     </div>
 
-    <!-- MAIN -->
-    <main class="max-w-7xl mx-auto px-6 py-10">
-        <div class="grid lg:grid-cols-12 gap-12">
+    <!-- FILTER BAR -->
+    <div id="filterBar">
+      <button class="filter-chip active" onclick="setFilterTipo('')" data-tipo="">Todos</button>
+      <div id="tipoChips"></div>
+      <select class="filter-select" id="filterEstrelas" onchange="renderList()">
+        <option value="">Todas as estrelas</option>
+        <option value="5">★★★★★</option>
+        <option value="4">★★★★+</option>
+        <option value="3">★★★+</option>
+      </select>
+      <select class="filter-select" id="sortSelect" onchange="renderList()">
+        <option value="recentes">Mais recentes</option>
+        <option value="rating">Melhor nota</option>
+        <option value="preco-desc">Preço ↓</option>
+        <option value="preco-asc">Preço ↑</option>
+        <option value="stock-desc">Stock ↓</option>
+        <option value="nome">Nome A-Z</option>
+        <option value="consumo">Consumo ideal</option>
+      </select>
+      <button class="filter-chip" id="favChip" onclick="toggleFavFilter()">❤️ Favoritos</button>
+      <button class="filter-chip" onclick="clearFilters()" style="margin-left:auto;">Limpar</button>
+    </div>
 
-            <!-- FORM -->
-            <aside class="lg:col-span-4">
-                <div class="bg-white p-8 rounded-[40px] shadow-2xl border border-slate-50 sticky top-28">
-                    <form id="mainForm" class="space-y-5">
-                        <input type="hidden" id="editIndex" value="-1">
+    <!-- CONTENT -->
+    <div id="content">
 
-                        <input type="text" id="nome" required placeholder="Nome do Vinho ou Local" class="!text-lg font-semibold">
+      <!-- WINE LIST VIEW -->
+      <div id="listView">
+        <div id="cardsGrid"></div>
+      </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <select id="tipo" class="font-bold text-pink-900"></select>
-                            <input type="text" id="ano" placeholder="Ano / Vindima">
-                        </div>
+      <!-- STATS VIEW -->
+      <div id="statsView">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;" id="chartsGrid"></div>
+      </div>
 
-                        <div id="produtorWrap">
-                            <input type="text" id="produtor" placeholder="Produtor / Quinta">
-                        </div>
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end app -->
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <input type="text" id="extra1" class="text-sm">
-                            <input type="text" id="extra2" class="text-sm">
-                        </div>
+<!-- MOBILE NAV -->
+<nav id="mobileNav">
+  <div class="mnav-item active" onclick="setView('vinhos')" id="mnav-vinhos"><div class="mnav-icon">🍷</div>Adega</div>
+  <div class="mnav-item" onclick="setView('restaurantes')" id="mnav-restaurantes"><div class="mnav-icon">🍽️</div>Exp.</div>
+  <div class="mnav-item" onclick="setView('stats')" id="mnav-stats"><div class="mnav-icon">📊</div>Stats</div>
+  <div class="mnav-item" onclick="openForm()" id="mnav-add"><div class="mnav-icon" style="width:36px;height:36px;background:var(--wine);border-radius:99px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">+</div>Adicionar</div>
+  <div class="mnav-item" onclick="openScanModal()"><div class="mnav-icon">📷</div>Scanner</div>
+</nav>
 
-                        <div id="precoWrap" class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none z-10">€</span>
-                            <input type="number" id="preco" placeholder="Preço (opcional)" class="!pl-8" min="0" step="0.01">
-                        </div>
+<!-- FORM DRAWER -->
+<div id="formPanel">
+  <div id="formOverlay" onclick="closeForm()"></div>
+  <div id="formDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerTitle">Novo Vinho</div>
+      <button class="drawer-close" onclick="closeForm()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <input type="hidden" id="editId">
 
-                        <div id="notasProvaWrap" class="space-y-3">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Notas de Prova</label>
-                            <div class="flex flex-wrap gap-1.5" id="sugestoesNotasProva"></div>
-                            <div class="flex gap-2">
-                                <input type="text" id="inputNotaProva" placeholder="Outra nota..." class="flex-1 !py-2 !text-xs" onkeydown="if(event.key==='Enter'){event.preventDefault();addNotaProva();}">
-                                <button type="button" onclick="addNotaProva()" class="bg-amber-700 text-white w-12 rounded-2xl font-bold text-xl flex-shrink-0">+</button>
-                            </div>
-                            <div id="notasProvaList" class="flex flex-wrap gap-2"></div>
-                        </div>
+      <div class="field-group">
+        <label class="field-label">Nome</label>
+        <input class="field-input" type="text" id="fNome" placeholder="Ex: Barca Velha 2011" required>
+      </div>
 
-                        <div class="space-y-3">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Etiquetas</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="inputTag" placeholder="Ex: Picante, Reserva..." class="flex-1 !py-2 !text-xs" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag();}">
-                                <button type="button" onclick="addTag()" class="bg-pink-900 text-white w-12 rounded-2xl font-bold text-xl flex-shrink-0">+</button>
-                            </div>
-                            <div id="tagsList" class="flex flex-wrap gap-2"></div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Avaliação & Notas</label>
-                            <select id="estrelas" class="text-amber-500 font-bold text-center">
-                                <option value="5">★★★★★ Excepcional</option>
-                                <option value="4">★★★★ Muito Bom</option>
-                                <option value="3" selected>★★★ Bom</option>
-                                <option value="2">★★ Razoável</option>
-                                <option value="1">★ Fraco</option>
-                            </select>
-                            <textarea id="notas" rows="3" placeholder="O que achou desta experiência?..." class="text-sm italic"></textarea>
-                        </div>
-
-                        <div class="bg-slate-50 border-2 border-dashed border-slate-200 p-4 rounded-3xl text-center relative hover:bg-slate-100 transition-colors">
-                            <input type="file" id="foto" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer !rounded-3xl !border-none !bg-transparent !p-0">
-                            <span class="text-xs font-bold text-slate-400" id="fotoLabel">🖼️ CARREGAR FOTO</span>
-                            <input type="hidden" id="fotoBase64">
-                        </div>
-
-                        <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold uppercase tracking-widest text-[11px] shadow-xl hover:bg-pink-900 transition-all active:scale-95">
-                            Guardar Registo
-                        </button>
-                    </form>
-                </div>
-            </aside>
-
-            <!-- LISTA -->
-            <section class="lg:col-span-8">
-                <div id="listaItems" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
-            </section>
+      <div class="field-row cols-2">
+        <div>
+          <label class="field-label">Tipo</label>
+          <select class="field-input" id="fTipo"></select>
         </div>
-    </main>
+        <div>
+          <label class="field-label">Ano / Vindima</label>
+          <input class="field-input" type="text" id="fAno" placeholder="2020">
+        </div>
+      </div>
 
-    <script>
-    const DB_NAME    = 'DiarioGourmet';
-    const DB_VERSION = 1;
-    const STORE      = 'dados';
-    let db = null;
+      <div id="wineOnlyFields">
+        <div class="field-group">
+          <label class="field-label">Produtor / Quinta</label>
+          <input class="field-input" type="text" id="fProdutor" placeholder="Ex: Quinta do Crasto">
+        </div>
+        <div class="field-row cols-2">
+          <div>
+            <label class="field-label">Região</label>
+            <input class="field-input" type="text" id="fRegiao" placeholder="Douro, Alentejo...">
+          </div>
+          <div>
+            <label class="field-label">Castas</label>
+            <input class="field-input" type="text" id="fCastas" placeholder="Touriga Nacional...">
+          </div>
+        </div>
+        <div class="field-row cols-3">
+          <div>
+            <label class="field-label">Preço (€)</label>
+            <input class="field-input" type="number" id="fPreco" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div>
+            <label class="field-label">Stock (garrafas)</label>
+            <input class="field-input" type="number" id="fStock" placeholder="1" min="0" step="1">
+          </div>
+          <div>
+            <label class="field-label">Consumo ideal</label>
+            <input class="field-input" type="text" id="fConsumo" placeholder="2024-2028">
+          </div>
+        </div>
 
-    function abrirDB() {
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.open(DB_NAME, DB_VERSION);
-            req.onupgradeneeded = e => {
-                const db = e.target.result;
-                if(!db.objectStoreNames.contains(STORE)) {
-                    db.createObjectStore(STORE, { keyPath: 'id' });
-                }
-            };
-            req.onsuccess = e => { db = e.target.result; resolve(db); };
-            req.onerror   = e => reject(e.target.error);
-        });
-    }
+        <!-- NOTAS DE PROVA -->
+        <div class="field-group">
+          <label class="field-label">Notas de Prova</label>
+          <div class="sugestao-grid" id="sugestaoGrid"></div>
+          <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+            <input class="field-input" type="text" id="fNotaInput" placeholder="Outra nota..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addNota();}">
+            <button type="button" onclick="addNota()" style="padding:.5rem 1rem;background:var(--gold);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:700;">+</button>
+          </div>
+          <div id="notasChips" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem;"></div>
+        </div>
 
-    function dbGet(id) {
-        return new Promise((resolve, reject) => {
-            const tx  = db.transaction(STORE, 'readonly');
-            const req = tx.objectStore(STORE).get(id);
-            req.onsuccess = e => resolve(e.target.result ? e.target.result.value : null);
-            req.onerror   = e => reject(e.target.error);
-        });
-    }
+        <!-- HARMONIZAÇÃO -->
+        <div class="field-group">
+          <label class="field-label">Harmonização com Comida</label>
+          <div class="harmony-section">
+            <div class="harmony-title">Sugestões</div>
+            <div class="harmony-chips" id="harmonyChips"></div>
+          </div>
+          <div id="harmonySelected" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem;"></div>
+        </div>
+      </div>
 
-    function dbSet(id, value) {
-        return new Promise((resolve, reject) => {
-            const tx  = db.transaction(STORE, 'readwrite');
-            const req = tx.objectStore(STORE).put({ id, value });
-            req.onsuccess = () => resolve();
-            req.onerror   = e => reject(e.target.error);
-        });
-    }
+      <!-- RESTAURANTE FIELDS -->
+      <div id="restaFields" style="display:none;">
+        <div class="field-row cols-2">
+          <div>
+            <label class="field-label">Localização</label>
+            <input class="field-input" type="text" id="fLocal" placeholder="Lisboa, Porto...">
+          </div>
+          <div>
+            <label class="field-label">Prato Favorito</label>
+            <input class="field-input" type="text" id="fPrato" placeholder="Bacalhau à brás...">
+          </div>
+        </div>
+      </div>
 
-    let abaAtual      = 'vinhos';
-    let dados         = { vinhos: [], restaurantes: [] };
-    let currentTags        = [];
-    let currentNotasProva  = [];
-    let historicoBackup    = null;
-    let apenasFavoritos    = false;
-    let statsAberto        = false;
-    let chartTipos         = null;
-    let chartEstrelas      = null;
+      <!-- DATA DE COMPRA -->
+      <div class="field-row cols-2">
+        <div>
+          <label class="field-label">Data de Compra</label>
+          <input class="field-input" type="date" id="fDataCompra">
+        </div>
+        <div>
+          <label class="field-label">Avaliação</label>
+          <select class="field-input" id="fEstrelas">
+            <option value="5">★★★★★ Excepcional</option>
+            <option value="4">★★★★ Muito Bom</option>
+            <option value="3" selected>★★★ Bom</option>
+            <option value="2">★★ Razoável</option>
+            <option value="1">★ Fraco</option>
+          </select>
+        </div>
+      </div>
 
-    const ordenarComparators = {
-        recentes: (a,b) => (b.dataRegisto||"").localeCompare(a.dataRegisto||""),
-        rating: (a,b) => (b.estrelas||0) - (a.estrelas||0),
-        "preco-desc": (a,b) => (b.preco??-1) - (a.preco??-1),
-        "preco-asc": (a,b) => (a.preco??Number.MAX_SAFE_INTEGER) - (b.preco??Number.MAX_SAFE_INTEGER),
-        nome: (a,b) => (a.nome||"").localeCompare(b.nome||"", "pt")
+      <!-- TAGS -->
+      <div class="field-group">
+        <label class="field-label">Etiquetas</label>
+        <div style="display:flex;gap:.5rem;">
+          <input class="field-input" type="text" id="fTagInput" placeholder="Ex: Presente, Colheita..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag();}">
+          <button type="button" onclick="addTag()" style="padding:.5rem 1rem;background:var(--wine);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:700;">+</button>
+        </div>
+        <div id="tagsChips" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem;"></div>
+      </div>
+
+      <!-- NOTAS -->
+      <div class="field-group">
+        <label class="field-label">Notas & Impressões</label>
+        <textarea class="field-input" id="fNotas" rows="3" placeholder="Anota a tua experiência..."></textarea>
+      </div>
+
+      <!-- FOTO -->
+      <div class="field-group">
+        <label class="field-label">Fotografia</label>
+        <div class="photo-drop" id="photoDrop" ondragover="photoDrag(event)" ondrop="photoDrop(event)" ondragleave="this.classList.remove('drag-over')">
+          <input type="file" accept="image/*" id="fFoto" onchange="handlePhoto(this)">
+          <div id="photoLabel" style="font-size:.75rem;color:var(--muted);font-weight:600;">📷 Arrasta ou clica para carregar foto</div>
+          <img id="photoPreview" class="photo-preview" style="display:none;">
+        </div>
+        <input type="hidden" id="fFotoBase64">
+      </div>
+
+      <button class="submit-btn" onclick="submitForm()">Guardar Registo</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE MODAL -->
+<div id="compareModal">
+  <div id="compareOverlay" onclick="closeCompareModal()"></div>
+  <div id="compareBox">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 class="serif" style="font-size:1.6rem;">Comparar Vinhos</h2>
+      <button onclick="closeCompareModal()" class="drawer-close">✕</button>
+    </div>
+    <div id="compareContent"></div>
+  </div>
+</div>
+
+<!-- COMPARE SELECTION BAR -->
+<div id="compareBar">
+  <div style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.15em;text-transform:uppercase;">Seleccionados</div>
+  <div class="compare-items" id="compareItems"></div>
+  <button onclick="openCompareModal()" style="padding:.5rem 1.25rem;background:var(--gold);color:white;border:none;border-radius:10px;font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;">Comparar →</button>
+  <button onclick="clearCompare()" style="padding:.5rem .75rem;background:rgba(255,255,255,.1);color:white;border:none;border-radius:10px;font-size:.75rem;cursor:pointer;">✕</button>
+</div>
+
+<!-- AI MODAL -->
+<div id="aiModal">
+  <div id="aiOverlay" onclick="closeAiModal()"></div>
+  <div id="aiBox">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+      <div class="ai-title">Análise com IA ✨</div>
+      <button onclick="closeAiModal()" class="drawer-close">✕</button>
+    </div>
+    <div class="ai-sub" id="aiSubTitle"></div>
+    <div id="aiLoading" class="ai-loading" style="display:none;">
+      <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+      <span>A analisar o vinho...</span>
+    </div>
+    <div id="aiContent"></div>
+  </div>
+</div>
+
+<!-- SCAN MODAL -->
+<div id="scanModal">
+  <div id="scanOverlay" onclick="closeScanModal()"></div>
+  <div id="scanBox">
+    <div class="scan-ui" style="border-bottom:1px solid rgba(255,255,255,.1);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="scan-title">Scanner de Etiqueta IA</div>
+        <button onclick="closeScanModal()" style="background:rgba(255,255,255,.1);border:none;color:white;width:32px;height:32px;border-radius:99px;cursor:pointer;font-size:1rem;">✕</button>
+      </div>
+      <p style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:.25rem;">Aponta para a etiqueta do vinho para análise automática</p>
+    </div>
+    <div style="position:relative;background:#111;min-height:200px;display:flex;align-items:center;justify-content:center;">
+      <video id="scanVideo" autoplay muted playsinline></video>
+      <div id="scanPlaceholder" style="color:rgba(255,255,255,.3);font-size:.85rem;padding:2rem;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:.5rem;">📷</div>
+        <div>Câmara não disponível ou sem permissão</div>
+        <div style="margin-top:.75rem;font-size:.7rem;">Em alternativa, carrega uma foto da etiqueta</div>
+      </div>
+    </div>
+    <div class="scan-ui">
+      <div style="display:flex;gap:.75rem;margin-top:.25rem;">
+        <label style="flex:1;padding:.75rem;background:rgba(255,255,255,.06);border-radius:12px;text-align:center;cursor:pointer;font-size:.8rem;position:relative;">
+          <input type="file" accept="image/*" id="scanUpload" onchange="scanFromFile(event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+          📁 Carregar Foto
+        </label>
+        <button onclick="scanCapture()" style="flex:1;padding:.75rem;background:var(--wine);color:white;border:none;border-radius:12px;font-weight:700;font-size:.8rem;cursor:pointer;">
+          📸 Capturar
+        </button>
+      </div>
+      <div id="scanResult" class="scan-result" style="display:none;"></div>
+      <button id="scanUseBtn" onclick="useScanResult()" style="display:none;width:100%;margin-top:.75rem;padding:.75rem;background:var(--gold);color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;">
+        ✓ Usar este vinho
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════ DB ═══════════════════════════════ */
+const DB_NAME = 'AdegaPrestige', DB_V = 2, STORE = 'dados';
+let db = null;
+
+function abrirDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_V);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: 'id' });
     };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = e => rej(e.target.error);
+  });
+}
+function dbGet(id) {
+  return new Promise((res, rej) => {
+    const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(id);
+    req.onsuccess = e => res(e.target.result ? e.target.result.value : null);
+    req.onerror = e => rej(e.target.error);
+  });
+}
+function dbSet(id, value) {
+  return new Promise((res, rej) => {
+    const req = db.transaction(STORE, 'readwrite').objectStore(STORE).put({ id, value });
+    req.onsuccess = () => res();
+    req.onerror = e => rej(e.target.error);
+  });
+}
 
-    const config = {
-        vinhos:       { opcoes: ['Tinto','Branco','Verde','Rosé','Espumante','Porto','Licoroso'], extra1:'Região',     extra2:'Castas'        },
-        restaurantes: { opcoes: ['Tradicional','Gourmet','Italiano','Japonês','Marisqueira'],     extra1:'Localização', extra2:'Prato Favorito' }
+/* ═══════════════════════════════ STATE ═══════════════════════════════ */
+let dados = { vinhos: [], restaurantes: [] };
+let currentView = 'vinhos';
+let listViewMode = 'grid';
+let filterTipo = '';
+let filterEstrelas = '';
+let filterFav = false;
+let compareSelection = [];
+let historicoBackup = null;
+let currentTags = [];
+let currentNotas = [];
+let currentHarmony = [];
+let scanStream = null;
+let scanData = null;
+let chartInstances = {};
+
+const TIPOS_VINHO = ['Tinto','Branco','Verde','Rosé','Espumante','Porto','Licoroso','Moscatel'];
+const TIPOS_RESTA = ['Tradicional','Gourmet','Italiano','Japonês','Marisqueira','Contemporâneo','Petiscos'];
+
+const NOTAS_SUGESTOES = [
+  { nome:'Frutos Vermelhos', cor:'#be185d' }, { nome:'Frutos Negros', cor:'#1e293b' },
+  { nome:'Floral',           cor:'#a855f7' }, { nome:'Especiarias',   cor:'#d97706' },
+  { nome:'Tabaco',           cor:'#78716c' }, { nome:'Terra',         cor:'#92400e' },
+  { nome:'Carvalho',         cor:'#b45309' }, { nome:'Frutos Secos',  cor:'#ca8a04' },
+  { nome:'Mineral',          cor:'#0891b2' }, { nome:'Baunilha',      cor:'#c2410c' },
+  { nome:'Chocolate',        cor:'#7c3aed' }, { nome:'Mel',           cor:'#f59e0b' },
+  { nome:'Citrinos',         cor:'#65a30d' }, { nome:'Tânicas',       cor:'#854d0e' },
+  { nome:'Ácido',            cor:'#0284c7' }, { nome:'Encorpado',     cor:'#831843' },
+];
+
+const HARMONY_MAP = {
+  Tinto:      ['Carnes Vermelhas','Caça','Queijos Curados','Massas','Cogumelos'],
+  Branco:     ['Peixe','Marisco','Aves','Saladas','Queijo Fresco'],
+  Verde:      ['Peixe Grelhado','Marisco','Saladas','Sushi'],
+  Rosé:       ['Saladas','Aves','Salmão','Queijo Fresco','Petiscos'],
+  Espumante:  ['Ostras','Sushi','Queijo','Frutas','Aperitivos'],
+  Porto:      ['Chocolate','Queijo Azul','Nozes','Sobremesas','Figos'],
+  Licoroso:   ['Foie Gras','Queijo Azul','Sobremesas','Frutas Secas'],
+  Moscatel:   ['Doces','Frutas','Queijo Curado','Tarte'],
+};
+
+const SORT_FN = {
+  recentes:    (a,b) => (b.dataRegisto||'').localeCompare(a.dataRegisto||''),
+  rating:      (a,b) => (b.estrelas||0)-(a.estrelas||0),
+  'preco-desc':(a,b) => (b.preco??-1)-(a.preco??-1),
+  'preco-asc': (a,b) => (a.preco??99999)-(b.preco??99999),
+  'stock-desc':(a,b) => (b.stock||0)-(a.stock||0),
+  nome:        (a,b) => (a.nome||'').localeCompare(b.nome||'','pt'),
+  consumo:     (a,b) => (a.consumo||'z').localeCompare(b.consumo||'z'),
+};
+
+/* ═══════════════════════════════ INIT ═══════════════════════════════ */
+async function init() {
+  await abrirDB();
+  const saved = await dbGet('main');
+  if (saved) dados = saved;
+  ['vinhos','restaurantes'].forEach(k => {
+    dados[k] = (dados[k]||[]).map(i => ({ ...i, dataRegisto: i.dataRegisto || new Date().toISOString() }));
+  });
+  mudarAba('vinhos');
+  buildTipoChips();
+  updateSidebarStats();
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('out');
+    setTimeout(() => document.getElementById('splash').remove(), 700);
+  }, 1400);
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 300);
+});
+function scrollToTop() { window.scrollTo({ top:0, behavior:'smooth' }); }
+
+/* ═══════════════════════════════ VIEW ═══════════════════════════════ */
+function setView(v) {
+  currentView = v;
+  ['vinhos','restaurantes','stats'].forEach(x => {
+    document.getElementById(`nav-${x}`)?.classList.toggle('active', x===v);
+    document.getElementById(`mnav-${x}`)?.classList.toggle('active', x===v);
+  });
+  document.getElementById('listView').style.display  = v !== 'stats' ? '' : 'none';
+  document.getElementById('statsView').classList.toggle('visible', v === 'stats');
+  document.getElementById('filterBar').style.display = v !== 'stats' ? '' : 'none';
+  const titles = { vinhos:'Adega Privada', restaurantes:'Experiências', stats:'Estatísticas' };
+  document.getElementById('topbarTitle').textContent = titles[v];
+  buildTipoChips();
+  renderList();
+  if (v === 'stats') renderStats();
+}
+
+function mudarAba(aba) {
+  currentView = aba;
+  const tipos = aba === 'vinhos' ? TIPOS_VINHO : TIPOS_RESTA;
+  document.getElementById('fTipo').innerHTML = tipos.map(t => `<option>${t}</option>`).join('');
+  document.getElementById('wineOnlyFields').style.display = aba === 'vinhos' ? '' : 'none';
+  document.getElementById('restaFields').style.display    = aba === 'restaurantes' ? '' : 'none';
+  setView(aba);
+}
+
+function setListView(mode) {
+  listViewMode = mode;
+  document.getElementById('cardsGrid').classList.toggle('list-view', mode === 'list');
+  document.getElementById('viewGrid').classList.toggle('active', mode === 'grid');
+  document.getElementById('viewList').classList.toggle('active', mode === 'list');
+}
+
+/* ═══════════════════════════════ FILTERS ═══════════════════════════════ */
+function buildTipoChips() {
+  if (currentView === 'stats') return;
+  const tipos = currentView === 'vinhos' ? TIPOS_VINHO : TIPOS_RESTA;
+  const existing = new Set(dados[currentView]?.map(i => i.tipo) || []);
+  document.getElementById('tipoChips').innerHTML = tipos
+    .filter(t => existing.has(t))
+    .map(t => `<button class="filter-chip${filterTipo===t?' active':''}" onclick="setFilterTipo('${t}')">${t}</button>`)
+    .join('');
+}
+
+function setFilterTipo(t) {
+  filterTipo = t;
+  document.querySelectorAll('#filterBar .filter-chip[data-tipo]').forEach(b => b.classList.toggle('active', b.dataset.tipo === t));
+  document.querySelectorAll('#tipoChips .filter-chip').forEach(b => b.classList.toggle('active', b.textContent === t && t !== ''));
+  if (!t) document.querySelector('#filterBar .filter-chip[data-tipo]')?.classList.add('active');
+  renderList();
+}
+
+function toggleFavFilter() {
+  filterFav = !filterFav;
+  document.getElementById('favChip').classList.toggle('active', filterFav);
+  renderList();
+}
+
+function clearFilters() {
+  filterTipo = ''; filterEstrelas = ''; filterFav = false;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterEstrelas').value = '';
+  document.getElementById('sortSelect').value = 'recentes';
+  document.getElementById('favChip').classList.remove('active');
+  document.querySelectorAll('#tipoChips .filter-chip').forEach(b => b.classList.remove('active'));
+  document.querySelector('#filterBar .filter-chip[data-tipo]')?.classList.add('active');
+  renderList();
+}
+
+/* ═══════════════════════════════ RENDER LIST ═══════════════════════════════ */
+function renderList() {
+  if (currentView === 'stats') return;
+  const grid  = document.getElementById('cardsGrid');
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const minStar = parseInt(document.getElementById('filterEstrelas').value || '0');
+  const sort  = document.getElementById('sortSelect').value;
+
+  let items = (dados[currentView] || []).map((it, i) => ({ ...it, _idx: i }));
+  if (filterTipo) items = items.filter(i => i.tipo === filterTipo);
+  if (filterFav)  items = items.filter(i => i.favorito);
+  if (minStar)    items = items.filter(i => (i.estrelas||0) >= minStar);
+  if (query)      items = items.filter(i =>
+    (i.nome||'').toLowerCase().includes(query) ||
+    (i.produtor||'').toLowerCase().includes(query) ||
+    (i.regiao||'').toLowerCase().includes(query) ||
+    (i.tags||[]).some(t => t.toLowerCase().includes(query))
+  );
+  items.sort(SORT_FN[sort] || SORT_FN.recentes);
+
+  if (!items.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <div class="empty-icon">🍷</div>
+      <div class="empty-text">Adega vazia</div>
+      <div class="empty-sub">Adiciona o teu primeiro registo para começar.</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = '';
+  items.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'wine-card';
+    card.style.animationDelay = `${i * 40}ms`;
+
+    const stars = '★'.repeat(item.estrelas || 0);
+    const notasHTML = (item.notasProva||[]).map(n => {
+      const c = (NOTAS_SUGESTOES.find(x => x.nome===n)||{}).cor || '#831843';
+      return `<span class="nota-chip-sm" style="background:${c}18;color:${c};">${n}</span>`;
+    }).join('');
+    const tagsHTML = (item.tags||[]).map(t => `<span class="tag-sm">${t}</span>`).join('');
+    const harmonyHTML = (item.harmony||[]).slice(0,3).map(h =>
+      `<span style="font-size:.6rem;color:var(--gold);background:rgba(181,131,42,.1);padding:.1rem .5rem;border-radius:99px;">${h}</span>`
+    ).join('');
+
+    const inCompare = compareSelection.includes(item._idx);
+    const isListMode = listViewMode === 'list';
+
+    card.innerHTML = `
+      <div class="card-photo">
+        ${item.foto
+          ? `<img src="${item.foto}" loading="lazy" alt="${item.nome}">`
+          : `<div class="card-photo-placeholder">🍷</div>`}
+        <button class="card-fav" onclick="toggleFavorito(${item._idx})">${item.favorito?'❤️':'🤍'}</button>
+        <div class="card-badge-type">${item.tipo}</div>
+        ${item.preco!=null ? `<div class="card-badge-price">€${item.preco.toFixed(2)}</div>`:''}
+        ${item.stock ? `<div class="card-badge-stock">📦 ${item.stock} gar.</div>`:''}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${item.nome}</div>
+        ${item.produtor ? `<div class="card-producer">${item.produtor}</div>`:''}
+        <div class="card-meta">
+          <span class="card-stars">${stars}</span>
+          ${item.regiao ? `<span class="card-region">· ${item.regiao}</span>`:''}
+          ${item.ano ? `<span class="card-year">${item.ano}</span>`:''}
+          ${item.consumo ? `<span style="font-size:.65rem;color:var(--gold);font-weight:600;">🕐 ${item.consumo}</span>`:''}
+        </div>
+        ${notasHTML ? `<div class="card-notas">${notasHTML}</div>`:''}
+        ${harmonyHTML ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;">${harmonyHTML}</div>`:''}
+        ${tagsHTML ? `<div class="card-tags">${tagsHTML}</div>`:''}
+        ${item.notas ? `<div class="card-notes-text">"${item.notas}"</div>`:''}
+      </div>
+      <div class="card-footer">
+        <div class="card-date">${formatDate(item.dataRegisto)}</div>
+        <div class="card-actions">
+          <button class="card-btn card-btn-compare${inCompare?' active':''}" onclick="toggleCompare(${item._idx},'${(item.nome||'').replace(/'/g,"\\'")}')">⚖</button>
+          <button class="card-btn" onclick="openAiModal(${item._idx})" style="background:rgba(181,131,42,.1);color:var(--gold);">✨ IA</button>
+          <button class="card-btn card-btn-edit" onclick="prepararEdicao(${item._idx})">Editar</button>
+          <button class="card-btn card-btn-del" onclick="remover(${item._idx})">×</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  buildTipoChips();
+  updateSidebarStats();
+}
+
+/* ═══════════════════════════════ FORM ═══════════════════════════════ */
+function openForm() {
+  resetForm();
+  document.getElementById('drawerTitle').textContent = currentView === 'vinhos' ? 'Novo Vinho' : 'Nova Experiência';
+  document.getElementById('formPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('fNome').focus(), 400);
+}
+function closeForm() {
+  document.getElementById('formPanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderSugestoes() {
+  document.getElementById('sugestaoGrid').innerHTML = NOTAS_SUGESTOES.map(s => {
+    const sel = currentNotas.includes(s.nome);
+    return `<button type="button" class="sug-btn${sel?' sel':''}" style="${sel?`background:${s.cor};border-color:${s.cor};`:''}" onclick="toggleNota('${s.nome}')">${s.nome}</button>`;
+  }).join('');
+}
+
+function toggleNota(nome) {
+  currentNotas.includes(nome) ? currentNotas = currentNotas.filter(n => n!==nome) : currentNotas.push(nome);
+  renderNotasChips(); renderSugestoes();
+}
+function addNota() {
+  const val = document.getElementById('fNotaInput').value.trim();
+  if (val && !currentNotas.includes(val)) { currentNotas.push(val); renderNotasChips(); renderSugestoes(); document.getElementById('fNotaInput').value = ''; }
+}
+function removeNota(n) { currentNotas = currentNotas.filter(x => x!==n); renderNotasChips(); renderSugestoes(); }
+function renderNotasChips() {
+  document.getElementById('notasChips').innerHTML = currentNotas.map(n => {
+    const cor = (NOTAS_SUGESTOES.find(x=>x.nome===n)||{}).cor || '#831843';
+    return `<span class="nota-chip-form" style="background:${cor}18;color:${cor};">${n}<button type="button" onclick="removeNota('${n.replace(/'/g,"\\'")}')">×</button></span>`;
+  }).join('');
+}
+
+function addTag() {
+  const val = document.getElementById('fTagInput').value.trim();
+  if (val && !currentTags.includes(val)) { currentTags.push(val); renderTagsChips(); document.getElementById('fTagInput').value = ''; }
+}
+function removeTag(t) { currentTags = currentTags.filter(x => x!==t); renderTagsChips(); }
+function renderTagsChips() {
+  document.getElementById('tagsChips').innerHTML = currentTags.map(t =>
+    `<span class="tag-chip-form">${t}<button type="button" onclick="removeTag('${t.replace(/'/g,"\\'")}')">×</button></span>`
+  ).join('');
+}
+
+function renderHarmony(tipo) {
+  const sugs = HARMONY_MAP[tipo] || [];
+  document.getElementById('harmonyChips').innerHTML = sugs.map(h =>
+    `<button type="button" class="harmony-chip${currentHarmony.includes(h)?' sel':''}" onclick="toggleHarmony('${h}')">${h}</button>`
+  ).join('');
+  renderHarmonySelected();
+}
+function toggleHarmony(h) {
+  currentHarmony.includes(h) ? currentHarmony = currentHarmony.filter(x => x!==h) : currentHarmony.push(h);
+  renderHarmony(document.getElementById('fTipo').value);
+}
+function renderHarmonySelected() {
+  document.getElementById('harmonySelected').innerHTML = currentHarmony.map(h =>
+    `<span style="font-size:.7rem;font-weight:700;padding:.25rem .65rem;border-radius:99px;background:var(--gold);color:white;">${h} <button type="button" onclick="toggleHarmony('${h}')" style="all:unset;cursor:pointer;opacity:.7;">×</button></span>`
+  ).join('');
+}
+
+document.getElementById('fTipo').addEventListener('change', () => {
+  if (currentView === 'vinhos') renderHarmony(document.getElementById('fTipo').value);
+});
+
+function resetForm() {
+  document.getElementById('editId').value = '';
+  ['fNome','fAno','fProdutor','fRegiao','fCastas','fNotas','fLocal','fPrato'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['fPreco','fStock'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('fConsumo').value = '';
+  document.getElementById('fDataCompra').value = '';
+  document.getElementById('fEstrelas').value = '3';
+  document.getElementById('fFotoBase64').value = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoLabel').textContent = '📷 Arrasta ou clica para carregar foto';
+  currentTags = []; currentNotas = []; currentHarmony = [];
+  renderTagsChips(); renderNotasChips(); renderSugestoes();
+  const tipos = currentView === 'vinhos' ? TIPOS_VINHO : TIPOS_RESTA;
+  document.getElementById('fTipo').innerHTML = tipos.map(t => `<option>${t}</option>`).join('');
+  renderHarmony(tipos[0]);
+  document.getElementById('wineOnlyFields').style.display = currentView === 'vinhos' ? '' : 'none';
+  document.getElementById('restaFields').style.display    = currentView === 'restaurantes' ? '' : 'none';
+}
+
+function prepararEdicao(idx) {
+  const item = dados[currentView][idx];
+  resetForm();
+  document.getElementById('editId').value   = idx;
+  document.getElementById('fNome').value    = item.nome || '';
+  document.getElementById('fAno').value     = item.ano || '';
+  document.getElementById('fProdutor').value= item.produtor || '';
+  document.getElementById('fRegiao').value  = item.regiao || '';
+  document.getElementById('fCastas').value  = item.castas || '';
+  document.getElementById('fNotas').value   = item.notas || '';
+  document.getElementById('fLocal').value   = item.local || '';
+  document.getElementById('fPrato').value   = item.prato || '';
+  document.getElementById('fPreco').value   = item.preco != null ? item.preco : '';
+  document.getElementById('fStock').value   = item.stock != null ? item.stock : '';
+  document.getElementById('fConsumo').value = item.consumo || '';
+  document.getElementById('fDataCompra').value = item.dataCompra || '';
+  document.getElementById('fEstrelas').value = item.estrelas || 3;
+  document.getElementById('fFotoBase64').value = item.foto || '';
+  if (item.foto) {
+    document.getElementById('photoPreview').src = item.foto;
+    document.getElementById('photoPreview').style.display = 'block';
+    document.getElementById('photoLabel').textContent = '✅ Foto carregada';
+  }
+  const tipos = currentView === 'vinhos' ? TIPOS_VINHO : TIPOS_RESTA;
+  document.getElementById('fTipo').innerHTML = tipos.map(t => `<option${t===item.tipo?' selected':''}>${t}</option>`).join('');
+  currentTags   = [...(item.tags||[])];
+  currentNotas  = [...(item.notasProva||[])];
+  currentHarmony= [...(item.harmony||[])];
+  renderTagsChips(); renderNotasChips(); renderSugestoes(); renderHarmony(item.tipo);
+  document.getElementById('drawerTitle').textContent = 'Editar';
+  document.getElementById('formPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+async function submitForm() {
+  const nome = document.getElementById('fNome').value.trim();
+  if (!nome) { document.getElementById('fNome').focus(); return; }
+  const idxStr = document.getElementById('editId').value;
+  const idx    = idxStr !== '' ? parseInt(idxStr) : -1;
+  const precoV = document.getElementById('fPreco').value;
+  const stockV = document.getElementById('fStock').value;
+
+  const reg = {
+    nome,
+    tipo:       document.getElementById('fTipo').value,
+    ano:        document.getElementById('fAno').value,
+    produtor:   document.getElementById('fProdutor').value,
+    regiao:     document.getElementById('fRegiao').value,
+    castas:     document.getElementById('fCastas').value,
+    local:      document.getElementById('fLocal').value,
+    prato:      document.getElementById('fPrato').value,
+    preco:      precoV !== '' ? parseFloat(precoV) : null,
+    stock:      stockV !== '' ? parseInt(stockV) : null,
+    consumo:    document.getElementById('fConsumo').value,
+    dataCompra: document.getElementById('fDataCompra').value,
+    notas:      document.getElementById('fNotas').value,
+    estrelas:   parseInt(document.getElementById('fEstrelas').value),
+    foto:       document.getElementById('fFotoBase64').value,
+    tags:       [...currentTags],
+    notasProva: [...currentNotas],
+    harmony:    [...currentHarmony],
+    favorito:   idx !== -1 ? (dados[currentView][idx].favorito||false) : false,
+    dataRegisto: idx !== -1 ? (dados[currentView][idx].dataRegisto || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  historicoBackup = JSON.parse(JSON.stringify(dados));
+  if (idx === -1) dados[currentView].unshift(reg);
+  else dados[currentView][idx] = reg;
+  await guardarDados();
+  closeForm();
+  renderList();
+  showUndo();
+  if (currentView === 'stats') renderStats();
+}
+
+/* ═══════════════════════════════ DATA OPS ═══════════════════════════════ */
+async function guardarDados() {
+  await dbSet('main', dados);
+  const el = document.getElementById('saveIndicator');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+async function toggleFavorito(idx) {
+  dados[currentView][idx].favorito = !dados[currentView][idx].favorito;
+  await guardarDados();
+  renderList();
+}
+
+async function remover(idx) {
+  if (!confirm('Apagar este registo?')) return;
+  historicoBackup = JSON.parse(JSON.stringify(dados));
+  dados[currentView].splice(idx, 1);
+  await guardarDados();
+  renderList();
+  showUndo();
+}
+
+async function undo() {
+  if (!historicoBackup) return;
+  dados = historicoBackup; historicoBackup = null;
+  await guardarDados();
+  document.getElementById('undoToast').style.display = 'none';
+  renderList();
+  updateSidebarStats();
+}
+
+function showUndo() {
+  const t = document.getElementById('undoToast');
+  t.style.display = 'block';
+  clearTimeout(showUndo._timer);
+  showUndo._timer = setTimeout(() => { t.style.display = 'none'; }, 9000);
+}
+
+function exportarTudo() {
+  const a = document.createElement('a');
+  a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dados));
+  a.download = `adega_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+async function importarTudo(e) {
+  const r = new FileReader();
+  r.onload = async ev => {
+    try {
+      dados = JSON.parse(ev.target.result);
+      await guardarDados();
+      renderList(); updateSidebarStats(); if (currentView==='stats') renderStats();
+      alert('✅ Dados importados!');
+    } catch { alert('❌ Ficheiro inválido.'); }
+  };
+  r.readAsText(e.target.files[0]);
+}
+
+/* ═══════════════════════════════ PHOTO ═══════════════════════════════ */
+function handlePhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('photoLabel').textContent = '⏳ A comprimir...';
+  const r = new FileReader();
+  r.onload = ev => {
+    const img = new Image();
+    img.src = ev.target.result;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 700, scale = Math.min(1, maxW / img.width);
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const b64 = canvas.toDataURL('image/jpeg', 0.72);
+      document.getElementById('fFotoBase64').value = b64;
+      document.getElementById('photoPreview').src = b64;
+      document.getElementById('photoPreview').style.display = 'block';
+      document.getElementById('photoLabel').textContent = `✅ ${file.name}`;
     };
+  };
+  r.readAsDataURL(file);
+}
 
-    const NOTAS_SUGESTOES = [
-        { nome:'Frutos Vermelhos', cor:'#be185d' }, { nome:'Frutos Negros', cor:'#1e293b' },
-        { nome:'Floral',           cor:'#a855f7' }, { nome:'Especiarias',   cor:'#d97706' },
-        { nome:'Tabaco',           cor:'#78716c' }, { nome:'Terra',         cor:'#92400e' },
-        { nome:'Carvalho',         cor:'#b45309' }, { nome:'Frutos Secos',  cor:'#ca8a04' },
-        { nome:'Mineral',          cor:'#0891b2' }, { nome:'Baunilha',      cor:'#c2410c' },
-        { nome:'Chocolate',        cor:'#7c3aed' }, { nome:'Mel',           cor:'#f59e0b' },
-    ];
+function photoDrag(e) { e.preventDefault(); document.getElementById('photoDrop').classList.add('drag-over'); }
+function photoDrop(e) {
+  e.preventDefault();
+  document.getElementById('photoDrop').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const input = document.getElementById('fFoto');
+    const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
+    handlePhoto(input);
+  }
+}
 
-    function getCorNota(n) { return (NOTAS_SUGESTOES.find(x => x.nome === n) || {}).cor || '#831843'; }
+/* ═══════════════════════════════ STATS ═══════════════════════════════ */
+function updateSidebarStats() {
+  const items = dados[currentView === 'stats' ? 'vinhos' : currentView] || [];
+  const comPreco = items.filter(i => i.preco != null);
+  const valor = comPreco.reduce((s,i) => s+i.preco, 0);
+  document.getElementById('ss-total').textContent     = items.length;
+  document.getElementById('ss-favoritos').textContent = items.filter(i => i.favorito).length;
+  document.getElementById('ss-rating').textContent    = items.length
+    ? (items.reduce((s,i) => s+i.estrelas,0)/items.length).toFixed(1)+'★' : '—';
+  document.getElementById('ss-valor').textContent     = '€'+valor.toFixed(0);
+}
 
-    async function carregarDados() {
-        const saved = await dbGet('main');
-        if(saved) dados = saved;
-        ['vinhos','restaurantes'].forEach(k => {
-            dados[k] = (dados[k] || []).map(item => ({ ...item, dataRegisto: item.dataRegisto || new Date().toISOString() }));
-        });
-    }
+function renderStats() {
+  const items = dados[currentView === 'stats' ? 'vinhos' : currentView] || [];
+  const comPreco = items.filter(i => i.preco != null);
+  const valor = comPreco.reduce((s,i) => s+i.preco, 0);
+  const topTipo = Object.entries(items.reduce((acc,i)=>{acc[i.tipo]=(acc[i.tipo]||0)+1;return acc;},{}))
+    .sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
 
-    async function guardarDados() {
-        await dbSet('main', dados);
-        mostrarSaveIndicator();
-    }
+  document.getElementById('statGrid').innerHTML = [
+    { val: items.length, lab: 'Total' },
+    { val: items.filter(i=>i.favorito).length, lab: 'Favoritos' },
+    { val: items.length ? (items.reduce((s,i)=>s+i.estrelas,0)/items.length).toFixed(1)+'★':'—', lab: 'Média' },
+    { val: comPreco.length ? '€'+(valor/comPreco.length).toFixed(2):'—', lab: 'Preço Médio' },
+    { val: '€'+valor.toFixed(2), lab: 'Valor Total' },
+    { val: items.reduce((s,i)=>s+(i.stock||0),0), lab: 'Stock Total' },
+    { val: topTipo, lab: 'Tipo Top' },
+    { val: items.filter(i=>i.consumo).length, lab: 'Com Janela' },
+  ].map(s => `<div class="stat-card"><div class="stat-val">${s.val}</div><div class="stat-lab">${s.lab}</div></div>`).join('');
 
-    function mostrarSaveIndicator() {
-        const el = document.getElementById('saveIndicator');
-        el.classList.add('show');
-        setTimeout(() => el.classList.remove('show'), 2000);
-    }
+  const chartsGrid = document.getElementById('chartsGrid');
+  chartsGrid.innerHTML = `
+    <div class="chart-card"><div class="chart-title">Distribuição por Tipo</div><div class="chart-wrap"><canvas id="cTipos"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Avaliações</div><div class="chart-wrap"><canvas id="cEstrelas"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Regiões Top</div><div id="topRegioes" class="top-list"></div></div>
+    <div class="chart-card"><div class="chart-title">Notas de Prova</div><div class="chart-wrap"><canvas id="cNotas"></canvas></div></div>
+  `;
 
-    async function salvarComHistorico() {
-        historicoBackup = JSON.parse(JSON.stringify(dados));
-        await guardarDados();
-        const toast = document.getElementById('undoContainer');
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 8000);
-        atualizarLista();
-        atualizarStats();
-    }
+  // Tipos doughnut
+  const tiposCount = {};
+  items.forEach(i => { tiposCount[i.tipo]=(tiposCount[i.tipo]||0)+1; });
+  if (chartInstances.tipos) chartInstances.tipos.destroy();
+  chartInstances.tipos = new Chart(document.getElementById('cTipos'), {
+    type:'doughnut',
+    data:{ labels:Object.keys(tiposCount), datasets:[{ data:Object.values(tiposCount), backgroundColor:['#6b1a2a','#9b1d35','#b5832a','#d4a94e','#1a1015','#475569','#0891b2','#a855f7'], borderWidth:0, hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'58%', plugins:{ legend:{ position:'right', labels:{ font:{size:11,family:'DM Sans'}, padding:12, usePointStyle:true } } } }
+  });
 
-    async function undo() {
-        if(historicoBackup) {
-            dados = historicoBackup;
-            historicoBackup = null;
-            await guardarDados();
-            document.getElementById('undoContainer').style.display = 'none';
-            atualizarLista();
-            atualizarStats();
-        }
-    }
+  // Estrelas bar
+  const estrelaCount = [0,0,0,0,0];
+  items.forEach(i => { if(i.estrelas>=1&&i.estrelas<=5) estrelaCount[i.estrelas-1]++; });
+  if (chartInstances.estrelas) chartInstances.estrelas.destroy();
+  chartInstances.estrelas = new Chart(document.getElementById('cEstrelas'), {
+    type:'bar',
+    data:{ labels:['★','★★','★★★','★★★★','★★★★★'], datasets:[{ data:estrelaCount, backgroundColor:['#fca5a5','#fbbf24','#86efac','#34d399','#059669'], borderRadius:8, borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0, font:{family:'DM Sans'} }, grid:{ color:'#f1f5f9' } }, x:{ grid:{ display:false }, ticks:{ font:{ size:13, family:'DM Sans' } } } } }
+  });
 
-    function renderSugestoes() {
-        document.getElementById('sugestoesNotasProva').innerHTML = NOTAS_SUGESTOES.map(s => {
-            const sel = currentNotasProva.includes(s.nome);
-            return `<button type="button" onclick="toggleSugestao('${s.nome}')"
-                style="${sel ? `background:${s.cor};color:white;border-color:${s.cor}` : ''}"
-                class="sugestao-btn">${s.nome}</button>`;
-        }).join('');
-    }
-    function toggleSugestao(nome) {
-        currentNotasProva.includes(nome)
-            ? currentNotasProva = currentNotasProva.filter(n => n !== nome)
-            : currentNotasProva.push(nome);
-        renderNotasProvaForm(); renderSugestoes();
-    }
-    function addNotaProva() {
-        const val = document.getElementById('inputNotaProva').value.trim();
-        if(val && !currentNotasProva.includes(val)) {
-            currentNotasProva.push(val);
-            renderNotasProvaForm(); renderSugestoes();
-            document.getElementById('inputNotaProva').value = '';
-        }
-    }
-    function removeNotaProva(nome) {
-        currentNotasProva = currentNotasProva.filter(n => n !== nome);
-        renderNotasProvaForm(); renderSugestoes();
-    }
-    function renderNotasProvaForm() {
-        document.getElementById('notasProvaList').innerHTML = currentNotasProva.map(n => {
-            const cor = getCorNota(n);
-            return `<span class="nota-chip" style="background:${cor}18;color:${cor};border:1.5px solid ${cor}30">
-                ${n}<button type="button" onclick="removeNotaProva('${n.replace(/'/g,"\\'")}')">×</button></span>`;
-        }).join('');
-    }
+  // Regiões top
+  const regCount = {};
+  items.filter(i=>i.regiao).forEach(i => { regCount[i.regiao]=(regCount[i.regiao]||0)+1; });
+  const regTop = Object.entries(regCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxReg = regTop[0]?.[1] || 1;
+  document.getElementById('topRegioes').innerHTML = regTop.length
+    ? regTop.map(([reg,cnt],i) => `
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <div class="top-rank">${i+1}</div>
+        <div class="top-name">${reg}</div>
+        <div class="top-bar-wrap" style="width:100px;"><div class="top-bar" style="width:${cnt/maxReg*100}%"></div></div>
+        <div class="top-val">${cnt}</div>
+      </div>`).join('')
+    : '<div style="color:var(--muted);font-size:.8rem;">Sem dados de região</div>';
 
-    function addTag() {
-        const val = document.getElementById('inputTag').value.trim();
-        if(val && !currentTags.includes(val)) { currentTags.push(val); renderTagsForm(); document.getElementById('inputTag').value = ''; }
-    }
-    function removeTag(tag) { currentTags = currentTags.filter(t => t !== tag); renderTagsForm(); }
-    function renderTagsForm() {
-        document.getElementById('tagsList').innerHTML = currentTags.map(t =>
-            `<span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-2">
-                ${t}<button type="button" onclick="removeTag('${t.replace(/'/g,"\\'")}')">×</button></span>`
-        ).join('');
-    }
-
-    function mudarAba(aba) {
-        abaAtual = aba;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-        document.getElementById(`tab-${aba}`).classList.add('tab-active');
-        const c = config[aba];
-        document.getElementById('tipo').innerHTML = c.opcoes.map(o => `<option>${o}</option>`).join('');
-        document.getElementById('extra1').placeholder = c.extra1;
-        document.getElementById('extra2').placeholder = c.extra2;
-        ['produtorWrap','precoWrap','notasProvaWrap'].forEach(id =>
-            document.getElementById(id).style.display = aba === 'vinhos' ? '' : 'none'
-        );
-        document.getElementById('statsPanelTitle').textContent =
-            aba === 'vinhos' ? 'Resumo da Adega' : 'Resumo das Experiências';
-        resetForm();
-        atualizarLista();
-        atualizarStats();
-    }
-
-    async function toggleFavorito(idx) {
-        dados[abaAtual][idx].favorito = !dados[abaAtual][idx].favorito;
-        await guardarDados();
-        atualizarLista();
-        atualizarStats();
-    }
-    function toggleFiltroFavoritos() {
-        apenasFavoritos = !apenasFavoritos;
-        document.getElementById('filtroFavoritos').classList.toggle('bg-red-500');
-        document.getElementById('filtroFavoritos').classList.toggle('text-white');
-        atualizarLista();
-    }
-
-    function limparFiltros() {
-        document.getElementById('filtroTag').value = '';
-        document.getElementById('ordenacao').value = 'recentes';
-        if(apenasFavoritos) toggleFiltroFavoritos();
-        atualizarLista();
-    }
-
-    document.getElementById('mainForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const idx     = parseInt(document.getElementById('editIndex').value);
-        const precoV  = document.getElementById('preco').value;
-        const registro = {
-            nome:       document.getElementById('nome').value,
-            tipo:       document.getElementById('tipo').value,
-            ano:        document.getElementById('ano').value,
-            produtor:   document.getElementById('produtor').value,
-            tags:       [...currentTags],
-            notasProva: [...currentNotasProva],
-            extra1:     document.getElementById('extra1').value,
-            extra2:     document.getElementById('extra2').value,
-            preco:      precoV !== '' ? parseFloat(precoV) : null,
-            notas:      document.getElementById('notas').value,
-            estrelas:   parseInt(document.getElementById('estrelas').value),
-            foto:       document.getElementById('fotoBase64').value,
-            favorito:   idx !== -1 ? dados[abaAtual][idx].favorito : false,
-            dataRegisto: idx !== -1 ? (dados[abaAtual][idx].dataRegisto || new Date().toISOString()) : new Date().toISOString()
-        };
-        if(idx === -1) dados[abaAtual].unshift(registro);
-        else           dados[abaAtual][idx] = registro;
-        await salvarComHistorico();
-        resetForm();
+  // Notas radar
+  const notaCount = {};
+  items.forEach(i => (i.notasProva||[]).forEach(n => { notaCount[n]=(notaCount[n]||0)+1; }));
+  const notaTop = Object.entries(notaCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if (chartInstances.notas) chartInstances.notas.destroy();
+  if (notaTop.length) {
+    chartInstances.notas = new Chart(document.getElementById('cNotas'), {
+      type:'polarArea',
+      data:{ labels:notaTop.map(x=>x[0]), datasets:[{ data:notaTop.map(x=>x[1]), backgroundColor:NOTAS_SUGESTOES.map(n=>n.cor+'55'), borderColor:NOTAS_SUGESTOES.map(n=>n.cor), borderWidth:1.5 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ font:{size:10,family:'DM Sans'}, padding:8, usePointStyle:true } } }, scales:{ r:{ ticks:{ display:false } } } }
     });
+  } else {
+    document.getElementById('cNotas').parentElement.innerHTML += '<div style="color:var(--muted);font-size:.8rem;margin-top:.5rem;">Sem notas de prova registadas</div>';
+  }
 
-    function formatarData(iso) {
-        if(!iso) return '—';
-        try { return new Date(iso).toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' }); }
-        catch(_) { return '—'; }
-    }
+  updateSidebarStats();
+}
 
-    function atualizarLista() {
-        const lista    = document.getElementById('listaItems');
-        const filtroTag = document.getElementById('filtroTag').value.toLowerCase();
-        lista.innerHTML = '';
+/* ═══════════════════════════════ COMPARE ═══════════════════════════════ */
+function toggleCompare(idx, nome) {
+  const pos = compareSelection.indexOf(idx);
+  if (pos !== -1) { compareSelection.splice(pos, 1); }
+  else if (compareSelection.length < 2) { compareSelection.push(idx); }
+  else { compareSelection.shift(); compareSelection.push(idx); }
+  updateCompareBar();
+  renderList();
+}
+function updateCompareBar() {
+  const bar = document.getElementById('compareBar');
+  bar.classList.toggle('show', compareSelection.length > 0);
+  document.getElementById('compareItems').innerHTML = compareSelection.map(i =>
+    `<span class="compare-item-chip">${dados[currentView][i]?.nome||'?'}</span>`
+  ).join('');
+}
+function clearCompare() { compareSelection = []; updateCompareBar(); renderList(); }
 
-        let filtrados = dados[abaAtual].map((item, originalIdx) => ({...item, originalIdx}));
-        if(apenasFavoritos) filtrados = filtrados.filter(i => i.favorito);
-        if(filtroTag)       filtrados = filtrados.filter(i =>
-            (i.tags||[]).some(t => t.toLowerCase().includes(filtroTag)) ||
-            i.nome.toLowerCase().includes(filtroTag) ||
-            (i.produtor||'').toLowerCase().includes(filtroTag)
-        );
+function openCompareModal() {
+  if (compareSelection.length < 2) { alert('Selecciona 2 vinhos com o botão ⚖'); return; }
+  const [a, b] = compareSelection.map(i => dados[currentView][i]);
+  const fields = [
+    ['Tipo',    a.tipo,   b.tipo,   null],
+    ['Ano',     a.ano,    b.ano,    null],
+    ['Região',  a.regiao, b.regiao, null],
+    ['Castas',  a.castas, b.castas, null],
+    ['Preço',   a.preco!=null?'€'+a.preco.toFixed(2):'—', b.preco!=null?'€'+b.preco.toFixed(2):'—', null],
+    ['Stock',   a.stock||'—', b.stock||'—', null],
+    ['Consumo', a.consumo||'—', b.consumo||'—', null],
+    ['Avaliação', '★'.repeat(a.estrelas||0), '★'.repeat(b.estrelas||0), (a.estrelas||0)>(b.estrelas||0)?'a':(b.estrelas||0)>(a.estrelas||0)?'b':null],
+  ];
+  document.getElementById('compareContent').innerHTML = `
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;">${a.nome}</div>
+        ${a.produtor?`<div style="font-size:.7rem;color:var(--muted);">${a.produtor}</div>`:''}
+        ${a.foto?`<img src="${a.foto}" style="width:100%;height:120px;object-fit:cover;border-radius:12px;margin:.5rem 0;">`:''}
+        ${fields.map(([lab,va,vb,w]) => `
+          <div>
+            <div class="compare-row-label">${lab}</div>
+            <div class="compare-val" style="${w==='a'?'color:var(--gold);font-weight:800;':''}">${va||'—'}</div>
+          </div>`).join('')}
+      </div>
+      <div class="compare-mid">
+        <div class="compare-vs">VS</div>
+      </div>
+      <div class="compare-col">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;">${b.nome}</div>
+        ${b.produtor?`<div style="font-size:.7rem;color:var(--muted);">${b.produtor}</div>`:''}
+        ${b.foto?`<img src="${b.foto}" style="width:100%;height:120px;object-fit:cover;border-radius:12px;margin:.5rem 0;">`:''}
+        ${fields.map(([lab,va,vb,w]) => `
+          <div>
+            <div class="compare-row-label">${lab}</div>
+            <div class="compare-val" style="${w==='b'?'color:var(--gold);font-weight:800;':''}">${vb||'—'}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    ${(a.estrelas||0)!==(b.estrelas||0)?`
+    <div class="compare-winner" style="margin-top:1.5rem;">
+      🏆 Vencedor: ${(a.estrelas||0)>(b.estrelas||0)?a.nome:b.nome}
+    </div>`:'<div class="compare-winner" style="margin-top:1.5rem;">🤝 Empate técnico</div>'}
+  `;
+  document.getElementById('compareModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCompareModal() { document.getElementById('compareModal').classList.remove('open'); document.body.style.overflow = ''; }
 
-        const ordem = document.getElementById('ordenacao')?.value || 'recentes';
-        filtrados.sort(ordenarComparators[ordem] || ordenarComparators.recentes);
+/* ═══════════════════════════════ AI MODAL ═══════════════════════════════ */
+function openAiModal(idx) {
+  const item = dados[currentView][idx];
+  document.getElementById('aiSubTitle').textContent = item.nome;
+  document.getElementById('aiContent').innerHTML = '';
+  document.getElementById('aiLoading').style.display = 'flex';
+  document.getElementById('aiModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  callAI(item);
+}
+function closeAiModal() { document.getElementById('aiModal').classList.remove('open'); document.body.style.overflow = ''; }
 
-        if(filtrados.length === 0) {
-            lista.innerHTML = `<div class="col-span-2 text-center py-24 text-slate-300">
-                <div class="text-5xl mb-4">🍷</div>
-                <p class="text-sm font-bold uppercase tracking-widest">${abaAtual === 'vinhos' ? 'Adega vazia — adiciona o teu primeiro vinho!' : 'Sem experiências — regista o teu próximo jantar memorável!'}</p>
-            </div>`;
-            return;
-        }
+async function callAI(item) {
+  try {
+    const prompt = `Analisa este vinho em português de Portugal e responde APENAS em JSON (sem markdown):
+{
+  "resumo": "2 frases sobre este vinho",
+  "notas_aroma": ["nota1","nota2","nota3"],
+  "harmonizacao": ["alimento1","alimento2","alimento3","alimento4"],
+  "temperatura": "temperatura ideal de serviço",
+  "potencial": "potencial de guarda",
+  "dica": "dica de sommelier em 1 frase"
+}
 
-        filtrados.forEach((item, i) => {
-            const card = document.createElement('div');
-            card.className = 'card-anim premium-card overflow-hidden flex flex-col';
-            card.style.animationDelay = `${i * 45}ms`;
+Vinho: ${item.nome}
+Tipo: ${item.tipo}
+Região: ${item.regiao||'desconhecida'}
+Castas: ${item.castas||'desconhecidas'}
+Ano: ${item.ano||'desconhecido'}
+Notas actuais: ${(item.notasProva||[]).join(', ')||'nenhuma'}
+Avaliação: ${item.estrelas} estrelas`;
 
-            const notasProvaHTML = (item.notasProva||[]).map(n => {
-                const cor = getCorNota(n);
-                return `<span class="nota-card-chip" style="background:${cor}18;color:${cor}">${n}</span>`;
-            }).join('');
-
-            const precoHTML = item.preco != null
-                ? `<span class="price-pill">€${item.preco.toFixed(2)}</span>` : '';
-
-            card.innerHTML = `
-                <div class="relative h-56 overflow-hidden flex-shrink-0">
-                    ${item.foto
-                        ? `<img src="${item.foto}" class="w-full h-full object-cover" loading="lazy">`
-                        : `<div class="w-full h-full bg-gradient-to-br from-pink-50 to-rose-100 flex items-center justify-center text-7xl">🍷</div>`}
-                    <button onclick="toggleFavorito(${item.originalIdx})"
-                        class="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-110 transition-transform">
-                        ${item.favorito ? '❤️' : '🤍'}
-                    </button>
-                    <div class="absolute top-4 right-4 flex flex-col items-end gap-2">
-                        <div class="bg-black/70 backdrop-blur-md text-white text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-tight">${item.tipo}</div>
-                        ${precoHTML}
-                    </div>
-                </div>
-                <div class="p-7 flex-grow flex flex-col">
-                    <div class="flex justify-between items-start mb-1">
-                        <h3 class="text-xl font-bold text-slate-800 leading-tight">${item.nome}</h3>
-                        <div class="text-amber-400 text-[11px] ml-2 flex-shrink-0">${'★'.repeat(item.estrelas)}</div>
-                    </div>
-                    ${item.produtor ? `<p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">${item.produtor}</p>` : ''}
-                    <p class="text-[10px] text-slate-400 mb-2">Registado em ${formatarData(item.dataRegisto)}</p>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                        ${[item.extra1, item.ano].filter(Boolean).join(' · ')}
-                    </p>
-                    ${notasProvaHTML ? `<div class="flex flex-wrap gap-1.5 mb-3">${notasProvaHTML}</div>` : ''}
-                    <div class="flex flex-wrap gap-1 mb-3">
-                        ${(item.tags||[]).map(t => `<span class="text-[9px] bg-pink-50 text-pink-900 px-2 py-0.5 rounded-md font-bold uppercase">${t}</span>`).join('')}
-                    </div>
-                    ${item.notas
-                        ? `<p class="text-sm text-slate-500 italic mb-5 border-l-2 border-pink-100 pl-4 leading-relaxed flex-grow">"${item.notas}"</p>`
-                        : `<div class="flex-grow"></div>`}
-                    <div class="flex justify-between items-center pt-5 border-t border-slate-50 mt-2">
-                        <button onclick="remover(${item.originalIdx})"
-                            class="text-[10px] font-bold text-slate-300 hover:text-red-400 uppercase tracking-widest transition-colors">Apagar</button>
-                        <button onclick="prepararEdicao(${item.originalIdx})"
-                            class="text-[10px] font-bold text-pink-900 hover:underline uppercase tracking-widest">Editar</button>
-                    </div>
-                </div>`;
-            lista.appendChild(card);
-        });
-    }
-
-    async function remover(idx) {
-        if(confirm('Apagar este registo?')) {
-            dados[abaAtual].splice(idx, 1);
-            await salvarComHistorico();
-        }
-    }
-
-    function prepararEdicao(idx) {
-        const item = dados[abaAtual][idx];
-        document.getElementById('nome').value    = item.nome;
-        document.getElementById('tipo').value    = item.tipo;
-        document.getElementById('ano').value     = item.ano || '';
-        document.getElementById('produtor').value = item.produtor || '';
-        document.getElementById('extra1').value  = item.extra1 || '';
-        document.getElementById('extra2').value  = item.extra2 || '';
-        document.getElementById('preco').value   = item.preco != null ? item.preco : '';
-        document.getElementById('notas').value   = item.notas || '';
-        document.getElementById('estrelas').value = item.estrelas;
-        document.getElementById('fotoBase64').value = item.foto || '';
-        document.getElementById('fotoLabel').textContent = item.foto ? '✅ Foto carregada' : '🖼️ CARREGAR FOTO';
-        document.getElementById('editIndex').value = idx;
-        currentTags = [...(item.tags || [])];
-        currentNotasProva = [...(item.notasProva || [])];
-        renderTagsForm(); renderNotasProvaForm(); renderSugestoes();
-        window.scrollTo({top: 0, behavior: 'smooth'});
-    }
-
-    function resetForm() {
-        document.getElementById('mainForm').reset();
-        document.getElementById('editIndex').value  = '-1';
-        document.getElementById('fotoBase64').value = '';
-        document.getElementById('fotoLabel').textContent = '🖼️ CARREGAR FOTO';
-        currentTags = []; currentNotasProva = [];
-        renderTagsForm(); renderNotasProvaForm(); renderSugestoes();
-    }
-
-    document.getElementById('foto').addEventListener('change', function() {
-        const file = this.files[0];
-        if(!file) return;
-        const label = document.getElementById('fotoLabel');
-        label.textContent = '⏳ A comprimir...';
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const maxW = 600;
-                const scale = Math.min(1, maxW / img.width);
-                canvas.width  = Math.round(img.width  * scale);
-                canvas.height = Math.round(img.height * scale);
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                const b64 = canvas.toDataURL('image/jpeg', 0.7);
-                const kb  = Math.round(b64.length * 0.75 / 1024);
-                document.getElementById('fotoBase64').value = b64;
-                label.textContent = `✅ ${file.name} (${kb} KB)`;
-            };
-        };
-        reader.readAsDataURL(file);
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{ role:'user', content: prompt }]
+      })
     });
+    const data = await resp.json();
+    const raw  = data.content?.map(c=>c.text||'').join('') || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    let parsed;
+    try { parsed = JSON.parse(clean); } catch { parsed = null; }
 
-    function atualizarInsights(items, valorTotal, tipoCount) {
-        const labels = Object.keys(tipoCount);
-        const topTipo = [...labels].sort((a,b)=>tipoCount[b]-tipoCount[a])[0] || '—';
-        const ultimo = [...items].sort((a,b)=>(b.dataRegisto||'').localeCompare(a.dataRegisto||''))[0];
-        document.getElementById('insightValor').textContent = '€' + valorTotal.toFixed(2);
-        document.getElementById('insightTipo').textContent = topTipo;
-        document.getElementById('insightUltimo').textContent = ultimo ? `${ultimo.nome} · ${formatarData(ultimo.dataRegisto)}` : 'Ainda sem registos';
+    document.getElementById('aiLoading').style.display = 'none';
+    if (!parsed) {
+      document.getElementById('aiContent').innerHTML = `<div class="ai-result">${raw}</div>`;
+      return;
     }
+    document.getElementById('aiContent').innerHTML = `
+      <div class="ai-section">
+        <div class="ai-result">${parsed.resumo||''}</div>
+      </div>
+      ${parsed.notas_aroma?.length ? `
+      <div class="ai-section">
+        <div class="ai-section-title">Aromas identificados</div>
+        <div class="ai-chips">${parsed.notas_aroma.map(n=>`<span class="ai-chip">${n}</span>`).join('')}</div>
+      </div>`:'' }
+      ${parsed.harmonizacao?.length ? `
+      <div class="ai-section">
+        <div class="ai-section-title">Harmonização sugerida</div>
+        <div class="ai-chips">${parsed.harmonizacao.map(h=>`<span class="ai-chip food">${h}</span>`).join('')}</div>
+      </div>`:'' }
+      <div class="ai-section" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+        ${parsed.temperatura?`<div style="background:rgba(107,26,42,.05);border-radius:10px;padding:.75rem;"><div style="font-size:.6rem;font-weight:700;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;">Temperatura</div><div style="font-size:.85rem;font-weight:600;margin-top:.25rem;">${parsed.temperatura}</div></div>`:''}
+        ${parsed.potencial?`<div style="background:rgba(181,131,42,.05);border-radius:10px;padding:.75rem;"><div style="font-size:.6rem;font-weight:700;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;">Guarda</div><div style="font-size:.85rem;font-weight:600;margin-top:.25rem;">${parsed.potencial}</div></div>`:''}
+      </div>
+      ${parsed.dica?`<div style="margin-top:1rem;background:linear-gradient(135deg,rgba(181,131,42,.08),rgba(107,26,42,.05));border-radius:12px;padding:1rem;border-left:3px solid var(--gold);">
+        <div style="font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;">Dica de Sommelier</div>
+        <div style="font-size:.82rem;font-style:italic;color:var(--ink);">"${parsed.dica}"</div>
+      </div>`:''}
+    `;
+  } catch(err) {
+    document.getElementById('aiLoading').style.display = 'none';
+    document.getElementById('aiContent').innerHTML = `<div style="color:var(--muted);font-size:.85rem;">Não foi possível obter análise. Verifica a ligação à API.</div>`;
+  }
+}
 
-    function toggleStats() {
-        statsAberto = !statsAberto;
-        document.getElementById('statsPanel').classList.toggle('open', statsAberto);
-        document.getElementById('btnStats').style.color = statsAberto ? 'var(--wine)' : '';
-        atualizarStats();
+/* ═══════════════════════════════ SCANNER ═══════════════════════════════ */
+async function openScanModal() {
+  scanData = null;
+  document.getElementById('scanResult').style.display = 'none';
+  document.getElementById('scanUseBtn').style.display = 'none';
+  document.getElementById('scanModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
+    const video = document.getElementById('scanVideo');
+    video.srcObject = scanStream;
+    video.style.display = 'block';
+    document.getElementById('scanPlaceholder').style.display = 'none';
+  } catch { /* câmara não disponível */ }
+}
+
+function closeScanModal() {
+  if (scanStream) { scanStream.getTracks().forEach(t=>t.stop()); scanStream = null; }
+  document.getElementById('scanVideo').srcObject = null;
+  document.getElementById('scanVideo').style.display = 'none';
+  document.getElementById('scanPlaceholder').style.display = 'flex';
+  document.getElementById('scanModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function scanCapture() {
+  const video = document.getElementById('scanVideo');
+  if (!video.srcObject) { document.getElementById('scanUpload').click(); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const b64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+  await analyzeLabel(b64);
+}
+
+async function scanFromFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = async ev => {
+    const b64 = ev.target.result.split(',')[1];
+    await analyzeLabel(b64);
+  };
+  r.readAsDataURL(file);
+}
+
+async function analyzeLabel(b64) {
+  const resultDiv = document.getElementById('scanResult');
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<div style="color:rgba(255,255,255,.5);font-size:.8rem;">🔍 A analisar etiqueta com IA...</div>';
+  document.getElementById('scanUseBtn').style.display = 'none';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        messages:[{
+          role:'user',
+          content:[
+            { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 } },
+            { type:'text', text:'Analisa esta etiqueta de vinho. Responde APENAS em JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","notas":"","avaliacao_estimada":3}. Se não for uma etiqueta de vinho, coloca nome:"NÃO RECONHECIDO".' }
+          ]
+        }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.map(c=>c.text||'').join('') || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    let parsed; try { parsed = JSON.parse(clean); } catch { parsed = null; }
+
+    if (!parsed || parsed.nome === 'NÃO RECONHECIDO') {
+      resultDiv.innerHTML = '<div style="color:rgba(255,100,100,.8);font-size:.8rem;">❌ Não foi possível identificar um vinho. Tenta com uma imagem mais nítida.</div>';
+      return;
     }
+    scanData = parsed;
+    resultDiv.innerHTML = `
+      <div style="color:var(--gold2);font-weight:700;font-size:.9rem;margin-bottom:.5rem;">${parsed.nome}</div>
+      <div style="color:rgba(255,255,255,.6);font-size:.75rem;line-height:1.6;">
+        ${parsed.produtor?`<div>🏡 ${parsed.produtor}</div>`:''}
+        ${parsed.ano?`<div>📅 ${parsed.ano}</div>`:''}
+        ${parsed.tipo?`<div>🍷 ${parsed.tipo}</div>`:''}
+        ${parsed.regiao?`<div>📍 ${parsed.regiao}</div>`:''}
+        ${parsed.castas?`<div>🌿 ${parsed.castas}</div>`:''}
+      </div>`;
+    document.getElementById('scanUseBtn').style.display = 'block';
+  } catch {
+    resultDiv.innerHTML = '<div style="color:rgba(255,100,100,.8);font-size:.8rem;">❌ Erro na análise. Verifica a ligação.</div>';
+  }
+}
 
-    function atualizarStats() {
-        const items = dados[abaAtual];
-        document.getElementById('statTotal').textContent     = items.length;
-        document.getElementById('statFavoritos').textContent = items.filter(v => v.favorito).length;
-        document.getElementById('statMedia').textContent     = items.length
-            ? (items.reduce((s,v) => s + v.estrelas, 0) / items.length).toFixed(1) + ' ★' : '—';
-        const comPreco = items.filter(v => v.preco != null);
-        document.getElementById('statMediaPreco').textContent = comPreco.length
-            ? '€' + (comPreco.reduce((s,v) => s + v.preco, 0) / comPreco.length).toFixed(2) : '—';
-        const valorTotal = comPreco.reduce((s,v) => s + v.preco, 0);
-        document.getElementById('statValorTotal').textContent = '€' + valorTotal.toFixed(2);
+function useScanResult() {
+  if (!scanData) return;
+  closeScanModal();
+  resetForm();
+  document.getElementById('fNome').value     = scanData.nome || '';
+  document.getElementById('fProdutor').value = scanData.produtor || '';
+  document.getElementById('fAno').value      = scanData.ano || '';
+  document.getElementById('fRegiao').value   = scanData.regiao || '';
+  document.getElementById('fCastas').value   = scanData.castas || '';
+  document.getElementById('fNotas').value    = scanData.notas || '';
+  document.getElementById('fEstrelas').value = scanData.avaliacao_estimada || 3;
+  const tipos = TIPOS_VINHO;
+  document.getElementById('fTipo').innerHTML = tipos.map(t => `<option${t===scanData.tipo?' selected':''}>${t}</option>`).join('');
+  renderHarmony(scanData.tipo || 'Tinto');
+  document.getElementById('drawerTitle').textContent = 'Vinho Identificado pela IA';
+  document.getElementById('formPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
-        const tipoCount = {};
-        items.forEach(v => { tipoCount[v.tipo] = (tipoCount[v.tipo]||0) + 1; });
-        const tipoLabels = Object.keys(tipoCount);
-        atualizarInsights(items, valorTotal, tipoCount);
+/* ═══════════════════════════════ UTILS ═══════════════════════════════ */
+function formatDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('pt-PT', { day:'2-digit', month:'short', year:'numeric' }); }
+  catch { return '—'; }
+}
 
-        if(!statsAberto) return;
-
-        const paletaTipos = ['#831843','#be185d','#92400e','#d97706','#1e293b','#475569','#0891b2','#a855f7'];
-
-        if(chartTipos) chartTipos.destroy();
-        chartTipos = new Chart(document.getElementById('chartTipos'), {
-            type: 'doughnut',
-            data: { labels: tipoLabels, datasets: [{ data: Object.values(tipoCount), backgroundColor: paletaTipos.slice(0,tipoLabels.length), borderWidth: 0, hoverOffset: 6 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
-                plugins: { legend: { position: 'right', labels: { font: { size: 11, family: 'Outfit' }, padding: 14, usePointStyle: true } } } }
-        });
-
-        const estCount = [0,0,0,0,0];
-        items.forEach(v => { if(v.estrelas >= 1 && v.estrelas <= 5) estCount[v.estrelas-1]++; });
-        if(chartEstrelas) chartEstrelas.destroy();
-        chartEstrelas = new Chart(document.getElementById('chartEstrelas'), {
-            type: 'bar',
-            data: { labels: ['★','★★','★★★','★★★★','★★★★★'],
-                datasets: [{ data: estCount, backgroundColor: ['#fca5a5','#fbbf24','#86efac','#34d399','#059669'], borderRadius: 10, borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Outfit' } }, grid: { color: '#f1f5f9' } },
-                    x: { grid: { display: false }, ticks: { font: { size: 13, family: 'Outfit' } } } } }
-        });
-    }
-
-    function exportarTudo() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
-        const dl = document.createElement('a');
-        dl.setAttribute("href", dataStr);
-        dl.setAttribute("download", "gourmet_journal_backup.json");
-        dl.click();
-    }
-
-    async function importarTudo(event) {
-        const reader = new FileReader();
-        reader.onload = async e => {
-            try {
-                dados = JSON.parse(e.target.result);
-                await guardarDados();
-                atualizarLista();
-                atualizarStats();
-                alert('✅ Dados importados com sucesso!');
-            } catch(err) {
-                alert('❌ Ficheiro inválido.');
-            }
-        };
-        reader.readAsText(event.target.files[0]);
-    }
-
-    async function init() {
-        await abrirDB();
-        await carregarDados();
-        mudarAba('vinhos');
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.classList.add('hidden');
-        setTimeout(() => overlay.remove(), 400);
-    }
-
-    init();
-    </script>
+/* ═══════════════════════════════ BOOT ═══════════════════════════════ */
+init();
+</script>
 </body>
 </html>
