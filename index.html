@@ -357,6 +357,28 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 .mx{width:32px;height:32px;border-radius:99px;border:1.5px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--muted);transition:all .18s;}
 .mx:hover{background:var(--wine);color:white;border-color:var(--wine);}
 
+/* WINE ATLAS */
+.atlas-hero{border-radius:26px;padding:1.4rem;background:linear-gradient(120deg,#210d16,#6b1a2a 60%,#9b1d35);color:#fff;margin-bottom:1rem}
+.atlas-eyebrow{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:#d4a94e;font-weight:700}
+.atlas-hero h2{font:600 2.4rem 'Cormorant Garamond',serif;margin:.35rem 0}
+.atlas-hero p{font-size:.76rem;color:rgba(255,255,255,.75);max-width:600px;line-height:1.6}
+.atlas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.atlas-kpi,.atlas-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem}
+.atlas-kpi{text-align:center}.atlas-kpi b{display:block;font:600 1.8rem 'Cormorant Garamond',serif;color:var(--wine)}
+.atlas-kpi span{font-size:.53rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);font-weight:700}
+.atlas-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:.8rem}
+.atlas-panel-title{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);font-weight:700;margin-bottom:.7rem}
+.atlas-map-wrap{background:var(--surface2);border-radius:14px;min-height:370px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.atlas-map{width:100%;max-height:470px}.atlas-pin{cursor:pointer}.atlas-pin circle{fill:var(--gold2);stroke:white;stroke-width:2}.atlas-pin text{font:700 10px 'DM Sans';fill:white;text-anchor:middle;dominant-baseline:central;pointer-events:none}.atlas-pin.selected circle,.atlas-pin:hover circle{fill:var(--wine2);stroke:var(--gold2);stroke-width:3}
+.atlas-region-list{display:flex;flex-direction:column;gap:.35rem;max-height:420px;overflow:auto}
+.atlas-region-row{display:flex;align-items:center;gap:.5rem;padding:.55rem .6rem;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--ink);width:100%;text-align:left;cursor:pointer;font:inherit}
+.atlas-region-row.selected,.atlas-region-row:hover{border-color:var(--gold);background:rgba(181,131,42,.09)}
+.atlas-region-name{font-size:.7rem;font-weight:700;flex:1}.atlas-region-meta,.atlas-note{font-size:.6rem;color:var(--muted2)}
+.atlas-producers{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.7rem}.atlas-producer{font-size:.62rem;padding:.25rem .5rem;border-radius:99px;background:rgba(107,26,42,.08);color:var(--wine)}
+.atlas-wine-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.5rem}.atlas-wine{padding:.6rem;border:1px solid var(--border);border-radius:10px;background:var(--surface2);min-width:0}.atlas-wine b{display:block;font:600 1rem 'Cormorant Garamond';overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.atlas-wine span{display:block;font-size:.6rem;color:var(--muted2);margin-top:.15rem}
+.atlas-detail-head{display:flex;align-items:center;justify-content:space-between;margin:.8rem 0}.atlas-detail-head h3{font:600 1.35rem 'Cormorant Garamond'}.atlas-clear{border:1px solid var(--border);border-radius:99px;padding:.3rem .6rem;background:transparent;color:var(--muted);cursor:pointer}
+.atlas-note{line-height:1.5;margin-top:.6rem}
+@media(max-width:900px){.atlas-kpis{grid-template-columns:repeat(2,1fr)}.atlas-layout{grid-template-columns:1fr}.atlas-map-wrap{min-height:320px}}
 /* ══ STATS ══ */
 #statsView{display:none;}
 #statsView.vis{display:block;}
@@ -775,6 +797,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div class="sb-label">Análise</div>
     <div class="sb-item" onclick="setView('sommelier')" id="nav-sommelier"><div class="sb-icon">🍽️</div>Sommelier IA</div>
     <div class="sb-item" onclick="setView('stats')" id="nav-stats"><div class="sb-icon">📊</div>Dashboard Premium</div>
+    <div class="sb-item" onclick="setView('atlas')" id="nav-atlas"><div class="sb-icon">🇵🇹</div>Atlas do Vinho</div>
     <div class="sb-item" onclick="setView('goals')" id="nav-goals"><div class="sb-icon">🎯</div>Objetivos</div>
     <div class="sb-item" onclick="setView('diary')" id="nav-diary"><div class="sb-icon">📓</div>Diário Mensal</div>
     <div class="sb-label">Ferramentas</div>
@@ -828,6 +851,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div id="listView"><div id="cardsGrid"></div></div>
     <div id="wishView" style="display:none;"></div>
     <div id="statsView"></div>
+    <div id="atlasView" style="display:none;"></div>
     <div id="goalsView" style="display:none;"></div>
     <div id="diaryView"></div>
     <div id="sommelierView" style="display:none;"></div>
@@ -852,6 +876,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;">
       <button onclick="closeModal('moreModal');setView('wish');" class="mbtn">⭐ Wish List</button>
       <button onclick="closeModal('moreModal');setView('goals');" class="mbtn">🎯 Objetivos</button>
+      <button onclick="closeModal('moreModal');setView('atlas');" class="mbtn">🇵🇹 Atlas do Vinho</button>
       <button onclick="closeModal('moreModal');setView('diary');" class="mbtn" style="background:rgba(2,132,199,.08);color:var(--blue);">📓 Diário</button>
       <button onclick="closeModal('moreModal');setView('sommelier');" class="mbtn">🍽️ Sommelier IA</button>
       <button onclick="closeModal('moreModal');openWineSearch();" class="mbtn" style="background:rgba(2,132,199,.08);color:var(--blue);">🔎 Pesquisar</button>
@@ -1147,7 +1172,7 @@ function applyDark(on){
 function setView(v){
   if(v!==view && view && !window.__goingBack) viewHistory.push(view);
   view=v;
-  ['vinhos','restaurantes','stats','wish','goals','diary','sommelier'].forEach(x=>{
+  ['vinhos','restaurantes','stats','atlas','wish','goals','diary','sommelier'].forEach(x=>{
     document.getElementById(`nav-${x}`)?.classList.toggle('active',x===v);
     document.getElementById(`mnav-${x}`)?.classList.toggle('active',x===v);
   });
@@ -1155,11 +1180,12 @@ function setView(v){
   document.getElementById('listView').style.display=isCollection?'':'none';
   document.getElementById('wishView').style.display=v==='wish'?'':'none';
   document.getElementById('statsView').classList.toggle('vis',v==='stats');
+  document.getElementById('atlasView').style.display=v==='atlas'?'':'none';
   document.getElementById('goalsView').style.display=v==='goals'?'':'none';
   document.getElementById('diaryView').style.display=v==='diary'?'':'none';
   document.getElementById('sommelierView').style.display=v==='sommelier'?'':'none';
   document.getElementById('filterBar').style.display=isCollection?'':'none';
-  const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Dashboard Premium',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal',sommelier:'Sommelier IA'};
+  const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Dashboard Premium',atlas:'Atlas do Vinho',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal',sommelier:'Sommelier IA'};
   document.getElementById('topbarTitle').textContent=titles[v]||v;
   if(isCollection){
     const tipos=v==='vinhos'?TIPOS_V:TIPOS_R;
@@ -1170,6 +1196,7 @@ function setView(v){
     renderList();
   }
   if(v==='stats')renderStats();
+  if(v==='atlas')renderWineAtlas();
   if(v==='wish')renderWish();
   if(v==='goals')renderGoals();
   if(v==='diary')renderDiary();
@@ -1498,6 +1525,36 @@ function buildPremiumDashboard(items,restaurants){
  html+='</div><div class="dashboard-section-head"><div class="dashboard-section-title">Indicadores complementares</div></div><div class="dashboard-kpis">'+kpi('Favoritos',items.filter(i=>i.favorito).length,'Vinhos marcados como favoritos')+kpi('Preço médio registado',priceAvg===null?'—':priceAvg.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}),priced.length+' referências com preço')+kpi('Experiências',restaurants.length,'Restaurantes registados')+kpi('Total de registos',items.length+restaurants.length,'Vinhos + experiências')+'</div><div class="dashboard-section-head"><div class="dashboard-section-title">Análise detalhada</div></div>';
  return html;
 }
+/* ATLAS DO VINHO */
+const ATLAS_REGIONS=[
+{name:'Vinho Verde',x:150,y:92,k:['vinho verde','minho']},{name:'Trás-os-Montes',x:285,y:105,k:['trás-os-montes','tras-os-montes']},
+{name:'Douro',x:275,y:165,k:['douro','porto']},{name:'Távora-Varosa',x:250,y:215,k:['távora-varosa','tavora-varosa']},
+{name:'Dão',x:225,y:255,k:['dão','dao']},{name:'Bairrada',x:160,y:275,k:['bairrada']},
+{name:'Beira Interior',x:300,y:300,k:['beira interior']},{name:'Lisboa',x:125,y:365,k:['lisboa','estremadura']},
+{name:'Tejo',x:170,y:405,k:['tejo','ribatejo']},{name:'Península de Setúbal',x:155,y:465,k:['península de setúbal','peninsula de setubal','setúbal','setubal']},
+{name:'Alentejo',x:260,y:455,k:['alentejo']},{name:'Algarve',x:250,y:555,k:['algarve']},
+{name:'Madeira',x:45,y:505,k:['madeira']},{name:'Açores',x:45,y:590,k:['açores','acores']}];
+let atlasSelectedRegion='';
+function atlasEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function atlasRegion(v){const q=String(v||'').toLocaleLowerCase('pt-PT').trim();return ATLAS_REGIONS.find(r=>r.k.some(k=>q.includes(k)))||null;}
+function renderWineAtlas(){
+ const el=document.getElementById('atlasView');if(!el)return;
+ const wines=dados.vinhos||[],counts={},grouped={},unknown=[];
+ wines.forEach(w=>{const r=atlasRegion(w.regiao);if(!r){unknown.push(w);return;}counts[r.name]=(counts[r.name]||0)+1;(grouped[r.name]||(grouped[r.name]=[])).push(w);});
+ const active=atlasSelectedRegion,regions=ATLAS_REGIONS.filter(r=>counts[r.name]).sort((a,b)=>counts[b.name]-counts[a.name]);
+ const chosen=active?(grouped[active]||[]):wines,producers=[...new Set(chosen.map(w=>String(w.produtor||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+ const shape='M137 35 L190 42 222 60 267 56 315 82 326 118 307 150 319 178 291 207 306 242 285 276 303 307 279 340 292 375 270 411 284 447 257 479 265 511 239 542 218 580 183 610 151 592 132 559 116 528 108 491 119 459 100 429 111 397 93 366 111 335 102 301 124 271 111 239 126 208 113 174 131 143 118 111 135 82 Z';
+ let pins='';ATLAS_REGIONS.forEach(r=>{const n=counts[r.name]||0;if(n){const rad=Math.min(18,9+Math.sqrt(n)*2);pins+='<g class="atlas-pin '+(active===r.name?'selected':'')+'" tabindex="0" role="button" aria-label="'+atlasEsc(r.name)+': '+n+'" onclick="selectAtlasRegion('+JSON.stringify(r.name)+')"><circle cx="'+r.x+'" cy="'+r.y+'" r="'+rad+'"/><text x="'+r.x+'" y="'+r.y+'">'+n+'</text></g>';}});
+ const map='<svg class="atlas-map" viewBox="0 0 390 660" role="img" aria-label="Mapa esquemático de Portugal"><path d="'+shape+'" fill="rgba(181,131,42,.18)" stroke="var(--wine)" stroke-width="2.2"/>'+pins+'<text x="210" y="642" text-anchor="middle" font-size="9" fill="var(--muted2)">PORTUGAL · ESQUEMÁTICO</text></svg>';
+ const rows=regions.length?regions.map(r=>'<button class="atlas-region-row '+(active===r.name?'selected':'')+'" onclick="selectAtlasRegion('+JSON.stringify(r.name)+')"><span>🍇</span><span class="atlas-region-name">'+atlasEsc(r.name)+'</span><span class="atlas-region-meta">'+counts[r.name]+' vinhos</span></button>').join(''):'<p class="atlas-note">Ainda não existem regiões reconhecidas. Preenche o campo Região nos teus vinhos para começar.</p>';
+ const cards=chosen.length?chosen.map(w=>'<div class="atlas-wine"><b>'+atlasEsc(w.nome||'Vinho sem nome')+'</b><span>'+[w.produtor,w.ano,w.tipo].filter(Boolean).map(atlasEsc).join(' · ')+'</span><span>'+atlasEsc(w.regiao||'Região por identificar')+'</span></div>').join(''):'<p class="atlas-note">Não há vinhos nesta região.</p>';
+ el.innerHTML='<section class="atlas-hero"><div class="atlas-eyebrow">ADEGA PRESTIGE · TERRITÓRIO & ORIGEM</div><h2>Atlas do Vinho</h2><p>Explora as regiões vitivinícolas portuguesas, acompanha os produtores e descobre como a tua coleção se distribui pelo território.</p></section>'+
+ '<div class="atlas-kpis"><div class="atlas-kpi"><b>'+wines.length+'</b><span>Vinhos na adega</span></div><div class="atlas-kpi"><b>'+regions.length+'</b><span>Regiões identificadas</span></div><div class="atlas-kpi"><b>'+producers.length+'</b><span>Produtores na seleção</span></div><div class="atlas-kpi"><b>'+unknown.length+'</b><span>Por localizar</span></div></div>'+
+ '<div class="atlas-layout"><section class="atlas-panel"><div class="atlas-panel-title">Distribuição geográfica · seleciona um ponto</div><div class="atlas-map-wrap">'+map+'</div><p class="atlas-note">Mapa esquemático. Os pontos representam a região vitivinícola indicada no registo, não a localização exata da quinta ou do produtor.</p></section>'+
+ '<section class="atlas-panel"><div class="atlas-panel-title">Regiões na tua coleção</div><div class="atlas-region-list">'+rows+'</div><div class="atlas-detail-head"><h3>'+atlasEsc(active||'Toda a coleção')+'</h3><button class="atlas-clear" onclick="selectAtlasRegion(\\'\\')">Ver tudo</button></div><div class="atlas-producers">'+(producers.length?producers.map(p=>'<span class="atlas-producer">'+atlasEsc(p)+'</span>').join(''):'<span class="atlas-note">Sem produtores identificados.</span>')+'</div></section></div>'+
+ '<section class="atlas-panel" style="margin-top:.8rem"><div class="atlas-detail-head"><h3>'+atlasEsc(active||'Toda a coleção')+' · '+chosen.length+' vinhos</h3></div><div class="atlas-wine-list">'+cards+'</div>'+(unknown.length&&!active?'<p class="atlas-note">'+unknown.length+' vinho(s) sem região reconhecida. Atualiza o campo Região para os posicionar no Atlas.</p>':'')+'</section>';
+}
+function selectAtlasRegion(name){atlasSelectedRegion=name||'';renderWineAtlas();}
 /* ══ STATS ══ */
 function renderStats(){
   const items=dados['vinhos']||[];
