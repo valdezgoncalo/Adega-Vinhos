@@ -1490,14 +1490,14 @@ function renderHarm(tipo){const s=HARM[tipo]||[];document.getElementById('harmCh
 function toggleHarm(h){cHarm.includes(h)?cHarm=cHarm.filter(x=>x!==h):cHarm.push(h);renderHarm(document.getElementById('fTipo').value);}
 function renderHarmSel(){document.getElementById('harmSel').innerHTML=cHarm.map(h=>`<span style="font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;background:var(--gold);color:white;">${h}<button type="button" onclick="toggleHarm('${h}')" style="all:unset;cursor:pointer;opacity:.65;margin-left:.2rem;">×</button></span>`).join('');}
 function pairingWineLabel(w){return [w.nome,w.produtor,w.ano].filter(Boolean).join(' · ');}
-function addPairing(){cPairings.push({vinhoNome:'',vinhoProdutor:'',vinhoAno:'',vinhoTipo:'',vinhoRegiao:'',prato:document.getElementById('fPrato')?.value||'',estrelas:3,nota:''});renderPairingsEditor();}
+function addPairing(){cPairings.push({vinhoNome:'',vinhoProdutor:'',vinhoAno:'',vinhoTipo:'',vinhoRegiao:'',vinhoCastas:'',prato:document.getElementById('fPrato')?.value||'',estrelas:3,nota:''});renderPairingsEditor();}
 function updatePairingField(index,field,value){
   const h=cPairings[index];if(!h)return;
   if(field==='vinhoIdx'){
-    if(value===''){h.vinhoNome='';h.vinhoProdutor='';h.vinhoAno='';h.vinhoTipo='';h.vinhoRegiao='';}
+    if(value===''){h.vinhoNome='';h.vinhoProdutor='';h.vinhoAno='';h.vinhoTipo='';h.vinhoRegiao='';h.vinhoCastas='';}
     else{
       const wine=dados.vinhos[Number(value)];
-      if(wine){h.vinhoNome=wine.nome||'';h.vinhoProdutor=wine.produtor||'';h.vinhoAno=wine.ano||'';h.vinhoTipo=wine.tipo||'';h.vinhoRegiao=wine.regiao||'';}
+      if(wine){h.vinhoNome=wine.nome||'';h.vinhoProdutor=wine.produtor||'';h.vinhoAno=wine.ano||'';h.vinhoTipo=wine.tipo||'';h.vinhoRegiao=wine.regiao||'';h.vinhoCastas=wine.castas||'';}
     }
   }else h[field]=value;
   if(field==='vinhoIdx')renderPairingsEditor();
@@ -1515,7 +1515,7 @@ function renderPairingsEditor(){
       '<select class="fi" onchange="updatePairingField('+i+',\'vinhoIdx\',this.value)"><option value="">Selecionar vinho da adega…</option>'+archived+options+'</select>'+
       '<input class="fi" type="text" value="'+atlasEsc(h.prato||'')+'" placeholder="Prato / elemento da harmonização" oninput="updatePairingField('+i+',\'prato\',this.value)">'+
       '<div style="display:grid;grid-template-columns:110px 1fr;gap:.45rem;align-items:center;"><select class="fi" aria-label="Avaliação da harmonização" onchange="updatePairingField('+i+',\'estrelas\',this.value)">'+[1,2,3,4,5].map(n=>'<option value="'+n+'"'+(Number(h.estrelas||3)===n?' selected':'')+'>'+('★'.repeat(n))+'</option>').join('')+'</select><input class="fi" type="text" value="'+atlasEsc(h.nota||'')+'" placeholder="Notas da combinação" oninput="updatePairingField('+i+',\'nota\',this.value)"></div>'+
-      (h.vinhoNome?'<div style="font-size:.62rem;color:var(--muted2);">'+atlasEsc([h.vinhoTipo,h.vinhoRegiao].filter(Boolean).join(' · '))+'</div>':'')+
+      (h.vinhoNome?'<div style="font-size:.62rem;color:var(--muted2);">'+atlasEsc([h.vinhoTipo,h.vinhoRegiao,h.vinhoCastas].filter(Boolean).join(' · '))+'</div>':'')+
       '</div>';
   }).join('');
 }
@@ -1558,7 +1558,7 @@ async function submitForm(){
   const nome=document.getElementById('fNome').value.trim();if(!nome){document.getElementById('fNome').focus();return;}
   const idxS=document.getElementById('editId').value;const idx=idxS!==''?parseInt(idxS):-1;
   const p=document.getElementById('fPreco').value;const s=document.getElementById('fStock').value;
-  const harmonizacoes=cPairings.filter(h=>String(h.vinhoNome||'').trim()).map(h=>({vinhoNome:h.vinhoNome,vinhoProdutor:h.vinhoProdutor||'',vinhoAno:h.vinhoAno||'',vinhoTipo:h.vinhoTipo||'',vinhoRegiao:h.vinhoRegiao||'',prato:String(h.prato||'').trim(),estrelas:Math.max(1,Math.min(5,Number(h.estrelas)||3)),nota:String(h.nota||'').trim()}));
+  const harmonizacoes=cPairings.filter(h=>String(h.vinhoNome||'').trim()).map(h=>({vinhoNome:h.vinhoNome,vinhoProdutor:h.vinhoProdutor||'',vinhoAno:h.vinhoAno||'',vinhoTipo:h.vinhoTipo||'',vinhoRegiao:h.vinhoRegiao||'',vinhoCastas:h.vinhoCastas||'',prato:String(h.prato||'').trim(),estrelas:Math.max(1,Math.min(5,Number(h.estrelas)||3)),nota:String(h.nota||'').trim()}));
   const reg={nome,tipo:document.getElementById('fTipo').value,ano:document.getElementById('fAno').value,produtor:document.getElementById('fProdutor').value,regiao:document.getElementById('fRegiao').value,castas:document.getElementById('fCastas').value,local:document.getElementById('fLocal').value,prato:document.getElementById('fPrato').value,cozinha:document.getElementById('fCozinha')?.value||'',dataVisita:document.getElementById('fDataVisita')?.value||'',precoMedio:document.getElementById('fPrecoMedio')?.value!==''?parseFloat(document.getElementById('fPrecoMedio').value):null,vinhosProvados:document.getElementById('fVinhosProvados')?.value||'',harmonizacoes,preco:p!==''?parseFloat(p):null,stock:s!==''?parseInt(s):null,consumo:document.getElementById('fConsumo').value,dataCompra:document.getElementById('fDataCompra').value,notas:document.getElementById('fNotas').value,estrelas:parseInt(document.getElementById('fEstrelas').value),foto:document.getElementById('fFotoB64').value,tags:[...cTags],notasProva:[...cNotas],harmony:[...cHarm],favorito:idx!==-1?(dados[view][idx].favorito||false):false,history:idx!==-1?(dados[view][idx].history||[]):[],dataRegisto:idx!==-1?(dados[view][idx].dataRegisto||new Date().toISOString()):new Date().toISOString()};
   backup=JSON.parse(JSON.stringify(dados));
   if(idx===-1)dados[view].unshift(reg);else dados[view][idx]=reg;
@@ -1662,12 +1662,15 @@ function buildPremiumDashboard(items,restaurants){
  const topPairDishes=groupPairings('prato').sort((a,b)=>b.count-a.count||b.avg-a.avg).slice(0,5);
  const topPairPlaces=groupPairings('_restaurante').sort((a,b)=>b.avg-a.avg||b.count-a.count).slice(0,5);
  const pairTypes=groupPairings('vinhoTipo').sort((a,b)=>b.count-a.count).slice(0,5);
+ const castasGroups={};pairings.forEach(h=>String(h.vinhoCastas||'').split(/[,;/]+/).map(c=>c.trim()).filter(Boolean).forEach(c=>{castasGroups[c]=(castasGroups[c]||0)+1;}));
+ const topCastas=Object.entries(castasGroups).sort((a,b)=>b[1]-a[1]).slice(0,6);
  html+='<div class="dashboard-section-head"><div class="dashboard-section-title">Ranking de harmonizações</div><button class="dashboard-section-link" onclick="setView(\'restaurantes\')">Ver experiências →</button></div>';
  html+='<div class="dashboard-kpis">'+kpi('Harmonizações registadas',pairings.length,'Associações entre vinho e prato')+kpi('Avaliação média',ratedPairings.length?avgPairing.toFixed(1)+' ★':'—',ratedPairings.length+' harmonizações avaliadas')+kpi('Vinhos associados',new Set(pairings.map(h=>String(h.vinhoNome||'').trim()).filter(Boolean)).size,'Vinhos distintos com harmonização')+kpi('Pratos identificados',new Set(pairings.map(h=>String(h.prato||'').trim()).filter(Boolean)).size,'Pratos com associação registada')+'</div><div class="dashboard-grid">';
  html+=dashPanel('Vinhos com melhor desempenho',topPairWines.map((x,i)=>dashRow(x.name,x.count+' registo(s) · '+x.places.size+' experiência(s)',x.rated?x.avg.toFixed(1)+' ★':'Sem avaliação',i+1)),'Ainda não existem harmonizações associadas a vinhos.');
  html+=dashPanel('Pratos mais harmonizados',topPairDishes.map((x,i)=>dashRow(x.name,x.count+' associação(ões) · '+(x.rated?x.avg.toFixed(1)+' ★ em média':'sem avaliações'),x.count+'x',i+1)),'Os pratos registados nas harmonizações aparecerão aqui.');
  html+=dashPanel('Experiências melhor avaliadas',topPairPlaces.map((x,i)=>dashRow(x.name,x.count+' harmonização(ões) registadas',x.rated?x.avg.toFixed(1)+' ★':'Sem avaliação',i+1)),'Avalia harmonizações nas experiências para criar este ranking.');
  html+=dashPanel('Tipos de vinho utilizados',pairTypes.map((x,i)=>dashRow(x.name,x.count+' harmonização(ões)',x.rated?x.avg.toFixed(1)+' ★':'—',i+1)),'O tipo de vinho será apresentado quando estiver registado.');
+ html+=dashPanel('Castas mais presentes',topCastas.map((x,i)=>dashRow(x[0],x[1]+' associação(ões) em harmonizações',x[1]+'x',i+1)),'As castas serão apresentadas quando estiverem guardadas nas referências dos vinhos associados.');
  html+='</div><div class="dashboard-section-head"><div class="dashboard-section-title">Análise detalhada</div></div>';
  return html;
 }
