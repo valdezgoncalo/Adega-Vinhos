@@ -1465,7 +1465,7 @@ function updateSBStats(){
 }
 
 /* ══ PREMIUM DASHBOARD HELPERS ══ */
-function dashEscape(value){return String(value??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));}
+function dashEscape(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function dashRow(name,meta,value,rank){return '<div class="dashboard-row">'+(rank?'<div class="dashboard-rank">'+rank+'</div>':'')+'<div class="dashboard-row-main"><div class="dashboard-row-name">'+dashEscape(name)+'</div><div class="dashboard-row-meta">'+dashEscape(meta)+'</div></div><div class="dashboard-row-value">'+dashEscape(value)+'</div></div>';}
 function dashPanel(title,rows,empty){return '<div class="dashboard-panel"><div class="dashboard-panel-title">'+title+'</div>'+(rows.length?rows.join(''):'<div class="dashboard-empty">'+empty+'</div>')+'</div>';}
 function buildPremiumDashboard(items,restaurants){
