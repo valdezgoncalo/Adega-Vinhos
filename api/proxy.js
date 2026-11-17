@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   const allowedOrigins = [
     'https://valdezgoncalo.github.io',
     'https://adega-vinhos.vercel.app',
+    'https://adega-prestige-preview.vercel.app',
     'http://localhost',
     'http://localhost:3000',
     'http://localhost:5173',
