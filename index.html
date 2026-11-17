@@ -1159,7 +1159,12 @@ async function callProxy(body) {
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error || `HTTP ${resp.status}`);
+    const detail = typeof err.error === 'string' ? err.error
+      : (err.error && typeof err.error.message === 'string') ? err.error.message
+      : (typeof err.message === 'string') ? err.message
+      : (typeof err.details === 'string') ? err.details
+      : '';
+    throw new Error(detail || `HTTP ${resp.status} — ${resp.statusText || 'Erro no serviço de IA'}`);
   }
   return resp.json();
 }
