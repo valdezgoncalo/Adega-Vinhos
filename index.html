@@ -1013,9 +1013,15 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
       </div>
       <div id="restaFields" style="display:none;">
         <div class="fr c2">
-          <div><label class="fl">Localização</label><input class="fi" type="text" id="fLocal"></div>
-          <div><label class="fl">Prato Favorito</label><input class="fi" type="text" id="fPrato"></div>
+          <div><label class="fl">Localização / Cidade</label><input class="fi" type="text" id="fLocal" placeholder="Ex.: Lisboa, Chiado"></div>
+          <div><label class="fl">Tipo de cozinha</label><input class="fi" type="text" id="fCozinha" placeholder="Ex.: portuguesa, italiana, japonesa"></div>
         </div>
+        <div class="fr c2">
+          <div><label class="fl">Data da visita</label><input class="fi" type="date" id="fDataVisita"></div>
+          <div><label class="fl">Preço médio por pessoa (€)</label><input class="fi" type="number" id="fPrecoMedio" min="0" step="0.01" placeholder="Ex.: 35"></div>
+        </div>
+        <div class="fg"><label class="fl">Prato / Experiência gastronómica</label><input class="fi" type="text" id="fPrato" placeholder="Ex.: polvo à lagareiro, menu de degustação"></div>
+        <div class="fg"><label class="fl">Vinho(s) provado(s) / Harmonização</label><input class="fi" type="text" id="fVinhosProvados" placeholder="Nome do vinho e como acompanhou o prato"></div>
       </div>
       <div class="fr c2">
         <div><label class="fl">Data Compra</label><input class="fi" type="date" id="fDataCompra"></div>
@@ -1440,7 +1446,7 @@ function toggleHarm(h){cHarm.includes(h)?cHarm=cHarm.filter(x=>x!==h):cHarm.push
 function renderHarmSel(){document.getElementById('harmSel').innerHTML=cHarm.map(h=>`<span style="font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;background:var(--gold);color:white;">${h}<button type="button" onclick="toggleHarm('${h}')" style="all:unset;cursor:pointer;opacity:.65;margin-left:.2rem;">×</button></span>`).join('');}
 function resetForm(){
   document.getElementById('editId').value='';
-  ['fNome','fAno','fProdutor','fRegiao','fCastas','fNotas','fLocal','fPrato','fConsumo','fDataCompra'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['fNome','fAno','fProdutor','fRegiao','fCastas','fNotas','fLocal','fPrato','fConsumo','fDataCompra','fCozinha','fDataVisita','fPrecoMedio','fVinhosProvados'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['fPreco','fStock'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('fEstrelas').value='3';document.getElementById('fFotoB64').value='';
   document.getElementById('photoPrev').style.display='none';document.getElementById('photoLbl').textContent='📷 Arrasta ou clica';
@@ -1458,7 +1464,7 @@ function editItem(idx){
   const item=dados[view][idx];resetForm();
   document.getElementById('editId').value=idx;
   ({fNome:'nome',fAno:'ano',fProdutor:'produtor',fRegiao:'regiao',fCastas:'castas',fNotas:'notas',fLocal:'local',fPrato:'prato',fConsumo:'consumo'});
-  const map={fNome:'nome',fAno:'ano',fProdutor:'produtor',fRegiao:'regiao',fCastas:'castas',fNotas:'notas',fLocal:'local',fPrato:'prato',fConsumo:'consumo'};
+  const map={fNome:'nome',fAno:'ano',fProdutor:'produtor',fRegiao:'regiao',fCastas:'castas',fNotas:'notas',fLocal:'local',fPrato:'prato',fConsumo:'consumo',fCozinha:'cozinha',fDataVisita:'dataVisita',fPrecoMedio:'precoMedio',fVinhosProvados:'vinhosProvados'};
   Object.entries(map).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&item[key]!=null)el.value=item[key];});
   if(item.preco!=null)document.getElementById('fPreco').value=item.preco;
   if(item.stock!=null)document.getElementById('fStock').value=item.stock;
@@ -1477,7 +1483,7 @@ async function submitForm(){
   const nome=document.getElementById('fNome').value.trim();if(!nome){document.getElementById('fNome').focus();return;}
   const idxS=document.getElementById('editId').value;const idx=idxS!==''?parseInt(idxS):-1;
   const p=document.getElementById('fPreco').value;const s=document.getElementById('fStock').value;
-  const reg={nome,tipo:document.getElementById('fTipo').value,ano:document.getElementById('fAno').value,produtor:document.getElementById('fProdutor').value,regiao:document.getElementById('fRegiao').value,castas:document.getElementById('fCastas').value,local:document.getElementById('fLocal').value,prato:document.getElementById('fPrato').value,preco:p!==''?parseFloat(p):null,stock:s!==''?parseInt(s):null,consumo:document.getElementById('fConsumo').value,dataCompra:document.getElementById('fDataCompra').value,notas:document.getElementById('fNotas').value,estrelas:parseInt(document.getElementById('fEstrelas').value),foto:document.getElementById('fFotoB64').value,tags:[...cTags],notasProva:[...cNotas],harmony:[...cHarm],favorito:idx!==-1?(dados[view][idx].favorito||false):false,history:idx!==-1?(dados[view][idx].history||[]):[],dataRegisto:idx!==-1?(dados[view][idx].dataRegisto||new Date().toISOString()):new Date().toISOString()};
+  const reg={nome,tipo:document.getElementById('fTipo').value,ano:document.getElementById('fAno').value,produtor:document.getElementById('fProdutor').value,regiao:document.getElementById('fRegiao').value,castas:document.getElementById('fCastas').value,local:document.getElementById('fLocal').value,prato:document.getElementById('fPrato').value,cozinha:document.getElementById('fCozinha')?.value||'',dataVisita:document.getElementById('fDataVisita')?.value||'',precoMedio:document.getElementById('fPrecoMedio')?.value!==''?parseFloat(document.getElementById('fPrecoMedio').value):null,vinhosProvados:document.getElementById('fVinhosProvados')?.value||'',preco:p!==''?parseFloat(p):null,stock:s!==''?parseInt(s):null,consumo:document.getElementById('fConsumo').value,dataCompra:document.getElementById('fDataCompra').value,notas:document.getElementById('fNotas').value,estrelas:parseInt(document.getElementById('fEstrelas').value),foto:document.getElementById('fFotoB64').value,tags:[...cTags],notasProva:[...cNotas],harmony:[...cHarm],favorito:idx!==-1?(dados[view][idx].favorito||false):false,history:idx!==-1?(dados[view][idx].history||[]):[],dataRegisto:idx!==-1?(dados[view][idx].dataRegisto||new Date().toISOString()):new Date().toISOString()};
   backup=JSON.parse(JSON.stringify(dados));
   if(idx===-1)dados[view].unshift(reg);else dados[view][idx]=reg;
   await save();closeForm();renderList();showUndo();updateSBStats();
