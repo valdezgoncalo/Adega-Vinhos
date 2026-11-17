@@ -1415,6 +1415,7 @@ async function importarTudo(e){
       dados=incoming;
       try{await save();}catch(err){dados=snapshot;throw err;}
       setView(view);
+      if(document.getElementById('backupModal')?.classList.contains('open'))await renderBackupList();
       alert('✅ Backup importado. Uma cópia dos dados anteriores ficou guardada localmente antes da importação.');
     }catch(err){alert('❌ Não foi possível importar: '+(err.message||'ficheiro inválido.'));}
     finally{e.target.value='';}
