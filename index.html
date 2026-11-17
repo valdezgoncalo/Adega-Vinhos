@@ -1759,7 +1759,7 @@ function renderDiary(){
   const allItems=[...dados.vinhos,...dados.restaurantes];
   // filter by month
   const monthItems=allItems.filter(i=>{
-    if(!i.dataRegisto)return false;
+    if(!i.dataVisita&&!i.dataRegisto)return false;
     const d=new Date(i.dataVisita||i.dataRegisto);return d.getMonth()===diaryMonth&&d.getFullYear()===diaryYear;
   });
   // also include history entries from this month
