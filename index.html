@@ -1305,7 +1305,7 @@ function renderExperiencesList(){
   if(fTipo)items=items.filter(i=>i.tipo===fTipo);
   if(fFav)items=items.filter(i=>i.favorito);
   if(minStars)items=items.filter(i=>(i.estrelas||0)>=minStars);
-  if(q)items=items.filter(i=>[i.nome,i.local,i.cozinha,i.prato,i.vinhosProvados,i.notas].some(v=>String(v||'').toLocaleLowerCase('pt-PT').includes(q)));
+  if(q)items=items.filter(i=>[i.nome,i.local,i.cozinha,i.prato,i.vinhosProvados,i.notas,...(i.harmonizacoes||[]).flatMap(h=>[h.vinhoNome,h.vinhoProdutor,h.prato,h.nota])].some(v=>String(v||'').toLocaleLowerCase('pt-PT').includes(q)));
   items.sort((a,b)=>{
     if(sort==='rating')return (b.estrelas||0)-(a.estrelas||0);
     if(sort==='nome')return String(a.nome||'').localeCompare(String(b.nome||''),'pt-PT');
