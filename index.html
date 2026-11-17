@@ -379,6 +379,14 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 
 /* ══ DIARY / MONTHLY REPORT ══ */
 #diaryView{display:none;}
+#sommelierView{display:none;}
+.sommelier-wrap{max-width:760px;margin:0 auto;}
+.sommelier-hero{background:linear-gradient(135deg,#241018,#6b1a2a);color:#fff;border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;}
+.sommelier-hero h2{font:600 1.65rem 'Cormorant Garamond',serif;margin-bottom:.25rem;}
+.sommelier-hero p{font-size:.76rem;color:rgba(255,255,255,.72);line-height:1.55;}
+.sommelier-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:.85rem;}
+.sommelier-result{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;font-size:.82rem;color:var(--ink);}
+.sommelier-muted{font-size:.7rem;color:var(--muted);line-height:1.5;}
 .diary-month-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;}
 .diary-month-nav{display:flex;align-items:center;gap:.75rem;}
 .diary-mnav-btn{width:34px;height:34px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted);transition:all .18s;}
@@ -736,6 +744,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div class="sb-item" onclick="setView('restaurantes')" id="nav-restaurantes"><div class="sb-icon">🍽️</div>Experiências</div>
     <div class="sb-item" onclick="setView('wish')" id="nav-wish"><div class="sb-icon">⭐</div>Lista de Desejos</div>
     <div class="sb-label">Análise</div>
+    <div class="sb-item" onclick="setView('sommelier')" id="nav-sommelier"><div class="sb-icon">🍽️</div>Sommelier IA</div>
     <div class="sb-item" onclick="setView('stats')" id="nav-stats"><div class="sb-icon">📊</div>Estatísticas</div>
     <div class="sb-item" onclick="setView('goals')" id="nav-goals"><div class="sb-icon">🎯</div>Objetivos</div>
     <div class="sb-item" onclick="setView('diary')" id="nav-diary"><div class="sb-icon">📓</div>Diário Mensal</div>
@@ -792,6 +801,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div id="statsView"></div>
     <div id="goalsView" style="display:none;"></div>
     <div id="diaryView"></div>
+    <div id="sommelierView" style="display:none;"></div>
   </div>
 </div>
 </div>
@@ -814,6 +824,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
       <button onclick="closeModal('moreModal');setView('wish');" class="mbtn">⭐ Wish List</button>
       <button onclick="closeModal('moreModal');setView('goals');" class="mbtn">🎯 Objetivos</button>
       <button onclick="closeModal('moreModal');setView('diary');" class="mbtn" style="background:rgba(2,132,199,.08);color:var(--blue);">📓 Diário</button>
+      <button onclick="closeModal('moreModal');setView('sommelier');" class="mbtn">🍽️ Sommelier IA</button>
       <button onclick="closeModal('moreModal');openWineSearch();" class="mbtn" style="background:rgba(2,132,199,.08);color:var(--blue);">🔎 Pesquisar</button>
       <button onclick="closeModal('moreModal');openScanModal();" class="mbtn">📷 Scanner</button>
       <button onclick="closeModal('moreModal');exportPDF();" class="mbtn">📄 PDF</button>
@@ -1084,7 +1095,7 @@ function applyDark(on){
 function setView(v){
   if(v!==view && view && !window.__goingBack) viewHistory.push(view);
   view=v;
-  ['vinhos','restaurantes','stats','wish','goals','diary'].forEach(x=>{
+  ['vinhos','restaurantes','stats','wish','goals','diary','sommelier'].forEach(x=>{
     document.getElementById(`nav-${x}`)?.classList.toggle('active',x===v);
     document.getElementById(`mnav-${x}`)?.classList.toggle('active',x===v);
   });
@@ -1094,8 +1105,9 @@ function setView(v){
   document.getElementById('statsView').classList.toggle('vis',v==='stats');
   document.getElementById('goalsView').style.display=v==='goals'?'':'none';
   document.getElementById('diaryView').style.display=v==='diary'?'':'none';
+  document.getElementById('sommelierView').style.display=v==='sommelier'?'':'none';
   document.getElementById('filterBar').style.display=isCollection?'':'none';
-  const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Estatísticas',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal'};
+  const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Estatísticas',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal',sommelier:'Sommelier IA'};
   document.getElementById('topbarTitle').textContent=titles[v]||v;
   if(isCollection){
     const tipos=v==='vinhos'?TIPOS_V:TIPOS_R;
@@ -1109,6 +1121,7 @@ function setView(v){
   if(v==='wish')renderWish();
   if(v==='goals')renderGoals();
   if(v==='diary')renderDiary();
+  if(v==='sommelier')renderSommelier();
   const backBtn=document.getElementById('backBtn');
   if(backBtn) backBtn.style.visibility=(viewHistory.length>0)?'visible':'hidden';
   updateSBStats();
@@ -1510,7 +1523,7 @@ function changeMonth(d){
   if(diaryMonth>11){diaryMonth=0;diaryYear++;}
   renderDiary();
 }
-async async function saveDiaryNote(){
+async function saveDiaryNote(){
   const text=document.getElementById('diaryNoteInput').value;
   const key=`${diaryYear}-${diaryMonth}`;
   dados.diaryNotes=dados.diaryNotes.filter(n=>n.month!==key);
@@ -1639,6 +1652,25 @@ async function callAI(item){
   }catch{document.getElementById('aiLoad').style.display='none';document.getElementById('aiContent').innerHTML='<div style="color:var(--muted2);font-size:.8rem;">Erro. Verifica a ligação.</div>';}
 }
 
+/* ══ SOMMELIER IA — recomendações com base na adega pessoal ══ */
+function renderSommelier(){
+  const el=document.getElementById('sommelierView'); if(!el)return;
+  el.innerHTML='<div class="sommelier-wrap"><div class="sommelier-hero"><h2>O teu Sommelier Privado</h2><p>Conta-me o que vais comer e procuro a melhor combinação dentro dos vinhos que já tens na tua adega. Se não houver uma opção adequada, digo-te sem inventar stock.</p></div><div class="sommelier-card">'+
+    '<div class="fg"><label class="fl" for="somDish">O que vais comer?</label><input class="fi" id="somDish" type="text" maxlength="240" placeholder="Ex.: polvo à lagareiro, cabrito assado, risotto de cogumelos"></div>'+
+    '<div class="fr c2"><div><label class="fl" for="somOccasion">Ocasião</label><select class="fi" id="somOccasion"><option>Jantar descontraído</option><option>Almoço de família</option><option>Jantar especial</option><option>Petiscos com amigos</option><option>Prova / degustação</option></select></div><div><label class="fl" for="somBudget">Preço por garrafa</label><select class="fi" id="somBudget"><option>Sem limite</option><option>Até 10 €</option><option>10–20 €</option><option>20–40 €</option><option>Mais de 40 €</option></select></div></div>'+
+    '<div class="fg"><label class="fl" for="somNotes">Preferências ou detalhes (opcional)</label><textarea class="fi" id="somNotes" rows="2" maxlength="500" placeholder="Ex.: gosto de vinhos elegantes, pouca madeira; o prato leva molho de limão..."></textarea></div><button class="sbtn" id="somAskBtn" onclick="askSommelier()">Encontrar a melhor harmonização ✨</button><p class="sommelier-muted" style="margin-top:.65rem;">A recomendação usa os registos desta adega. Preços e quantidades só serão considerados quando estiverem registados.</p></div>'+
+    '<div class="sommelier-card" id="somResultCard" style="display:none"><div class="det-sec-title">Recomendação do Sommelier</div><div id="somResult" class="sommelier-result" aria-live="polite"></div></div></div>';
+}
+async function askSommelier(){
+  const dish=document.getElementById('somDish')?.value.trim(); if(!dish){document.getElementById('somDish')?.focus();return;}
+  const wines=(dados.vinhos||[]).map((w,i)=>({id:i,nome:w.nome||'Sem nome',produtor:w.produtor||null,tipo:w.tipo||null,regiao:w.regiao||null,castas:w.castas||null,ano:w.ano||null,preco:w.preco??null,stock:w.stock??null,notasProva:w.notasProva||[],notas:w.notas||null,avaliacao:w.estrelas??null,harmonizacao:w.harmony||[]}));
+  const btn=document.getElementById('somAskBtn'),card=document.getElementById('somResultCard'),result=document.getElementById('somResult');
+  btn.disabled=true;btn.textContent='A analisar a tua adega…';card.style.display='block';result.textContent='A cruzar o prato com os vinhos registados…';
+  const prompt=['És um sommelier experiente, especializado em vinhos portugueses e harmonização gastronómica. Responde em português europeu, com clareza e sem inventar factos.','Prato: '+dish,'Ocasião: '+document.getElementById('somOccasion').value,'Orçamento por garrafa: '+document.getElementById('somBudget').value,'Preferências: '+(document.getElementById('somNotes').value.trim()||'Não indicadas'),'Inventário fornecido (JSON; considera apenas estes registos):',JSON.stringify(wines),'Regras obrigatórias:','- Recomenda primeiro até 3 vinhos deste inventário, identificando-os exatamente pelo nome.','- Não recomendes como disponível um vinho com stock explicitamente igual a zero. Se stock for desconhecido/null, diz que a quantidade não está registada.','- Nunca inventes preço, stock, região, castas, notas ou características ausentes.','- Explica a lógica da harmonização apenas quando sustentada pelos dados; caso contrário apresenta-a como hipótese a confirmar.','- Se não existir boa combinação no inventário, diz isso claramente e sugere apenas o estilo de vinho a procurar, sem fingir que existe na adega.','- Distingue dados registados de inferências. Termina com uma dica prática de serviço.','- Não devolvas JSON; usa títulos curtos e texto simples.'].join('\n');
+  try{const data=await callProxy({model:'claude-haiku-4-5',max_tokens:1100,messages:[{role:'user',content:prompt}]});const answer=(data.content||[]).map(c=>c.text||'').join('').trim();result.textContent=answer||'Não foi possível obter uma recomendação. Tenta novamente.';}
+  catch(err){result.textContent='Não foi possível contactar o Sommelier IA. '+(err.message||'Verifica a ligação e tenta novamente.');}
+  finally{btn.disabled=false;btn.textContent='Encontrar a melhor harmonização ✨';}
+}
 /* ══ SCANNER ══ */
 async function openScanModal(){scanData=null;document.getElementById('scanRes').style.display='none';document.getElementById('scanUseBtn').style.display='none';openModal('scanModal');try{scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});const v=document.getElementById('scanVideo');v.srcObject=scanStream;v.style.display='block';document.getElementById('scanPh').style.display='none';}catch{}}
 function closeScan(){if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}const v=document.getElementById('scanVideo');v.srcObject=null;v.style.display='none';document.getElementById('scanPh').style.display='block';closeModal('scanModal');}
