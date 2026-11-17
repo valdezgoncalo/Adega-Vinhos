@@ -1323,7 +1323,8 @@ function renderExperiencesList(){
       '<div style="display:flex;justify-content:space-between;gap:.7rem;align-items:start;"><div><div style="font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);">'+atlasEsc(date?fmtDate(date):'Data não registada')+'</div><h3 style="margin:.25rem 0;font-family:Cormorant Garamond,serif;font-size:1.45rem;color:var(--ink);">'+atlasEsc(item.nome||'Experiência sem nome')+'</h3></div><div style="color:var(--gold);white-space:nowrap;">'+ '★'.repeat(item.estrelas||0)+'</div></div>'+
       '<div style="font-size:.76rem;color:var(--muted);margin:.2rem 0 .7rem;">'+[item.cozinha,item.local].filter(Boolean).map(atlasEsc).join(' · ')+'</div>'+
       (item.prato?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Prato / experiência:</b> '+atlasEsc(item.prato)+'</p>':'')+
-      (item.vinhosProvados?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Vinho / harmonização:</b> '+atlasEsc(item.vinhosProvados)+'</p>':'')+
+      (item.vinhosProvados?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Outros vinhos:</b> '+atlasEsc(item.vinhosProvados)+'</p>':'')+
+      ((item.harmonizacoes||[]).length?'<div style="margin:.65rem 0;padding:.65rem;background:var(--surface2,var(--surface));border-radius:var(--rsm);"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--gold);margin-bottom:.4rem;">🍷 HARMONIZAÇÕES</div>'+item.harmonizacoes.map(h=>'<div style="font-size:.72rem;color:var(--ink);margin:.3rem 0;"><b>'+atlasEsc(h.vinhoNome)+'</b>'+(h.prato?' · '+atlasEsc(h.prato):'')+' <span style="color:var(--gold);white-space:nowrap;">'+'★'.repeat(Number(h.estrelas)||0)+'</span>'+(h.nota?'<div style="font-size:.67rem;color:var(--muted);">'+atlasEsc(h.nota)+'</div>':'')+'</div>').join('')+'</div>':'')+
       '<div style="display:flex;flex-wrap:wrap;gap:.4rem;margin:.65rem 0;color:var(--muted);font-size:.7rem;">'+(item.precoMedio!=null&&item.precoMedio!==''?'<span>💶 '+price+'</span>':'')+'</div>'+
       (item.notas?'<p style="font-size:.75rem;color:var(--muted);font-style:italic;border-top:1px solid var(--border);padding-top:.6rem;">'+atlasEsc(item.notas)+'</p>':'')+
       '<div style="display:flex;gap:.5rem;margin-top:.8rem;"><button class="ca ca-edit" onclick="editItem('+item._i+')">Editar</button><button class="ca ca-del" onclick="delItem('+item._i+')">Apagar</button></div>'+
@@ -1851,6 +1852,7 @@ function renderDiary(){
               <div class="diary-entry-name">${atlasEsc(item.nome)}</div>
               ${item.prato?`<div class="diary-entry-note">🍽️ ${atlasEsc(item.prato)}</div>`:''}
               ${item.vinhosProvados?`<div class="diary-entry-note">🍷 ${atlasEsc(item.vinhosProvados)}</div>`:''}
+              ${(item.harmonizacoes||[]).map(h=>`<div class="diary-entry-note">🍷 ${atlasEsc(h.vinhoNome)} ${h.prato?'· '+atlasEsc(h.prato):''} · ${'★'.repeat(Number(h.estrelas)||0)}</div>`).join('')}
               <div class="diary-entry-stars">${'★'.repeat(item.estrelas||0)}</div>
               ${item.notas?`<div class="diary-entry-note">"${atlasEsc(item.notas)}"</div>`:''}
             </div>
