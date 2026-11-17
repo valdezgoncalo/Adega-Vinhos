@@ -1812,10 +1812,12 @@ function renderDiary(){
             <div class="diary-entry-accent"></div>
             ${item.foto?`<div class="diary-entry-photo"><img src="${item.foto}" alt=""></div>`:`<div class="diary-entry-ph">🍷</div>`}
             <div class="diary-entry-body">
-              <div class="diary-entry-date">${fmtDate(item.dataRegisto)}</div>
-              <div class="diary-entry-name">${item.nome}</div>
+              <div class="diary-entry-date">${fmtDate(item.dataVisita||item.dataRegisto)}</div>
+              <div class="diary-entry-name">${atlasEsc(item.nome)}</div>
+              ${item.prato?`<div class="diary-entry-note">🍽️ ${atlasEsc(item.prato)}</div>`:''}
+              ${item.vinhosProvados?`<div class="diary-entry-note">🍷 ${atlasEsc(item.vinhosProvados)}</div>`:''}
               <div class="diary-entry-stars">${'★'.repeat(item.estrelas||0)}</div>
-              ${item.notas?`<div class="diary-entry-note">"${item.notas}"</div>`:''}
+              ${item.notas?`<div class="diary-entry-note">"${atlasEsc(item.notas)}"</div>`:''}
             </div>
           </div>`).join(''):`<div class="diary-empty"><div style="font-size:2.5rem;opacity:.25;margin-bottom:.65rem;">📓</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--ink);margin-bottom:.3rem;">Mês vazio</div><div style="font-size:.76rem;color:var(--muted);">Nenhum registo em ${MONTHS[diaryMonth]}.</div></div>`}
       </div>
