@@ -752,7 +752,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div class="sb-item" onclick="openScanModal()"><div class="sb-icon">📷</div>Scanner IA</div>
     <div class="sb-item" onclick="openWineSearch()"><div class="sb-icon">🔎</div>Pesquisar Vinho</div>
     <div class="sb-item" onclick="exportPDF()"><div class="sb-icon">📄</div>Exportar PDF</div>
-    <div class="sb-item" onclick="exportarTudo()"><div class="sb-icon">📦</div>Backup</div>
+    <div class="sb-item" onclick="openBackupManager()"><div class="sb-icon">📦</div>Backups e Restauro</div>
     <div class="sb-item" onclick="document.getElementById('importFile').click()"><div class="sb-icon">📥</div>Importar</div>
     <div class="sb-item" onclick="toggleDark()"><div class="sb-icon" id="darkIcon">🌙</div><span id="darkLabel">Modo Escuro</span></div>
   </nav>
@@ -829,11 +829,33 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
       <button onclick="closeModal('moreModal');openScanModal();" class="mbtn">📷 Scanner</button>
       <button onclick="closeModal('moreModal');exportPDF();" class="mbtn">📄 PDF</button>
       <button onclick="closeModal('moreModal');toggleDark();" class="mbtn" id="darkMenuBtn">🌙 Dark Mode</button>
-      <button onclick="closeModal('moreModal');exportarTudo();" class="mbtn">📦 Backup</button>
+      <button onclick="closeModal('moreModal');openBackupManager();" class="mbtn">📦 Backups e Restauro</button>
     </div>
   </div>
 </div>
-<style>.mbtn{padding:.85rem;background:rgba(107,26,42,.07);color:var(--wine);border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;transition:all .18s;}.mbtn:active{transform:scale(.95);}</style>
+<div class="modal" id="backupModal">
+  <div class="mov" onclick="closeModal('backupModal')"></div>
+  <div class="mbox" style="max-width:560px;max-height:88dvh;overflow:auto;">
+    <div class="mh"><h2>Backups e Restauro</h2><button class="mx" onclick="closeModal('backupModal')">✕</button></div>
+    <div class="backup-intro">Cria cópias locais, exporta ficheiros JSON e recupera versões anteriores. Antes de cada restauro é guardada uma cópia do estado atual.</div>
+    <div class="backup-actions"><button class="sbtn" onclick="createManualBackup()">＋ Criar backup agora</button><button class="mbtn" onclick="exportarTudo()">⬇ Exportar dados atuais</button><button class="mbtn" onclick="document.getElementById('importFile').click()">⬆ Importar ficheiro</button></div>
+    <div class="backup-list-title">Cópias guardadas neste dispositivo</div><div id="backupList"><div class="sommelier-muted">A carregar backups…</div></div>
+    <p class="sommelier-muted" style="margin-top:.8rem;">As cópias locais ficam neste navegador e dispositivo. Para proteção adicional, exporta regularmente um ficheiro JSON para outro local.</p>
+  </div>
+</div>
+<style>
+.backup-intro{font-size:.76rem;line-height:1.55;color:var(--muted);margin:.1rem 0 .9rem;}
+.backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;}
+.backup-actions .sbtn{grid-column:1/-1;margin:0;}
+.backup-list-title{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin:.6rem 0;}
+.backup-item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.7rem .2rem;border-top:1px solid var(--border);}
+.backup-item-main{min-width:0;}
+.backup-item-name{font-size:.76rem;font-weight:700;color:var(--ink);}
+.backup-item-meta{font-size:.65rem;color:var(--muted2);margin-top:.18rem;}
+.backup-item-actions{display:flex;gap:.35rem;flex-shrink:0;}
+.backup-small-btn{border:1px solid var(--border);background:var(--surface2);color:var(--ink);border-radius:8px;padding:.42rem .55rem;font-size:.65rem;font-weight:700;cursor:pointer;}
+@media(max-width:420px){.backup-item{align-items:flex-start;flex-direction:column}.backup-item-actions{width:100%}.backup-small-btn{flex:1}}
+.mbtn{padding:.85rem;background:rgba(107,26,42,.07);color:var(--wine);border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;transition:all .18s;}.mbtn:active{transform:scale(.95);}</style>
 
 <!-- DETAIL PANEL -->
 <div id="detailPanel">
@@ -1047,6 +1069,7 @@ const DB='AdegaP4',DBV=4,ST='dados';let db=null;
 function openDB(){return new Promise((r,e)=>{const q=indexedDB.open(DB,DBV);q.onupgradeneeded=ev=>{const d=ev.target.result;if(!d.objectStoreNames.contains(ST))d.createObjectStore(ST,{keyPath:'id'});};q.onsuccess=ev=>{db=ev.target.result;r(db);};q.onerror=ev=>e(ev.target.error);});}
 function dbGet(id){return new Promise((r,e)=>{const q=db.transaction(ST,'readonly').objectStore(ST).get(id);q.onsuccess=ev=>r(ev.target.result?ev.target.result.value:null);q.onerror=ev=>e(ev.target.error);});}
 function dbSet(id,v){return new Promise((r,e)=>{const q=db.transaction(ST,'readwrite').objectStore(ST).put({id,value:v});q.onsuccess=()=>r();q.onerror=ev=>e(ev.target.error);});}
+function dbListAll(){return new Promise((r,e)=>{const q=db.transaction(ST,'readonly').objectStore(ST).getAll();q.onsuccess=ev=>r(ev.target.result||[]);q.onerror=ev=>e(ev.target.error);});}
 
 /* ══ STATE ══ */
 let dados={vinhos:[],restaurantes:[],wishlist:[],goals:[],diaryNotes:[]};
@@ -1361,7 +1384,18 @@ async function toggleFavorito(idx){dados[view][idx].favorito=!dados[view][idx].f
 async function delItem(idx){if(!confirm('Apagar?'))return;backup=JSON.parse(JSON.stringify(dados));dados[view].splice(idx,1);await save();renderList();showUndo();}
 async function undo(){if(!backup)return;dados=backup;backup=null;await save();document.getElementById('undoToast').style.display='none';renderList();updateSBStats();}
 function showUndo(){const t=document.getElementById('undoToast');t.style.display='block';clearTimeout(showUndo._t);showUndo._t=setTimeout(()=>t.style.display='none',8000);}
-function exportarTudo(){const a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(dados));a.download=`adega_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();}
+function downloadBackupData(data,name){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportarTudo(){downloadBackupData(dados,`adega_backup_${new Date().toISOString().slice(0,10)}.json`);}
+/* ══ BACKUP MANAGER ══ */
+let backupItems=[];
+function backupCounts(data){return ['vinhos','restaurantes','wishlist','goals','diaryNotes'].reduce((n,k)=>n+((data&&Array.isArray(data[k]))?data[k].length:0),0);}
+function isAdegaBackup(data){const keys=['vinhos','restaurantes','wishlist','goals','diaryNotes'];return !!data&&typeof data==='object'&&!Array.isArray(data)&&keys.some(k=>Object.prototype.hasOwnProperty.call(data,k))&&keys.every(k=>data[k]===undefined||Array.isArray(data[k]));}
+function backupLabel(id){const raw=id.replace(/^(backup-|pre-import-|pre-restore-)/,'').replace(/T/,' · ').replace(/:/g,'h').replace(/\.\d{3}Z$/,'');return id.startsWith('pre-import-')?'Antes de importação · '+raw:id.startsWith('pre-restore-')?'Antes de restauro · '+raw:'Backup manual · '+raw;}
+async function openBackupManager(){openModal('backupModal');await renderBackupList();}
+async function renderBackupList(){const el=document.getElementById('backupList');if(!el)return;el.innerHTML='<div class="sommelier-muted">A carregar backups…</div>';try{const records=await dbListAll();backupItems=records.filter(x=>typeof x.id==='string'&&/^(backup-|pre-import-|pre-restore-)/.test(x.id)&&isAdegaBackup(x.value)).sort((a,b)=>b.id.localeCompare(a.id));if(!backupItems.length){el.innerHTML='<div class="sommelier-muted">Ainda não existem cópias locais. Cria o primeiro backup antes de continuares.</div>';return;}el.innerHTML=backupItems.map((item,i)=>'<div class="backup-item"><div class="backup-item-main"><div class="backup-item-name">'+backupLabel(item.id)+'</div><div class="backup-item-meta">'+backupCounts(item.value)+' registos · guardado neste dispositivo</div></div><div class="backup-item-actions"><button class="backup-small-btn" onclick="exportStoredBackup('+i+')">Exportar</button><button class="backup-small-btn" onclick="restoreStoredBackup('+i+')">Restaurar</button></div></div>').join('');}catch(err){el.textContent='Não foi possível ler os backups: '+(err.message||'erro de armazenamento');}}
+async function createManualBackup(){try{const id='backup-'+new Date().toISOString();const snapshot=JSON.parse(JSON.stringify(dados));await dbSet(id,snapshot);await renderBackupList();alert('Backup criado com sucesso neste dispositivo.');}catch(err){alert('Não foi possível criar o backup: '+(err.message||'erro de armazenamento'));}}
+function exportStoredBackup(index){const item=backupItems[index];if(!item)return;downloadBackupData(item.value,'adega_'+item.id.replace(/[^a-zA-Z0-9-]/g,'-')+'.json');}
+async function restoreStoredBackup(index){const item=backupItems[index];if(!item||!isAdegaBackup(item.value)){alert('Este backup não é válido.');return;}const count=backupCounts(item.value);if(!confirm('Vais substituir os dados atuais por esta cópia ('+count+' registos). Antes disso será guardada uma cópia do estado atual. Queres continuar?'))return;const current=JSON.parse(JSON.stringify(dados));const safetyId='pre-restore-'+new Date().toISOString();try{await dbSet(safetyId,current);const restored={vinhos:[],restaurantes:[],wishlist:[],goals:[],diaryNotes:[],...item.value};dados=restored;try{await save();}catch(err){dados=current;throw err;}setView(view);await renderBackupList();alert('Restauro concluído. O estado anterior ficou guardado na lista de backups.');}catch(err){alert('Não foi possível concluir o restauro: '+(err.message||'erro de armazenamento'));}}
 async function importarTudo(e){
   const file=e.target.files?.[0];
   if(!file)return;
