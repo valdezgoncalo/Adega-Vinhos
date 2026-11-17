@@ -1349,7 +1349,32 @@ async function delItem(idx){if(!confirm('Apagar?'))return;backup=JSON.parse(JSON
 async function undo(){if(!backup)return;dados=backup;backup=null;await save();document.getElementById('undoToast').style.display='none';renderList();updateSBStats();}
 function showUndo(){const t=document.getElementById('undoToast');t.style.display='block';clearTimeout(showUndo._t);showUndo._t=setTimeout(()=>t.style.display='none',8000);}
 function exportarTudo(){const a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(dados));a.download=`adega_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();}
-async function importarTudo(e){const r=new FileReader();r.onload=async ev=>{try{dados={vinhos:[],restaurantes:[],wishlist:[],goals:[],diaryNotes:[],...JSON.parse(ev.target.result)};await save();setView(view);alert('✅ Importado!');}catch{alert('❌ Ficheiro inválido.');}};r.readAsText(e.target.files[0]);}
+async function importarTudo(e){
+  const file=e.target.files?.[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    try{
+      const parsed=JSON.parse(ev.target.result);
+      const keys=['vinhos','restaurantes','wishlist','goals','diaryNotes'];
+      if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)||!keys.some(k=>Object.prototype.hasOwnProperty.call(parsed,k)))throw new Error('Estrutura de backup inválida.');
+      for(const key of keys)if(parsed[key]!==undefined&&!Array.isArray(parsed[key]))throw new Error('O backup contém dados inválidos em '+key+'.');
+      const incoming={vinhos:[],restaurantes:[],wishlist:[],goals:[],diaryNotes:[],...parsed};
+      const total=dados.vinhos.length+dados.restaurantes.length+dados.wishlist.length+dados.goals.length+dados.diaryNotes.length;
+      if(!confirm('A importação irá substituir os dados atuais desta aplicação. Antes disso será guardada uma cópia de segurança interna. Queres continuar?'))return;
+      const snapshot=JSON.parse(JSON.stringify(dados));
+      const backupKey='pre-import-'+new Date().toISOString();
+      await dbSet(backupKey,snapshot);
+      dados=incoming;
+      try{await save();}catch(err){dados=snapshot;throw err;}
+      setView(view);
+      alert('✅ Backup importado. Uma cópia dos dados anteriores ficou guardada localmente antes da importação.');
+    }catch(err){alert('❌ Não foi possível importar: '+(err.message||'ficheiro inválido.'));}
+    finally{e.target.value='';}
+  };
+  reader.onerror=()=>{alert('❌ Não foi possível ler o ficheiro.');e.target.value='';};
+  reader.readAsText(file);
+}
 
 /* ══ SIDEBAR STATS ══ */
 function updateSBStats(){
@@ -1485,7 +1510,7 @@ function changeMonth(d){
   if(diaryMonth>11){diaryMonth=0;diaryYear++;}
   renderDiary();
 }
-async function saveDiaryNote(){
+async async function saveDiaryNote(){
   const text=document.getElementById('diaryNoteInput').value;
   const key=`${diaryYear}-${diaryMonth}`;
   dados.diaryNotes=dados.diaryNotes.filter(n=>n.month!==key);
