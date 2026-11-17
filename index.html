@@ -1289,10 +1289,48 @@ function setFTipo(t){fTipo=t;document.querySelectorAll('#filterBar .fc[data-tipo
 function toggleFav(){fFav=!fFav;document.getElementById('favChip').classList.toggle('on',fFav);renderList();}
 function clearFilters(){fTipo='';fFav=false;document.getElementById('searchInput').value='';document.getElementById('fEstrelas').value='';document.getElementById('fSort').value='recentes';document.getElementById('favChip').classList.remove('on');document.querySelectorAll('#tipoChips .fc').forEach(b=>b.classList.remove('on'));document.querySelector('#filterBar .fc[data-tipo]')?.classList.add('on');renderList();}
 
+/* ══ EXPERIÊNCIAS GASTRONÓMICAS ══ */
+function renderExperiencesList(){
+  const grid=document.getElementById('cardsGrid');
+  const q=(document.getElementById('searchInput').value||'').toLocaleLowerCase('pt-PT');
+  const minStars=parseInt(document.getElementById('fEstrelas').value||'0');
+  const sort=document.getElementById('fSort').value;
+  let items=(dados.restaurantes||[]).map((it,i)=>({...it,_i:i}));
+  if(fTipo)items=items.filter(i=>i.tipo===fTipo);
+  if(fFav)items=items.filter(i=>i.favorito);
+  if(minStars)items=items.filter(i=>(i.estrelas||0)>=minStars);
+  if(q)items=items.filter(i=>[i.nome,i.local,i.cozinha,i.prato,i.vinhosProvados,i.notas].some(v=>String(v||'').toLocaleLowerCase('pt-PT').includes(q)));
+  items.sort((a,b)=>{
+    if(sort==='rating')return (b.estrelas||0)-(a.estrelas||0);
+    if(sort==='nome')return String(a.nome||'').localeCompare(String(b.nome||''),'pt-PT');
+    if(sort==='preco-asc')return (Number(a.precoMedio)||Infinity)-(Number(b.precoMedio)||Infinity);
+    if(sort==='preco-desc')return (Number(b.precoMedio)||0)-(Number(a.precoMedio)||0);
+    return String(b.dataVisita||b.dataRegisto||'').localeCompare(String(a.dataVisita||a.dataRegisto||''));
+  });
+  if(!items.length){grid.innerHTML='<div class="empty"><div class="empty-icon">🍽️</div><div class="empty-txt">Ainda sem experiências</div><div class="empty-sub">Regista restaurantes, pratos e harmonizações que queiras recordar.</div></div>';return;}
+  grid.innerHTML=items.map(item=>{
+    const date=item.dataVisita||item.dataRegisto;
+    const price=Number.isFinite(Number(item.precoMedio))&&item.precoMedio!==null&&item.precoMedio!==''?'€'+Number(item.precoMedio).toFixed(0)+'/pessoa':'Preço não registado';
+    return '<article class="wine-card" style="overflow:hidden;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);">'+
+      (item.foto?'<img src="'+atlasEsc(item.foto)+'" alt="" loading="lazy" style="width:100%;height:190px;object-fit:cover;">':'<div style="height:115px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(107,26,42,.12),rgba(181,131,42,.13));font-size:2.5rem;">🍽️</div>')+
+      '<div style="padding:1rem;">'+
+      '<div style="display:flex;justify-content:space-between;gap:.7rem;align-items:start;"><div><div style="font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);">'+atlasEsc(date?fmtDate(date):'Data não registada')+'</div><h3 style="margin:.25rem 0;font-family:Cormorant Garamond,serif;font-size:1.45rem;color:var(--ink);">'+atlasEsc(item.nome||'Experiência sem nome')+'</h3></div><div style="color:var(--gold);white-space:nowrap;">'+ '★'.repeat(item.estrelas||0)+'</div></div>'+
+      '<div style="font-size:.76rem;color:var(--muted);margin:.2rem 0 .7rem;">'+[item.cozinha,item.local].filter(Boolean).map(atlasEsc).join(' · ')+'</div>'+
+      (item.prato?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Prato / experiência:</b> '+atlasEsc(item.prato)+'</p>':'')+
+      (item.vinhosProvados?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Vinho / harmonização:</b> '+atlasEsc(item.vinhosProvados)+'</p>':'')+
+      '<div style="display:flex;flex-wrap:wrap;gap:.4rem;margin:.65rem 0;color:var(--muted);font-size:.7rem;">'+(item.precoMedio!=null&&item.precoMedio!==''?'<span>💶 '+price+'</span>':'')+'</div>'+
+      (item.notas?'<p style="font-size:.75rem;color:var(--muted);font-style:italic;border-top:1px solid var(--border);padding-top:.6rem;">'+atlasEsc(item.notas)+'</p>':'')+
+      '<div style="display:flex;gap:.5rem;margin-top:.8rem;"><button class="ca ca-edit" onclick="editItem('+item._i+')">Editar</button><button class="ca ca-del" onclick="delItem('+item._i+')">Apagar</button></div>'+
+      '</div></article>';
+  }).join('');
+  buildTipoChips();updateSBStats();
+}
+
 /* ══ RENDER LIST ══ */
 function starsHtml(n,total=5){return Array.from({length:total},(_, i)=>`<span class="cstar${i<n?'':' empty'}">★</span>`).join('');}
 function renderList(){
   if(!['vinhos','restaurantes'].includes(view))return;
+  if(view==='restaurantes'){renderExperiencesList();return;}
   const grid=document.getElementById('cardsGrid');
   const q=document.getElementById('searchInput').value.toLowerCase();
   const ms=parseInt(document.getElementById('fEstrelas').value||'0');
@@ -1398,7 +1436,7 @@ function openDetail(idx){
         ${item.stock!=null?`<div class="det-cell"><div class="det-cell-l">Stock</div><div class="det-cell-v">${item.stock} garrafa${item.stock!==1?'s':''}</div></div>`:''}
         ${item.consumo?`<div class="det-cell"><div class="det-cell-l">Consumo ideal</div><div class="det-cell-v" style="color:var(--gold);">${item.consumo}</div></div>`:''}
         ${item.dataCompra?`<div class="det-cell"><div class="det-cell-l">Comprado em</div><div class="det-cell-v">${fmtDate(item.dataCompra)}</div></div>`:''}
-        <div class="det-cell"><div class="det-cell-l">Registado</div><div class="det-cell-v">${fmtDate(item.dataRegisto)}</div></div>
+        <div class="det-cell"><div class="det-cell-l">Registado</div><div class="det-cell-v">${fmtDate(item.dataVisita||item.dataRegisto)}</div></div>
       </div>
       ${notasH?`<div class="det-section"><div class="det-sec-title">Notas de Prova</div><div class="det-notas">${notasH}</div></div>`:''}
       ${harmH?`<div class="det-section"><div class="det-sec-title">Harmonização</div><div class="det-harm">${harmH}</div></div>`:''}
@@ -1722,20 +1760,20 @@ function renderDiary(){
   // filter by month
   const monthItems=allItems.filter(i=>{
     if(!i.dataRegisto)return false;
-    const d=new Date(i.dataRegisto);return d.getMonth()===diaryMonth&&d.getFullYear()===diaryYear;
+    const d=new Date(i.dataVisita||i.dataRegisto);return d.getMonth()===diaryMonth&&d.getFullYear()===diaryYear;
   });
   // also include history entries from this month
   const histItems=dados.vinhos.flatMap(v=>(v.history||[]).filter(h=>{
     const d=new Date(h.data);return d.getMonth()===diaryMonth&&d.getFullYear()===diaryYear;
   }).map(h=>({...h,vinhoNome:v.nome,vinhoFoto:v.foto,tipo:v.tipo,_isHist:true})));
-  const allDiary=[...monthItems.map(i=>({...i,_date:i.dataRegisto})),...histItems.map(i=>({...i,_date:i.data}))].sort((a,b)=>b._date.localeCompare(a._date));
+  const allDiary=[...monthItems.map(i=>({...i,_date:i.dataVisita||i.dataRegisto})),...histItems.map(i=>({...i,_date:i.data}))].sort((a,b)=>b._date.localeCompare(a._date));
   const avgRating=monthItems.length?monthItems.reduce((s,i)=>s+(i.estrelas||0),0)/monthItems.length:0;
   const totalVal=monthItems.filter(i=>i.preco!=null).reduce((s,i)=>s+i.preco,0);
   const nota=dados.diaryNotes.find(n=>n.month===`${diaryYear}-${diaryMonth}`);
 
   // weekly breakdown for chart
   const weekData=[0,0,0,0,0];
-  monthItems.forEach(i=>{const d=new Date(i.dataRegisto);const w=Math.floor((d.getDate()-1)/7);weekData[Math.min(w,4)]++;});
+  monthItems.forEach(i=>{const d=new Date(i.dataVisita||i.dataRegisto);const w=Math.floor((d.getDate()-1)/7);weekData[Math.min(w,4)]++;});
 
   el.innerHTML=`
     <div style="max-width:640px;">
