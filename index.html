@@ -1305,7 +1305,7 @@ function renderExperiencesList(){
   if(fTipo)items=items.filter(i=>i.tipo===fTipo);
   if(fFav)items=items.filter(i=>i.favorito);
   if(minStars)items=items.filter(i=>(i.estrelas||0)>=minStars);
-  if(q)items=items.filter(i=>[i.nome,i.local,i.cozinha,i.prato,i.vinhosProvados,i.notas,...(i.harmonizacoes||[]).flatMap(h=>[h.vinhoNome,h.vinhoProdutor,h.prato,h.nota])].some(v=>String(v||'').toLocaleLowerCase('pt-PT').includes(q)));
+  if(q)items=items.filter(i=>[i.nome,i.local,i.cozinha,i.prato,i.vinhosProvados,i.notas,...(i.harmonizacoes||[]).flatMap(h=>[h.vinhoNome,h.vinhoProdutor,h.vinhoCastas,h.prato,h.nota])].some(v=>String(v||'').toLocaleLowerCase('pt-PT').includes(q)));
   items.sort((a,b)=>{
     if(sort==='rating')return (b.estrelas||0)-(a.estrelas||0);
     if(sort==='nome')return String(a.nome||'').localeCompare(String(b.nome||''),'pt-PT');
@@ -1324,7 +1324,7 @@ function renderExperiencesList(){
       '<div style="font-size:.76rem;color:var(--muted);margin:.2rem 0 .7rem;">'+[item.cozinha,item.local].filter(Boolean).map(atlasEsc).join(' · ')+'</div>'+
       (item.prato?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Prato / experiência:</b> '+atlasEsc(item.prato)+'</p>':'')+
       (item.vinhosProvados?'<p style="font-size:.82rem;margin:.45rem 0;color:var(--ink);"><b>Outros vinhos:</b> '+atlasEsc(item.vinhosProvados)+'</p>':'')+
-      ((item.harmonizacoes||[]).length?'<div style="margin:.65rem 0;padding:.65rem;background:var(--surface2,var(--surface));border-radius:var(--rsm);"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--gold);margin-bottom:.4rem;">🍷 HARMONIZAÇÕES</div>'+item.harmonizacoes.map(h=>'<div style="font-size:.72rem;color:var(--ink);margin:.3rem 0;"><b>'+atlasEsc(h.vinhoNome)+'</b>'+(h.prato?' · '+atlasEsc(h.prato):'')+' <span style="color:var(--gold);white-space:nowrap;">'+'★'.repeat(Number(h.estrelas)||0)+'</span>'+(h.nota?'<div style="font-size:.67rem;color:var(--muted);">'+atlasEsc(h.nota)+'</div>':'')+'</div>').join('')+'</div>':'')+
+      ((item.harmonizacoes||[]).length?'<div style="margin:.65rem 0;padding:.65rem;background:var(--surface2,var(--surface));border-radius:var(--rsm);"><div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;color:var(--gold);margin-bottom:.4rem;">🍷 HARMONIZAÇÕES</div>'+item.harmonizacoes.map(h=>'<div style="font-size:.72rem;color:var(--ink);margin:.3rem 0;"><b>'+atlasEsc(h.vinhoNome)+'</b>'+(h.prato?' · '+atlasEsc(h.prato):'')+' <span style="color:var(--gold);white-space:nowrap;">'+'★'.repeat(Number(h.estrelas)||0)+'</span>'+(h.vinhoCastas?'<div style="font-size:.65rem;color:var(--muted2);">Castas: '+atlasEsc(h.vinhoCastas)+'</div>':'')+(h.nota?'<div style="font-size:.67rem;color:var(--muted);">'+atlasEsc(h.nota)+'</div>':'')+'</div>').join('')+'</div>':'')+
       '<div style="display:flex;flex-wrap:wrap;gap:.4rem;margin:.65rem 0;color:var(--muted);font-size:.7rem;">'+(item.precoMedio!=null&&item.precoMedio!==''?'<span>💶 '+price+'</span>':'')+'</div>'+
       (item.notas?'<p style="font-size:.75rem;color:var(--muted);font-style:italic;border-top:1px solid var(--border);padding-top:.6rem;">'+atlasEsc(item.notas)+'</p>':'')+
       '<div style="display:flex;gap:.5rem;margin-top:.8rem;"><button class="ca ca-edit" onclick="editItem('+item._i+')">Editar</button><button class="ca ca-del" onclick="delItem('+item._i+')">Apagar</button></div>'+
