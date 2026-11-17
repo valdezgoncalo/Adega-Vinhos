@@ -1494,9 +1494,11 @@ function addPairing(){cPairings.push({vinhoNome:'',vinhoProdutor:'',vinhoAno:'',
 function updatePairingField(index,field,value){
   const h=cPairings[index];if(!h)return;
   if(field==='vinhoIdx'){
-    const wine=dados.vinhos[Number(value)];
-    if(wine){h.vinhoNome=wine.nome||'';h.vinhoProdutor=wine.produtor||'';h.vinhoAno=wine.ano||'';h.vinhoTipo=wine.tipo||'';h.vinhoRegiao=wine.regiao||'';}
-    else if(value===''){h.vinhoNome='';h.vinhoProdutor='';h.vinhoAno='';h.vinhoTipo='';h.vinhoRegiao='';}
+    if(value===''){h.vinhoNome='';h.vinhoProdutor='';h.vinhoAno='';h.vinhoTipo='';h.vinhoRegiao='';}
+    else{
+      const wine=dados.vinhos[Number(value)];
+      if(wine){h.vinhoNome=wine.nome||'';h.vinhoProdutor=wine.produtor||'';h.vinhoAno=wine.ano||'';h.vinhoTipo=wine.tipo||'';h.vinhoRegiao=wine.regiao||'';}
+    }
   }else h[field]=value;
   if(field==='vinhoIdx')renderPairingsEditor();
 }
