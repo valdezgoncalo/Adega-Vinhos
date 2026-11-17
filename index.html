@@ -370,6 +370,19 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 .atlas-producer-facts b{display:block;font:600 1.3rem 'Cormorant Garamond',serif;color:var(--wine)}
 .atlas-producer-facts span{font-size:.52rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
 
+
+.atlas-knowledge-select{max-width:52%;padding:.55rem .65rem;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--ink);font:inherit;font-size:.68rem}
+.atlas-knowledge-body{padding:.8rem;border-radius:13px;background:var(--surface2)}
+.atlas-knowledge-name{font:600 1.65rem 'Cormorant Garamond',serif;color:var(--wine)}
+.atlas-knowledge-label{font-size:.57rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin:.85rem 0 .4rem}
+.atlas-knowledge-tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.atlas-knowledge-tags span{font-size:.64rem;padding:.28rem .5rem;border:1px solid var(--border);border-radius:99px;background:var(--surface);color:var(--ink)}
+.atlas-source-links{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.8rem}
+.atlas-source-links a{font-size:.62rem;font-weight:700;color:var(--wine);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:2px}
+[data-theme="dark"] .atlas-knowledge-name{color:var(--gold2)}
+[data-theme="dark"] .atlas-source-links a{color:var(--gold2)}
+@media(max-width:560px){.atlas-knowledge-select{max-width:48%;font-size:.62rem}}
+
 /* WINE ATLAS */
 .atlas-hero{border-radius:26px;padding:1.4rem;background:linear-gradient(120deg,#210d16,#6b1a2a 60%,#9b1d35);color:#fff;margin-bottom:1rem}
 .atlas-eyebrow{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:#d4a94e;font-weight:700}
@@ -1547,6 +1560,25 @@ const ATLAS_REGIONS=[
 {name:'Tejo',x:170,y:405,k:['tejo','ribatejo']},{name:'Península de Setúbal',x:155,y:465,k:['península de setúbal','peninsula de setubal','setúbal','setubal']},
 {name:'Alentejo',x:260,y:455,k:['alentejo']},{name:'Algarve',x:250,y:555,k:['algarve']},
 {name:'Madeira',x:45,y:505,k:['madeira']},{name:'Açores',x:45,y:590,k:['açores','acores']}];
+
+const ATLAS_KNOWLEDGE=[
+{name:'Vinho Verde',designations:['DOP Vinho Verde','IG Minho'],subregions:['Amarante','Ave','Baião','Basto','Cávado','Lima','Monção e Melgaço','Paiva','Sousa'],whites:['Alvarinho','Arinto','Avesso','Azal','Batoca','Loureiro','Trajadura'],reds:['Alvarelhão','Amaral','Borraçal','Espadeiro','Padeiro','Pedral','Vinhão'],summary:'Região do noroeste, marcada pela diversidade de microclimas e por nove sub-regiões reconhecidas. A DO Vinho Verde e a IG Minho têm regras próprias.'},
+{name:'Trás-os-Montes',designations:['DOP Trás-os-Montes','IG Transmontano'],subregions:[],whites:[],reds:[],summary:'Região do interior nordeste. As denominações e castas autorizadas devem ser confirmadas no caderno de especificações em vigor.'},
+{name:'Douro',designations:['DOP Douro','DOP Porto','IG Duriense'],subregions:[],whites:[],reds:[],summary:'Região do Douro, com denominações distintas para Douro e Porto e indicação geográfica Duriense.'},
+{name:'Távora-Varosa',designations:['DOP Távora-Varosa','IG Terras de Cister'],subregions:[],whites:[],reds:[],summary:'Região vitivinícola do centro-norte, com denominação de origem Távora-Varosa e IG Terras de Cister.'},
+{name:'Dão',designations:['DOP Dão','IG Terras do Dão'],subregions:[],whites:[],reds:[],summary:'Região do interior centro, com DOP Dão e indicação geográfica Terras do Dão.'},
+{name:'Bairrada',designations:['DOP Bairrada','IG Beira Atlântico'],subregions:[],whites:[],reds:[],summary:'Região atlântica do centro, com DOP Bairrada e IG Beira Atlântico.'},
+{name:'Beira Interior',designations:['DOP Beira Interior','IG Terras da Beira'],subregions:[],whites:[],reds:[],summary:'Região de altitude no interior centro, com DOP Beira Interior e IG Terras da Beira.'},
+{name:'Lisboa',designations:['IG Lisboa','DOP Encosta d’Aire','DOP Óbidos','DOP Alenquer','DOP Arruda','DOP Torres Vedras','DOP Lourinhã','DOP Bucelas','DOP Carcavelos','DOP Colares'],subregions:[],whites:['Arinto','Chardonnay','Fernão Pires','Malvasia','Seara Nova','Vital'],reds:['Alicante Bouschet','Aragonez','Castelão','Tinta Miúda','Touriga Nacional','Trincadeira'],summary:'Região atlântica com várias denominações de origem delimitadas. A CVR Lisboa é a entidade responsável pela gestão e certificação das DOP e da IGP Lisboa.'},
+{name:'Tejo',designations:['DOP Tejo','IG Tejo'],subregions:[],whites:[],reds:[],summary:'Região vitivinícola associada à bacia do Tejo, com DOP Tejo e indicação geográfica Tejo.'},
+{name:'Península de Setúbal',designations:['DOP Palmela','DOP Setúbal','IG Península de Setúbal'],subregions:[],whites:[],reds:[],summary:'Região a sul de Lisboa, com as DOP Palmela e Setúbal e a IG Península de Setúbal.'},
+{name:'Alentejo',designations:['DOP Alentejo','IG Alentejano'],subregions:[],whites:[],reds:[],summary:'Região do sul interior, com DOP Alentejo e indicação geográfica Alentejano.'},
+{name:'Algarve',designations:['DOP Lagoa','DOP Lagos','DOP Portimão','DOP Tavira','IG Algarve'],subregions:[],whites:[],reds:[],summary:'Região do sul litoral, com quatro denominações de origem e a indicação geográfica Algarve.'},
+{name:'Madeira',designations:['DOP Madeira','DOP Madeirense','IG Terras Madeirenses'],subregions:[],whites:[],reds:[],summary:'Região autónoma atlântica, com DOP Madeira, DOP Madeirense e IG Terras Madeirenses.'},
+{name:'Açores',designations:['IG Açores'],subregions:[],whites:[],reds:[],summary:'Região vitivinícola do arquipélago dos Açores, com indicação geográfica Açores.'}
+];
+let atlasKnowledgeRegion='Vinho Verde';
+
 let atlasSelectedRegion='';
 let atlasSelectedProducer='';
 let atlasProducerSearch='';
@@ -1579,7 +1611,13 @@ function renderWineAtlas(){
  '<section class="atlas-panel"><div class="atlas-panel-title">Regiões na tua coleção</div><div class="atlas-region-list">'+rows+'</div><div class="atlas-detail-head"><h3>'+atlasEsc(active||'Toda a coleção')+'</h3><button class="atlas-clear" onclick="selectAtlasRegion(&quot;&quot;)">Ver tudo</button></div></section></div>'+
  '<section class="atlas-panel" style="margin-top:.8rem"><div class="atlas-detail-head"><div><div class="atlas-panel-title">Explorador de produtores</div><h3>'+producerEntries.length+' produtores identificados</h3></div><input class="atlas-producer-search" type="search" placeholder="Pesquisar produtor..." value="'+atlasEsc(atlasProducerSearch)+'" onchange="setAtlasProducerSearch(this.value)"></div><div class="atlas-producer-grid">'+producerCards+'</div>'+producerDetail+'</section>'+
  '<section class="atlas-panel" style="margin-top:.8rem"><div class="atlas-detail-head"><h3>'+atlasEsc(selectedEntry?selectedEntry.name:(active||'Toda a coleção'))+' · '+chosen.length+' vinhos</h3></div><div class="atlas-wine-list">'+cards+'</div>'+(unknown.length&&!active?'<p class="atlas-note">'+unknown.length+' vinho(s) sem região reconhecida. Atualiza o campo Região para os posicionar no Atlas.</p>':'')+'</section>';
+
+ const knowledge=ATLAS_KNOWLEDGE.find(r=>r.name===atlasKnowledgeRegion)||ATLAS_KNOWLEDGE[0];
+ const sourceLinks='<div class="atlas-source-links"><a href="https://www.ivv.gov.pt/regioes-vitivinicolas/mapa-das-regioes/" target="_blank" rel="noopener">IVV · Mapa das regiões ↗</a><a href="https://www.ivv.gov.pt/tipologia_documentos/cadernos-de-especificacoes/" target="_blank" rel="noopener">IVV · Cadernos DOP/IGP ↗</a>'+(knowledge.name==='Vinho Verde'?'<a href="https://portal.vinhoverde.pt/pt/a-vinha/implantacao/castas/" target="_blank" rel="noopener">CVRVV · Castas e sub-regiões ↗</a>':'')+'</div>';
+ el.insertAdjacentHTML('beforeend','<section class="atlas-panel atlas-knowledge" style="margin-top:.8rem"><div class="atlas-detail-head"><div><div class="atlas-panel-title">Conhecimento vitivinícola · fontes oficiais</div><h3>Guia das regiões portuguesas</h3></div><select class="atlas-knowledge-select" onchange="setAtlasKnowledgeRegion(this.value)">'+ATLAS_KNOWLEDGE.map(r=>'<option value="'+atlasEsc(r.name)+'"'+(r.name===knowledge.name?' selected':'')+'>'+atlasEsc(r.name)+'</option>').join('')+'</select></div><div class="atlas-knowledge-body"><div><div class="atlas-knowledge-name">'+atlasEsc(knowledge.name)+'</div><p class="atlas-note">'+atlasEsc(knowledge.summary)+'</p><div class="atlas-knowledge-label">Denominações e indicações</div><div class="atlas-knowledge-tags">'+knowledge.designations.map(x=>'<span>'+atlasEsc(x)+'</span>').join('')+'</div>'+(knowledge.subregions.length?'<div class="atlas-knowledge-label">Sub-regiões / denominações locais</div><div class="atlas-knowledge-tags">'+knowledge.subregions.map(x=>'<span>'+atlasEsc(x)+'</span>').join('')+'</div>':'')+(knowledge.whites.length?'<div class="atlas-knowledge-label">Castas brancas destacadas pela entidade regional</div><div class="atlas-knowledge-tags">'+knowledge.whites.map(x=>'<span>'+atlasEsc(x)+'</span>').join('')+'</div>':'')+(knowledge.reds.length?'<div class="atlas-knowledge-label">Castas tintas destacadas pela entidade regional</div><div class="atlas-knowledge-tags">'+knowledge.reds.map(x=>'<span>'+atlasEsc(x)+'</span>').join('')+'</div>':'')+'<p class="atlas-note">As castas apresentadas são uma seleção de referência, não uma lista completa de castas legalmente autorizadas. Para requisitos de certificação, consulta sempre o caderno de especificações aplicável.</p>'+sourceLinks+'</div></div></section>');
 }
+
+function setAtlasKnowledgeRegion(name){atlasKnowledgeRegion=ATLAS_KNOWLEDGE.some(r=>r.name===name)?name:'Vinho Verde';renderWineAtlas();}
 function selectAtlasRegion(name){atlasSelectedRegion=name||'';atlasSelectedProducer='';renderWineAtlas();}
 function selectAtlasProducer(name){atlasSelectedProducer=atlasSelectedProducer===name?'':name;renderWineAtlas();}
 function setAtlasProducerSearch(value){atlasProducerSearch=value||'';renderWineAtlas();}
