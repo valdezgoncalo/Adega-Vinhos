@@ -379,6 +379,35 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 
 /* ══ DIARY / MONTHLY REPORT ══ */
 #diaryView{display:none;}
+.dashboard-wrap{max-width:1180px;margin:0 auto;padding-bottom:1.2rem;}
+.dashboard-hero{background:linear-gradient(125deg,#211016 0%,#4d1727 58%,#7a2938 100%);color:#fff;border-radius:18px;padding:1.35rem 1.45rem;margin-bottom:1rem;box-shadow:0 12px 30px rgba(58,15,30,.14);}
+.dashboard-kicker{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:#d9b66d;font-weight:800;margin-bottom:.4rem;}
+.dashboard-title{font:600 2rem 'Cormorant Garamond',serif;line-height:1.05;margin:0 0 .35rem;}
+.dashboard-sub{font-size:.73rem;line-height:1.55;color:rgba(255,255,255,.72);max-width:620px;}
+.dashboard-hero-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem;}
+.dashboard-hero-btn{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:9px;padding:.55rem .8rem;font-size:.68rem;font-weight:700;cursor:pointer;}
+.dashboard-hero-btn.primary{background:#c39a4b;color:#24151a;border-color:#c39a4b;}
+.dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin:1.15rem 0 .55rem;}
+.dashboard-section-title{font:600 1.15rem 'Cormorant Garamond',serif;color:var(--ink);}
+.dashboard-section-link{border:0;background:none;color:var(--wine);font-size:.67rem;font-weight:800;cursor:pointer;}
+.dashboard-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-bottom:.9rem;}
+.dashboard-kpi{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:.85rem .9rem;min-width:0;}
+.dashboard-kpi-label{font-size:.58rem;color:var(--muted2);font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+.dashboard-kpi-value{font:600 1.55rem 'Cormorant Garamond',serif;color:var(--ink);margin-top:.18rem;overflow-wrap:anywhere;}
+.dashboard-kpi-note{font-size:.62rem;color:var(--muted);margin-top:.12rem;line-height:1.35;}
+.dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;}
+.dashboard-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.9rem;min-width:0;}
+.dashboard-panel-title{font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:.65rem;}
+.dashboard-row{display:flex;align-items:center;gap:.6rem;padding:.55rem 0;border-top:1px solid var(--border);min-width:0;}
+.dashboard-row:first-of-type{border-top:0;padding-top:0;}
+.dashboard-rank{width:25px;height:25px;border-radius:8px;background:var(--surface2);display:grid;place-items:center;font-size:.65rem;font-weight:800;color:var(--wine);flex-shrink:0;}
+.dashboard-row-main{min-width:0;flex:1;}
+.dashboard-row-name{font-size:.75rem;font-weight:750;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dashboard-row-meta{font-size:.62rem;color:var(--muted2);margin-top:.12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dashboard-row-value{font-size:.68rem;font-weight:800;color:var(--ink);white-space:nowrap;}
+.dashboard-empty{font-size:.7rem;color:var(--muted2);padding:.5rem 0;line-height:1.5;}
+@media(max-width:760px){.dashboard-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}.dashboard-grid{grid-template-columns:1fr;}.dashboard-hero{padding:1.1rem}.dashboard-title{font-size:1.75rem;}}
+
 #sommelierView{display:none;}
 .sommelier-wrap{max-width:760px;margin:0 auto;}
 .sommelier-hero{background:linear-gradient(135deg,#241018,#6b1a2a);color:#fff;border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;}
@@ -745,7 +774,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div class="sb-item" onclick="setView('wish')" id="nav-wish"><div class="sb-icon">⭐</div>Lista de Desejos</div>
     <div class="sb-label">Análise</div>
     <div class="sb-item" onclick="setView('sommelier')" id="nav-sommelier"><div class="sb-icon">🍽️</div>Sommelier IA</div>
-    <div class="sb-item" onclick="setView('stats')" id="nav-stats"><div class="sb-icon">📊</div>Estatísticas</div>
+    <div class="sb-item" onclick="setView('stats')" id="nav-stats"><div class="sb-icon">📊</div>Dashboard Premium</div>
     <div class="sb-item" onclick="setView('goals')" id="nav-goals"><div class="sb-icon">🎯</div>Objetivos</div>
     <div class="sb-item" onclick="setView('diary')" id="nav-diary"><div class="sb-icon">📓</div>Diário Mensal</div>
     <div class="sb-label">Ferramentas</div>
@@ -811,7 +840,7 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
   <div class="mn-item active" onclick="setView('vinhos')" id="mnav-vinhos"><div class="mn-icon">🍷</div>Adega</div>
   <div class="mn-item" onclick="setView('restaurantes')" id="mnav-restaurantes"><div class="mn-icon">🍽️</div>Exp.</div>
   <div class="mn-item" onclick="openForm()"><div class="mn-add">+</div>Add</div>
-  <div class="mn-item" onclick="setView('stats')" id="mnav-stats"><div class="mn-icon">📊</div>Stats</div>
+  <div class="mn-item" onclick="setView('stats')" id="mnav-stats"><div class="mn-icon">📊</div>Painel</div>
   <div class="mn-item" onclick="moreMenu()"><div class="mn-icon">⋯</div>Mais</div>
 </nav>
 
@@ -1130,7 +1159,7 @@ function setView(v){
   document.getElementById('diaryView').style.display=v==='diary'?'':'none';
   document.getElementById('sommelierView').style.display=v==='sommelier'?'':'none';
   document.getElementById('filterBar').style.display=isCollection?'':'none';
-  const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Estatísticas',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal',sommelier:'Sommelier IA'};
+  const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Dashboard Premium',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal',sommelier:'Sommelier IA'};
   document.getElementById('topbarTitle').textContent=titles[v]||v;
   if(isCollection){
     const tipos=v==='vinhos'?TIPOS_V:TIPOS_R;
@@ -1435,12 +1464,48 @@ function updateSBStats(){
   document.getElementById('ss-val').textContent='€'+cp.reduce((s,i)=>s+i.preco,0).toFixed(0);
 }
 
+/* ══ PREMIUM DASHBOARD HELPERS ══ */
+function dashEscape(value){return String(value??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));}
+function dashRow(name,meta,value,rank){return '<div class="dashboard-row">'+(rank?'<div class="dashboard-rank">'+rank+'</div>':'')+'<div class="dashboard-row-main"><div class="dashboard-row-name">'+dashEscape(name)+'</div><div class="dashboard-row-meta">'+dashEscape(meta)+'</div></div><div class="dashboard-row-value">'+dashEscape(value)+'</div></div>';}
+function dashPanel(title,rows,empty){return '<div class="dashboard-panel"><div class="dashboard-panel-title">'+title+'</div>'+(rows.length?rows.join(''):'<div class="dashboard-empty">'+empty+'</div>')+'</div>';}
+function buildPremiumDashboard(items,restaurants){
+ const stockKnown=items.filter(i=>i.stock!==null&&i.stock!==undefined&&i.stock!==''&&Number.isFinite(Number(i.stock)));
+ const stockUnits=stockKnown.reduce((s,i)=>s+Math.max(0,Number(i.stock)||0),0);
+ const valued=items.filter(i=>i.preco!==null&&i.preco!==undefined&&i.preco!==''&&i.stock!==null&&i.stock!==undefined&&i.stock!==''&&Number.isFinite(Number(i.preco))&&Number.isFinite(Number(i.stock)));
+ const stockValue=valued.reduce((s,i)=>s+Math.max(0,Number(i.preco))*Math.max(0,Number(i.stock)),0);
+ const priced=items.filter(i=>i.preco!==null&&i.preco!==undefined&&i.preco!==''&&Number.isFinite(Number(i.preco)));
+ const priceAvg=priced.length?priced.reduce((s,i)=>s+Number(i.preco),0)/priced.length:null;
+ const avg=items.length?items.reduce((s,i)=>s+(Number(i.estrelas)||0),0)/items.length:0;
+ const regions={};items.filter(i=>i.regiao).forEach(i=>{const k=String(i.regiao).split(',')[0].trim();regions[k]=(regions[k]||0)+1;});
+ const types={};items.forEach(i=>{const k=i.tipo||'Sem tipo';types[k]=(types[k]||0)+1;});
+ const topRegions=Object.entries(regions).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ const topTypes=Object.entries(types).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ const best=[...items].filter(i=>Number(i.estrelas)>0).sort((a,b)=>(Number(b.estrelas)||0)-(Number(a.estrelas)||0)).slice(0,4);
+ const recent=[...items].sort((a,b)=>(b.dataRegisto||'').localeCompare(a.dataRegisto||'')).slice(0,4);
+ const recentFood=[...restaurants].sort((a,b)=>(b.dataRegisto||'').localeCompare(a.dataRegisto||'')).slice(0,4);
+ const windows=items.filter(i=>String(i.consumo||'').trim()).slice(0,5);
+ const kpi=(label,value,note)=>'<div class="dashboard-kpi"><div class="dashboard-kpi-label">'+label+'</div><div class="dashboard-kpi-value">'+value+'</div><div class="dashboard-kpi-note">'+note+'</div></div>';
+ let html='<div class="dashboard-wrap"><section class="dashboard-hero"><div class="dashboard-kicker">ADEGA PRESTIGE · WINE / FOOD / EXPERIENCES</div><h2 class="dashboard-title">A tua adega, num só olhar.</h2><p class="dashboard-sub">Uma visão cuidada da coleção, do stock, dos vinhos favoritos e das experiências que tens vindo a descobrir.</p><div class="dashboard-hero-actions"><button class="dashboard-hero-btn primary" onclick="setView(\'vinhos\')">🍷 Ver a minha adega</button><button class="dashboard-hero-btn" onclick="openForm()">＋ Adicionar registo</button><button class="dashboard-hero-btn" onclick="setView(\'sommelier\')">✨ Sommelier IA</button></div></section>';
+ html+='<div class="dashboard-kpis">'+kpi('Referências de vinho',items.length,'Vinhos registados')+kpi('Unidades em stock',stockUnits,stockKnown.length+' referências com stock indicado')+kpi('Valor estimado do stock',stockValue.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}),valued.length+' referências com preço e stock conhecidos')+kpi('Avaliação média',items.length?avg.toFixed(1)+' ★':'—','Com base nas classificações registadas')+'</div>';
+ html+='<div class="dashboard-section-head"><div class="dashboard-section-title">A coleção em números</div><button class="dashboard-section-link" onclick="setView(\'vinhos\')">Abrir adega →</button></div><div class="dashboard-grid">';
+ html+=dashPanel('Distribuição por tipo',topTypes.map(x=>dashRow(x[0],x[1]+' referências · '+(items.length?Math.round(x[1]/items.length*100):0)+'% da coleção',x[1])),'Ainda não existem vinhos registados.');
+ html+=dashPanel('Regiões em destaque',topRegions.map((x,i)=>dashRow(x[0],'Presença na tua coleção',x[1],i+1)),'Adiciona a região aos vinhos para criar o teu mapa de origens.');
+ html+=dashPanel('Vinhos melhor classificados',best.map((w,i)=>dashRow(w.nome,[w.produtor,w.regiao,w.ano].filter(Boolean).join(' · ')||'Detalhes por preencher',(Number(w.estrelas)||0)+' ★',i+1)),'As tuas classificações vão aparecer aqui quando começares a avaliar os vinhos.');
+ html+=dashPanel('Janelas de consumo registadas',windows.map(w=>dashRow(w.nome,'Janela indicada: '+w.consumo,w.stock!=null?w.stock+' un.':'Stock n/d')),'Ainda não registaste janelas de consumo.');
+ html+='</div><div class="dashboard-section-head"><div class="dashboard-section-title">Atividade recente</div><button class="dashboard-section-link" onclick="setView(\'diary\')">Abrir diário →</button></div><div class="dashboard-grid">';
+ html+=dashPanel('Últimos vinhos adicionados',recent.map(w=>dashRow(w.nome,[w.tipo,w.regiao,fmtDate(w.dataRegisto)].filter(Boolean).join(' · '),w.estrelas?(w.estrelas+' ★'):'—')),'Os teus novos registos aparecerão aqui.');
+ html+=dashPanel('Últimas experiências gastronómicas',recentFood.map(r=>dashRow(r.nome,[r.tipo,r.local,fmtDate(r.dataRegisto)].filter(Boolean).join(' · '),r.estrelas?(r.estrelas+' ★'):'—')),'Regista restaurantes e experiências para veres o teu histórico gastronómico.');
+ html+='</div><div class="dashboard-section-head"><div class="dashboard-section-title">Indicadores complementares</div></div><div class="dashboard-kpis">'+kpi('Favoritos',items.filter(i=>i.favorito).length,'Vinhos marcados como favoritos')+kpi('Preço médio registado',priceAvg===null?'—':priceAvg.toLocaleString('pt-PT',{style:'currency',currency:'EUR'}),priced.length+' referências com preço')+kpi('Experiências',restaurants.length,'Restaurantes registados')+kpi('Total de registos',items.length+restaurants.length,'Vinhos + experiências')+'</div><div class="dashboard-section-head"><div class="dashboard-section-title">Análise detalhada</div></div>';
+ return html;
+}
 /* ══ STATS ══ */
 function renderStats(){
   const items=dados['vinhos']||[];
+  const restaurants=dados.restaurantes||[];
   const cp=items.filter(i=>i.preco!=null),val=cp.reduce((s,i)=>s+i.preco,0);
   const el=document.getElementById('statsView');
-  el.innerHTML=`<div class="sg">${[
+  el.innerHTML=buildPremiumDashboard(items,restaurants);
+  el.innerHTML+=`<div class="sg">${[
     {v:items.length,l:'Total'},{v:items.filter(i=>i.favorito).length,l:'Favoritos'},
     {v:items.length?(items.reduce((s,i)=>s+i.estrelas,0)/items.length).toFixed(1)+'★':'—',l:'Média'},
     {v:cp.length?'€'+(val/cp.length).toFixed(2):'—',l:'Preço Médio'},
@@ -1453,7 +1518,7 @@ function renderStats(){
     <div class="cc"><div class="ct">Top Regiões</div><div id="topReg" class="tl"></div></div>
     <div class="cc"><div class="ct">Notas de Prova</div><div class="cw"><canvas id="cNotas2"></canvas></div></div>
     <div class="cc" style="grid-column:1/-1"><div class="ct">Mapa de Regiões</div><div id="regMap"></div></div>
-  </div>`;
+  </div></div>`;
   const tc={};items.forEach(i=>{tc[i.tipo]=(tc[i.tipo]||0)+1;});
   Object.values(charts).forEach(c=>{try{c.destroy();}catch{}});charts={};
   charts.tipos=new Chart(document.getElementById('cTipos'),{type:'doughnut',data:{labels:Object.keys(tc),datasets:[{data:Object.values(tc),backgroundColor:['#6b1a2a','#9b1d35','#b5832a','#d4a94e','#1a1015','#475569','#0891b2','#a855f7'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:10,family:'DM Sans'},padding:10,usePointStyle:true}}}}});
