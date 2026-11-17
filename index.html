@@ -1227,7 +1227,7 @@ function setView(v){
   document.getElementById('atlasView').style.display=v==='atlas'?'':'none';
   document.getElementById('goalsView').style.display=v==='goals'?'':'none';
   document.getElementById('diaryView').style.display=v==='diary'?'':'none';
-  document.getElementById('sommelierView').style.display=v==='sommelier'?'':'none';
+  document.getElementById('sommelierView').style.display=v==='sommelier'?'block':'none';
   document.getElementById('filterBar').style.display=isCollection?'':'none';
   const titles={vinhos:'Adega Privada',restaurantes:'Experiências',stats:'Dashboard Premium',atlas:'Atlas do Vinho',wish:'Lista de Desejos',goals:'Objetivos',diary:'Diário Mensal',sommelier:'Sommelier IA'};
   document.getElementById('topbarTitle').textContent=titles[v]||v;
