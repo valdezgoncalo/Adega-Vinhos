@@ -357,6 +357,19 @@ select.fcs:focus{outline:none;border-color:var(--wine);}
 .mx{width:32px;height:32px;border-radius:99px;border:1.5px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--muted);transition:all .18s;}
 .mx:hover{background:var(--wine);color:white;border-color:var(--wine);}
 
+
+.atlas-producer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.5rem}
+.atlas-producer-card{display:flex;flex-direction:column;align-items:flex-start;gap:.24rem;text-align:left;padding:.7rem;border:1px solid var(--border);border-radius:11px;background:var(--surface2);color:var(--ink);cursor:pointer;min-width:0}
+.atlas-producer-card:hover,.atlas-producer-card.selected{border-color:var(--gold);background:rgba(181,131,42,.09)}
+.atlas-producer-card-name{font:600 1rem 'Cormorant Garamond',serif;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atlas-producer-card-sub{font-size:.58rem;color:var(--muted2)}
+.atlas-producer-search{width:min(230px,48%);padding:.55rem .7rem;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--ink);font:inherit;font-size:.68rem}
+.atlas-producer-detail{margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.atlas-producer-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.65rem 0}
+.atlas-producer-facts div{padding:.55rem;border-radius:9px;background:var(--surface2);text-align:center}
+.atlas-producer-facts b{display:block;font:600 1.3rem 'Cormorant Garamond',serif;color:var(--wine)}
+.atlas-producer-facts span{font-size:.52rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
+
 /* WINE ATLAS */
 .atlas-hero{border-radius:26px;padding:1.4rem;background:linear-gradient(120deg,#210d16,#6b1a2a 60%,#9b1d35);color:#fff;margin-bottom:1rem}
 .atlas-eyebrow{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:#d4a94e;font-weight:700}
@@ -1535,6 +1548,8 @@ const ATLAS_REGIONS=[
 {name:'Alentejo',x:260,y:455,k:['alentejo']},{name:'Algarve',x:250,y:555,k:['algarve']},
 {name:'Madeira',x:45,y:505,k:['madeira']},{name:'Açores',x:45,y:590,k:['açores','acores']}];
 let atlasSelectedRegion='';
+let atlasSelectedProducer='';
+let atlasProducerSearch='';
 function atlasEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function atlasRegion(v){const q=String(v||'').toLocaleLowerCase('pt-PT').trim();return ATLAS_REGIONS.find(r=>r.k.some(k=>q.includes(k)))||null;}
 function renderWineAtlas(){
@@ -1542,19 +1557,32 @@ function renderWineAtlas(){
  const wines=dados.vinhos||[],counts={},grouped={},unknown=[];
  wines.forEach(w=>{const r=atlasRegion(w.regiao);if(!r){unknown.push(w);return;}counts[r.name]=(counts[r.name]||0)+1;(grouped[r.name]||(grouped[r.name]=[])).push(w);});
  const active=atlasSelectedRegion,regions=ATLAS_REGIONS.filter(r=>counts[r.name]).sort((a,b)=>counts[b.name]-counts[a.name]);
- const chosen=active?(grouped[active]||[]):wines,producers=[...new Set(chosen.map(w=>String(w.produtor||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+ const regionalWines=active?(grouped[active]||[]):wines;
+ const producerMap={};
+ regionalWines.forEach(w=>{const name=String(w.produtor||'').trim();if(name){const key=name.toLocaleLowerCase('pt-PT');if(!producerMap[key])producerMap[key]={name,wines:[]};producerMap[key].wines.push(w);}});
+ const producerEntries=Object.values(producerMap).sort((a,b)=>a.name.localeCompare(b.name,'pt-PT'));
+ const search=String(atlasProducerSearch||'').trim().toLocaleLowerCase('pt-PT');
+ const visibleProducers=producerEntries.filter(p=>!search||p.name.toLocaleLowerCase('pt-PT').includes(search));
+ const selectedEntry=atlasSelectedProducer?producerEntries.find(p=>p.name.toLocaleLowerCase('pt-PT')===atlasSelectedProducer.toLocaleLowerCase('pt-PT')):null;
+ const chosen=selectedEntry?selectedEntry.wines:regionalWines;
  const shape='M137 35 L190 42 222 60 267 56 315 82 326 118 307 150 319 178 291 207 306 242 285 276 303 307 279 340 292 375 270 411 284 447 257 479 265 511 239 542 218 580 183 610 151 592 132 559 116 528 108 491 119 459 100 429 111 397 93 366 111 335 102 301 124 271 111 239 126 208 113 174 131 143 118 111 135 82 Z';
  let pins='';ATLAS_REGIONS.forEach(r=>{const n=counts[r.name]||0;if(n){const rad=Math.min(18,9+Math.sqrt(n)*2);pins+='<g class="atlas-pin '+(active===r.name?'selected':'')+'" tabindex="0" role="button" aria-label="'+atlasEsc(r.name)+': '+n+'" onclick="selectAtlasRegion('+JSON.stringify(r.name)+')"><circle cx="'+r.x+'" cy="'+r.y+'" r="'+rad+'"/><text x="'+r.x+'" y="'+r.y+'">'+n+'</text></g>';}});
  const map='<svg class="atlas-map" viewBox="0 0 390 660" role="img" aria-label="Mapa esquemático de Portugal"><path d="'+shape+'" fill="rgba(181,131,42,.18)" stroke="var(--wine)" stroke-width="2.2"/>'+pins+'<text x="210" y="642" text-anchor="middle" font-size="9" fill="var(--muted2)">PORTUGAL · ESQUEMÁTICO</text></svg>';
  const rows=regions.length?regions.map(r=>'<button class="atlas-region-row '+(active===r.name?'selected':'')+'" onclick="selectAtlasRegion('+JSON.stringify(r.name)+')"><span>🍇</span><span class="atlas-region-name">'+atlasEsc(r.name)+'</span><span class="atlas-region-meta">'+counts[r.name]+' vinhos</span></button>').join(''):'<p class="atlas-note">Ainda não existem regiões reconhecidas. Preenche o campo Região nos teus vinhos para começar.</p>';
- const cards=chosen.length?chosen.map(w=>'<div class="atlas-wine"><b>'+atlasEsc(w.nome||'Vinho sem nome')+'</b><span>'+[w.produtor,w.ano,w.tipo].filter(Boolean).map(atlasEsc).join(' · ')+'</span><span>'+atlasEsc(w.regiao||'Região por identificar')+'</span></div>').join(''):'<p class="atlas-note">Não há vinhos nesta região.</p>';
- el.innerHTML='<section class="atlas-hero"><div class="atlas-eyebrow">ADEGA PRESTIGE · TERRITÓRIO & ORIGEM</div><h2>Atlas do Vinho</h2><p>Explora as regiões vitivinícolas portuguesas, acompanha os produtores e descobre como a tua coleção se distribui pelo território.</p></section>'+
- '<div class="atlas-kpis"><div class="atlas-kpi"><b>'+wines.length+'</b><span>Vinhos na adega</span></div><div class="atlas-kpi"><b>'+regions.length+'</b><span>Regiões identificadas</span></div><div class="atlas-kpi"><b>'+producers.length+'</b><span>Produtores na seleção</span></div><div class="atlas-kpi"><b>'+unknown.length+'</b><span>Por localizar</span></div></div>'+
+ const producerCards=visibleProducers.length?visibleProducers.map(p=>'<button class="atlas-producer-card '+(selectedEntry&&selectedEntry.name===p.name?'selected':'')+'" onclick="selectAtlasProducer('+JSON.stringify(p.name)+')"><span class="atlas-producer-card-name">'+atlasEsc(p.name)+'</span><span class="atlas-region-meta">'+p.wines.length+' '+(p.wines.length===1?'referência':'referências')+'</span><span class="atlas-producer-card-sub">'+atlasEsc([...new Set(p.wines.map(w=>w.regiao).filter(Boolean))].join(' · ')||'Região por identificar')+'</span></button>').join(''):'<p class="atlas-note">Não foram encontrados produtores com este filtro. Confirma o campo “Produtor / Quinta” nos registos.</p>';
+ const castas=selectedEntry?[...new Set(selectedEntry.wines.flatMap(w=>String(w.castas||'').split(/[,;/]+/).map(x=>x.trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'pt-PT')):[];
+ const producerDetail=selectedEntry?'<section class="atlas-producer-detail"><div class="atlas-detail-head"><div><div class="atlas-panel-title">Ficha do produtor</div><h3>'+atlasEsc(selectedEntry.name)+'</h3></div><button class="atlas-clear" onclick="selectAtlasProducer(\\'\\')">Fechar ficha</button></div><div class="atlas-producer-facts"><div><b>'+selectedEntry.wines.length+'</b><span>Vinhos na coleção</span></div><div><b>'+[...new Set(selectedEntry.wines.map(w=>w.regiao).filter(Boolean))].length+'</b><span>Regiões registadas</span></div><div><b>'+castas.length+'</b><span>Castas identificadas</span></div></div><div class="atlas-producers">'+(castas.length?castas.map(c=>'<span class="atlas-producer">'+atlasEsc(c)+'</span>').join(''):'<span class="atlas-note">Castas ainda não registadas nos vinhos deste produtor.</span>')+'</div><p class="atlas-note">A ficha é construída a partir dos teus registos. Morada, coordenadas e informação oficial do produtor não são inferidas.</p></section>':'';
+ const cards=chosen.length?chosen.map(w=>'<div class="atlas-wine"><b>'+atlasEsc(w.nome||'Vinho sem nome')+'</b><span>'+[w.produtor,w.ano,w.tipo].filter(Boolean).map(atlasEsc).join(' · ')+'</span><span>'+atlasEsc(w.regiao||'Região por identificar')+(w.castas?' · '+atlasEsc(w.castas):'')+'</span></div>').join(''):'<p class="atlas-note">Não há vinhos nesta seleção.</p>';
+ el.innerHTML='<section class="atlas-hero"><div class="atlas-eyebrow">ADEGA PRESTIGE · TERRITÓRIO & ORIGEM</div><h2>Atlas do Vinho</h2><p>Explora as regiões vitivinícolas portuguesas, conhece os produtores presentes na tua adega e descobre as castas que já identificaste.</p></section>'+
+ '<div class="atlas-kpis"><div class="atlas-kpi"><b>'+wines.length+'</b><span>Vinhos na adega</span></div><div class="atlas-kpi"><b>'+regions.length+'</b><span>Regiões identificadas</span></div><div class="atlas-kpi"><b>'+Object.keys(producerMap).length+'</b><span>Produtores nesta região</span></div><div class="atlas-kpi"><b>'+unknown.length+'</b><span>Por localizar</span></div></div>'+
  '<div class="atlas-layout"><section class="atlas-panel"><div class="atlas-panel-title">Distribuição geográfica · seleciona um ponto</div><div class="atlas-map-wrap">'+map+'</div><p class="atlas-note">Mapa esquemático. Os pontos representam a região vitivinícola indicada no registo, não a localização exata da quinta ou do produtor.</p></section>'+
- '<section class="atlas-panel"><div class="atlas-panel-title">Regiões na tua coleção</div><div class="atlas-region-list">'+rows+'</div><div class="atlas-detail-head"><h3>'+atlasEsc(active||'Toda a coleção')+'</h3><button class="atlas-clear" onclick="selectAtlasRegion(\'\')">Ver tudo</button></div><div class="atlas-producers">'+(producers.length?producers.map(p=>'<span class="atlas-producer">'+atlasEsc(p)+'</span>').join(''):'<span class="atlas-note">Sem produtores identificados.</span>')+'</div></section></div>'+
- '<section class="atlas-panel" style="margin-top:.8rem"><div class="atlas-detail-head"><h3>'+atlasEsc(active||'Toda a coleção')+' · '+chosen.length+' vinhos</h3></div><div class="atlas-wine-list">'+cards+'</div>'+(unknown.length&&!active?'<p class="atlas-note">'+unknown.length+' vinho(s) sem região reconhecida. Atualiza o campo Região para os posicionar no Atlas.</p>':'')+'</section>';
+ '<section class="atlas-panel"><div class="atlas-panel-title">Regiões na tua coleção</div><div class="atlas-region-list">'+rows+'</div><div class="atlas-detail-head"><h3>'+atlasEsc(active||'Toda a coleção')+'</h3><button class="atlas-clear" onclick="selectAtlasRegion(\\'\\')">Ver tudo</button></div></section></div>'+
+ '<section class="atlas-panel" style="margin-top:.8rem"><div class="atlas-detail-head"><div><div class="atlas-panel-title">Explorador de produtores</div><h3>'+producerEntries.length+' produtores identificados</h3></div><input class="atlas-producer-search" type="search" placeholder="Pesquisar produtor..." value="'+atlasEsc(atlasProducerSearch)+'" onchange="setAtlasProducerSearch(this.value)"></div><div class="atlas-producer-grid">'+producerCards+'</div>'+producerDetail+'</section>'+
+ '<section class="atlas-panel" style="margin-top:.8rem"><div class="atlas-detail-head"><h3>'+atlasEsc(selectedEntry?selectedEntry.name:(active||'Toda a coleção'))+' · '+chosen.length+' vinhos</h3></div><div class="atlas-wine-list">'+cards+'</div>'+(unknown.length&&!active?'<p class="atlas-note">'+unknown.length+' vinho(s) sem região reconhecida. Atualiza o campo Região para os posicionar no Atlas.</p>':'')+'</section>';
 }
-function selectAtlasRegion(name){atlasSelectedRegion=name||'';renderWineAtlas();}
+function selectAtlasRegion(name){atlasSelectedRegion=name||'';atlasSelectedProducer='';renderWineAtlas();}
+function selectAtlasProducer(name){atlasSelectedProducer=atlasSelectedProducer===name?'':name;renderWineAtlas();}
+function setAtlasProducerSearch(value){atlasProducerSearch=value||'';renderWineAtlas();}
 /* ══ STATS ══ */
 function renderStats(){
   const items=dados['vinhos']||[];
