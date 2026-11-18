@@ -2092,16 +2092,38 @@ async function openScanModal(){scanData=null;document.getElementById('scanRes').
 function closeScan(){if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}const v=document.getElementById('scanVideo');v.srcObject=null;v.style.display='none';document.getElementById('scanPh').style.display='block';closeModal('scanModal');}
 async function scanCapture(){const v=document.getElementById('scanVideo');if(!v.srcObject){document.getElementById('scanUpload').click();return;}const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);await analyseLabel(c.toDataURL('image/jpeg',.8).split(',')[1]);}
 async function scanFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>await analyseLabel(ev.target.result.split(',')[1]);r.readAsDataURL(f);}
-async function analyseLabel(b64){
-  const rd=document.getElementById('scanRes');rd.style.display='block';rd.innerHTML='<div style="color:rgba(255,255,255,.4);font-size:.76rem;">🔍 A analisar...</div>';document.getElementById('scanUseBtn').style.display='none';
+async function prepareWineImage(file){
+  if(!file||!file.type?.startsWith('image/'))throw new Error('Seleciona um ficheiro de imagem válido.');
+  let bitmap;
+  try{bitmap=await createImageBitmap(file);}catch{throw new Error('Não foi possível abrir esta imagem. Experimenta JPG ou PNG.');}
   try{
-    const data=await callProxy({model:'claude-haiku-4-5',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","notas":"","avaliacao_estimada":3}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});const raw=data.content?.map(c=>c.text||'').join('')||'';
-    let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
-    if(!p||p.nome==='NÃO RECONHECIDO'){rd.innerHTML='<div style="color:rgba(255,100,100,.8);font-size:.76rem;">❌ Não reconhecido.</div>';return;}
+    const max=1400,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Não foi possível preparar a fotografia.');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+    let dataUrl=canvas.toDataURL('image/jpeg',.82);
+    if(dataUrl.length>7_500_000)dataUrl=canvas.toDataURL('image/jpeg',.65);
+    if(dataUrl.length>8_000_000)throw new Error('A imagem continua demasiado grande. Escolhe uma fotografia mais pequena.');
+    return {dataUrl,base64:dataUrl.split(',')[1],mediaType:'image/jpeg'};
+  }finally{bitmap.close?.();}
+}
+function scanFile(e){
+  const f=e.target.files?.[0];if(!f)return;
+  const rd=document.getElementById('scanRes');rd.style.display='block';rd.textContent='A preparar fotografia…';
+  prepareWineImage(f).then(img=>analyseLabel(img.base64)).catch(err=>{rd.textContent='❌ '+(err.message||'Não foi possível ler a imagem.');});
+  e.target.value='';
+}
+async function analyseLabel(b64){
+  const rd=document.getElementById('scanRes');rd.style.display='block';rd.innerHTML='<div style="color:rgba(255,255,255,.4);font-size:.76rem;">🔍 A analisar etiqueta…</div>';document.getElementById('scanUseBtn').style.display='none';
+  try{
+    const data=await callProxy({model:'claude-haiku-4-5',max_tokens:900,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Lê cuidadosamente a etiqueta desta garrafa. Extrai apenas informação legível ou identificável com confiança. Não inventes colheita, produtor, região ou castas. Responde APENAS JSON sem markdown: {"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto/Licoroso","regiao":"","castas":"","notas":"","confianca":"alta/media/baixa"} . Se não for possível identificar o vinho, usa {"nome":"NÃO RECONHECIDO","motivo":"..."}. Distingue o nome comercial do produtor.'}]}]});
+    const raw=data.content?.map(c=>c.text||'').join('')||'';let p;
+    try{p=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());}catch{p=null;}
+    if(!p||!p.nome||p.nome==='NÃO RECONHECIDO'){rd.innerHTML='<div style="color:rgba(255,100,100,.85);font-size:.76rem;">❌ Não consegui identificar o vinho com segurança. Tenta uma fotografia frontal, nítida e com a etiqueta completa.</div>';return;}
     scanData=p;
-    rd.innerHTML=`<div style="color:var(--gold2);font-weight:700;font-size:.86rem;margin-bottom:.35rem;">${p.nome}</div><div style="color:rgba(255,255,255,.5);font-size:.7rem;line-height:1.6;">${[p.produtor&&`🏡 ${p.produtor}`,p.ano&&`📅 ${p.ano}`,p.tipo&&`🍷 ${p.tipo}`,p.regiao&&`📍 ${p.regiao}`].filter(Boolean).join('<br>')}</div>`;
+    rd.innerHTML='<div style="color:var(--gold2);font-weight:700;font-size:.86rem;margin-bottom:.35rem;">'+atlasEsc(p.nome)+'</div><div style="color:rgba(255,255,255,.65);font-size:.7rem;line-height:1.7;">'+[[p.produtor,'🏡'],[p.ano,'📅'],[p.tipo,'🍷'],[p.regiao,'📍'],[p.castas,'🌿']].filter(x=>x[0]).map(x=>x[1]+' '+atlasEsc(x[0])).join('<br>')+'</div><div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.35rem;">Identificação: '+atlasEsc(p.confianca||'não indicada')+'. Confirma os dados antes de guardar.</div>';
     document.getElementById('scanUseBtn').style.display='block';
-  }catch{rd.innerHTML='<div style="color:rgba(255,100,100,.8);font-size:.76rem;">❌ Erro na análise.</div>';}
+  }catch(err){rd.innerHTML='<div style="color:rgba(255,100,100,.85);font-size:.76rem;">❌ '+atlasEsc(err.message||'Erro na análise da imagem.')+'</div>';}
 }
 function useScan(){
   if(!scanData)return;closeScan();resetForm();
@@ -2113,22 +2135,27 @@ function useScan(){
 
 /* ══ FORM SCANNER ══ */
 async function formScanPhoto(e){
-  const f=e.target.files[0];if(!f)return;
+  const f=e.target.files?.[0];if(!f)return;
   const st=document.getElementById('formScanStatus');st.style.display='block';st.style.color='var(--muted2)';
-  st.innerHTML='<div style="display:flex;align-items:center;gap:.4rem;justify-content:center;"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div> A analisar...</div>';
-  const r=new FileReader();r.onload=async ev=>{
-    const b64=ev.target.result.split(',')[1];
-    try{
-      const data=await callProxy({model:'claude-haiku-4-5',max_tokens:700,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Analisa esta etiqueta de vinho. APENAS JSON sem markdown:\n{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","nota_degustacao":""}\nSe não for etiqueta: {"nome":"NÃO RECONHECIDO"}'}]}]});
-      const raw=data.content?.map(c=>c.text||'').join('')||'';
-      let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
-      if(!p||p.nome==='NÃO RECONHECIDO'){st.style.color='var(--red)';st.textContent='❌ Não reconhecido.';return;}
-      if(p.nome)document.getElementById('fNome').value=p.nome;if(p.produtor)document.getElementById('fProdutor').value=p.produtor;if(p.ano)document.getElementById('fAno').value=p.ano;if(p.regiao)document.getElementById('fRegiao').value=p.regiao;if(p.castas)document.getElementById('fCastas').value=p.castas;if(p.nota_degustacao)document.getElementById('fNotas').value=p.nota_degustacao;
-      if(p.tipo){document.getElementById('fTipo').innerHTML=TIPOS_V.map(t=>`<option${t===p.tipo?' selected':''}>${t}</option>`).join('');renderHarm(p.tipo);}
-      const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const mW=700,sc=Math.min(1,mW/img.width);c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const b=c.toDataURL('image/jpeg',.72);document.getElementById('fFotoB64').value=b;document.getElementById('photoPrev').src=b;document.getElementById('photoPrev').style.display='block';document.getElementById('photoLbl').textContent='✅ Foto da etiqueta';};img.src=ev.target.result;
-      st.style.color='var(--green)';st.innerHTML=`✅ <strong>${p.nome}</strong> identificado!`;
-    }catch{st.style.color='var(--red)';st.textContent='❌ Erro. Verifica ligação.';}
-  };r.readAsDataURL(f);
+  st.textContent='A preparar fotografia…';
+  try{
+    const img=await prepareWineImage(f);
+    st.textContent='A analisar etiqueta…';
+    const data=await callProxy({model:'claude-haiku-4-5',max_tokens:900,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:img.mediaType,data:img.base64}},{type:'text',text:'Lê cuidadosamente a etiqueta desta garrafa. Extrai apenas informação legível ou identificável com confiança. Não inventes colheita, produtor, região ou castas. Responde APENAS JSON sem markdown: {"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto/Licoroso","regiao":"","castas":"","nota_degustacao":"","confianca":"alta/media/baixa"}. Se não for etiqueta ou não for possível identificar: {"nome":"NÃO RECONHECIDO","motivo":"..."}. Distingue nome comercial e produtor.'}]}]});
+    const raw=data.content?.map(c=>c.text||'').join('')||'';let p;
+    try{p=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());}catch{p=null;}
+    if(!p||!p.nome||p.nome==='NÃO RECONHECIDO'){st.style.color='var(--red)';st.textContent='❌ Não consegui identificar a etiqueta. Tenta uma fotografia frontal e nítida.';return;}
+    if(p.nome)document.getElementById('fNome').value=p.nome;
+    if(p.produtor)document.getElementById('fProdutor').value=p.produtor;
+    if(p.ano)document.getElementById('fAno').value=p.ano;
+    if(p.regiao)document.getElementById('fRegiao').value=p.regiao;
+    if(p.castas)document.getElementById('fCastas').value=p.castas;
+    if(p.nota_degustacao)document.getElementById('fNotas').value=p.nota_degustacao;
+    if(p.tipo){document.getElementById('fTipo').innerHTML=TIPOS_V.map(t=>'<option'+(t===p.tipo?' selected':'')+'>'+t+'</option>').join('');renderHarm(p.tipo);}
+    document.getElementById('fFotoB64').value=img.dataUrl;document.getElementById('photoPrev').src=img.dataUrl;document.getElementById('photoPrev').style.display='block';document.getElementById('photoLbl').textContent='✅ Foto da etiqueta';
+    st.style.color='var(--green)';st.textContent='✅ '+p.nome+' identificado. Confirma os dados antes de guardar.';
+  }catch(err){st.style.color='var(--red)';st.textContent='❌ '+(err.message||'Erro na análise.');}
+  finally{e.target.value='';}
 }
 
 /* ══ SHARE ══ */
