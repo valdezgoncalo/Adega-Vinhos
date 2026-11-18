@@ -1905,7 +1905,7 @@ async function saveDiaryNote(){
 /* ══ WINE SEARCH (AI-powered) ══ */
 function wineSearchSources(data){
   const refs=[];(data.content||[]).forEach(block=>{(block.citations||[]).forEach(c=>{if(c.url&&c.title)refs.push({title:c.title,url:c.url});});});
-  const seen=new Set();return refs.filter(r=>/^https?:\\/\\//i.test(r.url)&&!seen.has(r.url)&&seen.add(r.url)).slice(0,5);
+  const seen=new Set();return refs.filter(r=>(r.url.startsWith('https://')||r.url.startsWith('http://'))&&!seen.has(r.url)&&seen.add(r.url)).slice(0,5);
 }
 function wineSearchSourcesHtml(data){const refs=wineSearchSources(data);return refs.length?'<div style="margin-top:.7rem;font-size:.66rem;color:var(--muted2);"><b>Fontes consultadas</b>'+refs.map(r=>'<div><a href="'+atlasEsc(r.url)+'" target="_blank" rel="noopener noreferrer">'+atlasEsc(r.title)+'</a></div>').join('')+'</div>':'<div style="font-size:.65rem;color:var(--muted2);">Sem fontes citáveis devolvidas. Confirma os dados.</div>';}
 
