@@ -845,8 +845,6 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div class="sb-item" onclick="setView('goals')" id="nav-goals"><div class="sb-icon">🎯</div>Objetivos</div>
     <div class="sb-item" onclick="setView('diary')" id="nav-diary"><div class="sb-icon">📓</div>Diário Mensal</div>
     <div class="sb-label">Ferramentas</div>
-    <div class="sb-item" onclick="openScanModal()"><div class="sb-icon">📷</div>Scanner IA</div>
-    <div class="sb-item" onclick="openWineSearch()"><div class="sb-icon">🔎</div>Pesquisar Vinho</div>
     <div class="sb-item" onclick="exportPDF()"><div class="sb-icon">📄</div>Exportar PDF</div>
     <div class="sb-item" onclick="openBackupManager()"><div class="sb-icon">📦</div>Backups e Restauro</div>
     <div class="sb-item" onclick="document.getElementById('importFile').click()"><div class="sb-icon">📥</div>Importar</div>
@@ -923,8 +921,6 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
       <button onclick="closeModal('moreModal');setView('atlas');" class="mbtn">🇵🇹 Atlas do Vinho</button>
       <button onclick="closeModal('moreModal');setView('diary');" class="mbtn" style="background:rgba(2,132,199,.08);color:var(--blue);">📓 Diário</button>
       <button onclick="closeModal('moreModal');setView('sommelier');" class="mbtn">🍽️ Sommelier IA</button>
-      <button onclick="closeModal('moreModal');openWineSearch();" class="mbtn" style="background:rgba(2,132,199,.08);color:var(--blue);">🔎 Pesquisar</button>
-      <button onclick="closeModal('moreModal');openScanModal();" class="mbtn">📷 Scanner</button>
       <button onclick="closeModal('moreModal');exportPDF();" class="mbtn">📄 PDF</button>
       <button onclick="closeModal('moreModal');toggleDark();" class="mbtn" id="darkMenuBtn">🌙 Dark Mode</button>
       <button onclick="closeModal('moreModal');openBackupManager();" class="mbtn">📦 Backups e Restauro</button>
@@ -971,15 +967,6 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
     <div class="dh"><div class="dh-title" id="drawerTitle">Novo Vinho</div><button class="dhx" onclick="closeForm()">✕</button></div>
     <div class="db">
       <input type="hidden" id="editId">
-      <!-- WINE SEARCH -->
-      <div class="wsearch-box" id="wsearchBox">
-        <div class="wsearch-title">🔎 Pesquisar vinho online para preencher automaticamente</div>
-        <div class="wsearch-input-wrap">
-          <input class="fi" type="text" id="wsInput" placeholder="Nome do vinho..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();searchWineInForm();}">
-          <button onclick="searchWineInForm()" style="padding:.55rem .9rem;background:var(--blue);color:white;border:none;border-radius:var(--rsm);cursor:pointer;font-weight:700;font-size:.78rem;flex-shrink:0;">Pesquisar</button>
-        </div>
-        <div id="wsResults" class="wsearch-results"></div>
-      </div>
       <div class="fg"><label class="fl">Nome</label><input class="fi" type="text" id="fNome" placeholder="Ex: Barca Velha 2011"></div>
       <div class="fr c2">
         <div><label class="fl">Tipo</label><select class="fi" id="fTipo" onchange="onTipoChange()"></select></div>
@@ -1051,16 +1038,6 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
         </div>
         <input type="hidden" id="fFotoB64">
       </div>
-      <!-- AI SCANNER IN FORM -->
-      <div class="scan-form-box">
-        <div class="scan-form-title">📷 Scanner de Etiqueta com IA</div>
-        <p style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;">Carrega uma foto da etiqueta — a IA preenche tudo automaticamente.</p>
-        <label style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.6rem;background:var(--wine);color:white;border-radius:var(--rsm);cursor:pointer;font-size:.76rem;font-weight:700;position:relative;">
-          <input type="file" accept="image/*" id="formScanFile" onchange="formScanPhoto(event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
-          📷 Carregar foto da etiqueta
-        </label>
-        <div id="formScanStatus" style="display:none;margin-top:.55rem;font-size:.72rem;text-align:center;"></div>
-      </div>
       <button class="sbtn" onclick="submitForm()">Guardar Registo</button>
     </div>
   </div>
@@ -1112,48 +1089,6 @@ button,.sb-item,.mn-item,.wine-card,.fc,.fcs,.ca,.wbtn,.diary-mnav-btn,.dhx,.mx,
   </div>
 </div>
 
-<!-- WINE SEARCH MODAL -->
-<div class="modal" id="wineSearchModal">
-  <div class="mov" onclick="closeModal('wineSearchModal')"></div>
-  <div class="mbox" style="max-width:520px;">
-    <div class="mh"><h2>🔎 Pesquisar Vinho</h2><button class="mx" onclick="closeModal('wineSearchModal')">✕</button></div>
-    <p style="font-size:.75rem;color:var(--muted);margin-bottom:.85rem;">Pesquisa informação sobre vinhos via IA. Os resultados podem ser adicionados à tua adega.</p>
-    <div style="display:flex;gap:.5rem;margin-bottom:.85rem;">
-      <input class="fi" type="text" id="wsModalInput" placeholder="Nome, produtor, região..." style="flex:1;" onkeydown="if(event.key==='Enter')doWineSearch();">
-      <button onclick="doWineSearch()" style="padding:.6rem 1rem;background:var(--wine);color:white;border:none;border-radius:var(--rsm);cursor:pointer;font-weight:700;white-space:nowrap;">Pesquisar</button>
-    </div>
-    <div id="wsLoad" class="ai-loading" style="display:none;"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>A pesquisar...</span></div>
-    <div id="wsModalResults"></div>
-  </div>
-</div>
-
-<!-- SCAN MODAL -->
-<div class="modal" id="scanModal">
-  <div class="mov" onclick="closeScan()"></div>
-  <div class="scan-inner">
-    <div class="scan-ui" style="border-bottom:1px solid rgba(255,255,255,.07);">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;">Scanner IA 📷</div>
-        <button onclick="closeScan()" style="background:rgba(255,255,255,.07);border:none;color:white;width:28px;height:28px;border-radius:99px;cursor:pointer;">✕</button>
-      </div>
-    </div>
-    <div style="position:relative;background:#111;min-height:150px;display:flex;align-items:center;justify-content:center;">
-      <video id="scanVideo" autoplay muted playsinline></video>
-      <div id="scanPh" style="color:rgba(255,255,255,.28);font-size:.78rem;padding:2rem;text-align:center;"><div style="font-size:1.8rem;margin-bottom:.4rem;">📷</div>Câmara não disponível</div>
-    </div>
-    <div class="scan-ui">
-      <div style="display:flex;gap:.5rem;">
-        <label style="flex:1;padding:.6rem;background:rgba(255,255,255,.06);border-radius:9px;text-align:center;cursor:pointer;font-size:.74rem;color:white;position:relative;">
-          <input type="file" accept="image/*" id="scanUpload" onchange="scanFile(event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;">📁 Carregar
-        </label>
-        <button onclick="scanCapture()" style="flex:1;padding:.6rem;background:var(--wine);color:white;border:none;border-radius:9px;font-weight:700;font-size:.74rem;cursor:pointer;">📸 Capturar</button>
-      </div>
-      <div id="scanRes" class="scan-res" style="display:none;"></div>
-      <button id="scanUseBtn" onclick="useScan()" style="display:none;width:100%;margin-top:.55rem;padding:.65rem;background:var(--gold);color:white;border:none;border-radius:9px;font-weight:700;cursor:pointer;">✓ Usar este vinho</button>
-    </div>
-  </div>
-</div>
-
 <script>
 /* ══ DB ══ */
 // ─────────────────────────────────────────────────────────────
@@ -1189,7 +1124,7 @@ function dbListAll(){return new Promise((r,e)=>{const q=db.transaction(ST,'reado
 /* ══ STATE ══ */
 let dados={vinhos:[],restaurantes:[],wishlist:[],goals:[],diaryNotes:[]};
 let view='vinhos',viewHistory=[],lvMode='grid',mobileGrid=2,fTipo='',fFav=false,cmpSel=[],backup=null;
-let cTags=[],cNotas=[],cHarm=[],cPairings=[],scanStream=null,scanData=null,histIdx=-1,charts={};
+let cTags=[],cNotas=[],cHarm=[],cPairings=[],histIdx=-1,charts={};
 let diaryMonth=new Date().getMonth(),diaryYear=new Date().getFullYear();
 
 const TIPOS_V=['Tinto','Branco','Verde','Rosé','Espumante','Porto','Licoroso','Moscatel'];
@@ -1253,7 +1188,6 @@ function setView(v){
     document.getElementById('fTipo').innerHTML=tipos.map(t=>`<option>${t}</option>`).join('');
     document.getElementById('wineFields').style.display=v==='vinhos'?'':'none';
     document.getElementById('restaFields').style.display=v==='restaurantes'?'':'none';
-    document.getElementById('wsearchBox').style.display=v==='vinhos'?'':'none';
     renderList();
   }
   if(v==='stats')renderStats();
@@ -1525,15 +1459,12 @@ function resetForm(){
   ['fPreco','fStock'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('fEstrelas').value='3';document.getElementById('fFotoB64').value='';
   document.getElementById('photoPrev').style.display='none';document.getElementById('photoLbl').textContent='📷 Arrasta ou clica';
-  document.getElementById('formScanStatus').style.display='none';
-  document.getElementById('wsResults').innerHTML='';document.getElementById('wsInput').value='';
   cTags=[];cNotas=[];cHarm=[];cPairings=[];renderTagChips();renderNotaChips();renderSug();renderPairingsEditor();
   const tipos=view==='vinhos'?TIPOS_V:TIPOS_R;
   document.getElementById('fTipo').innerHTML=tipos.map(t=>`<option>${t}</option>`).join('');
   renderHarm(tipos[0]);
   document.getElementById('wineFields').style.display=view==='vinhos'?'':'none';
   document.getElementById('restaFields').style.display=view==='restaurantes'?'':'none';
-  document.getElementById('wsearchBox').style.display=view==='vinhos'?'':'none';
 }
 function editItem(idx){
   const item=dados[view][idx];resetForm();
@@ -1902,85 +1833,6 @@ async function saveDiaryNote(){
   const s=document.getElementById('saveInd');s.classList.add('show');setTimeout(()=>s.classList.remove('show'),2000);
 }
 
-/* ══ WINE SEARCH (AI-powered) ══ */
-function wineSearchSources(data){
-  const refs=[];(data.content||[]).forEach(block=>{(block.citations||[]).forEach(c=>{if(c.url&&c.title)refs.push({title:c.title,url:c.url});});});
-  const seen=new Set();return refs.filter(r=>(r.url.startsWith('https://')||r.url.startsWith('http://'))&&!seen.has(r.url)&&seen.add(r.url)).slice(0,5);
-}
-function wineSearchSourcesHtml(data){const refs=wineSearchSources(data);return refs.length?'<div style="margin-top:.7rem;font-size:.66rem;color:var(--muted2);"><b>Fontes consultadas</b>'+refs.map(r=>'<div><a href="'+atlasEsc(r.url)+'" target="_blank" rel="noopener noreferrer">'+atlasEsc(r.title)+'</a></div>').join('')+'</div>':'<div style="font-size:.65rem;color:var(--muted2);">Sem fontes citáveis devolvidas. Confirma os dados.</div>';}
-
-function openWineSearch(){openModal('wineSearchModal');setTimeout(()=>document.getElementById('wsModalInput').focus(),300);}
-async function doWineSearch(){
-  const q=document.getElementById('wsModalInput').value.trim();if(!q)return;
-  document.getElementById('wsLoad').style.display='flex';
-  document.getElementById('wsModalResults').innerHTML='';
-  try{
-    const data=await callProxy({enable_web_search:true,model:'claude-haiku-4-5',max_tokens:1200,messages:[{role:'user',content:`Pesquisa na Internet informação verificável sobre o vinho: "${q}". Prioriza fontes oficiais do produtor e fichas técnicas. Não inventes dados nem confundas vinhos homónimos; deixa campos vazios quando não confirmados. Responde APENAS em JSON válido sem markdown:\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","preco_estimado":"","temperatura_servico":"","potencial_guarda":"","harmonizacao":["",""],"rating_estimado":3}]}\nDá até 3 resultados relevantes. Se não encontrares informação: {"resultados":[]}`}]});
-    const raw=data.content?.map(c=>c.text||'').join('')||'';
-    let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
-    document.getElementById('wsLoad').style.display='none';
-    if(!p||!p.resultados?.length){document.getElementById('wsModalResults').innerHTML='<div style="color:var(--muted2);font-size:.8rem;padding:.5rem 0;">Nenhum resultado encontrado. Tenta outro nome.</div>';return;}
-    document.getElementById('wsModalResults').innerHTML=p.resultados.map((r,i)=>`
-      <div class="ws-result" onclick="useWsResult(${i})">
-        <div style="display:flex;justify-content:space-between;align-items:start;">
-          <div class="ws-result-name">${r.nome}</div>
-          <span class="ws-badge">${r.tipo||'?'}</span>
-        </div>
-        <div class="ws-result-meta">${[r.produtor,r.regiao,r.ano].filter(Boolean).join(' · ')}</div>
-        ${r.descricao?`<div style="font-size:.7rem;color:var(--muted);margin-top:.3rem;font-style:italic;">${r.descricao.slice(0,100)}...</div>`:''}
-        <div class="ws-result-rating">
-          <span class="ws-vivino-rating">★ ${r.rating_estimado}/5</span>
-          ${r.preco_estimado?`<span style="font-size:.65rem;color:var(--gold);font-weight:600;">${r.preco_estimado}</span>`:''}
-          ${r.temperatura_servico?`<span style="font-size:.62rem;color:var(--muted2);">🌡️ ${r.temperatura_servico}</span>`:''}
-        </div>
-        <div style="font-size:.65rem;color:var(--blue);margin-top:.3rem;font-weight:600;">Clica para adicionar à adega →</div>
-      </div>`).join('');
-    window._wsResults=p.resultados;
-    document.getElementById('wsModalResults').insertAdjacentHTML('beforeend',wineSearchSourcesHtml(data));
-  }catch{document.getElementById('wsLoad').style.display='none';document.getElementById('wsModalResults').innerHTML='<div style="color:var(--red);font-size:.8rem;">Erro na pesquisa. Verifica a ligação.</div>';}
-}
-function useWsResult(i){
-  const r=window._wsResults[i];closeModal('wineSearchModal');resetForm();
-  document.getElementById('fNome').value=r.nome||'';
-  document.getElementById('fProdutor').value=r.produtor||'';
-  document.getElementById('fAno').value=r.ano||'';
-  document.getElementById('fRegiao').value=r.regiao||'';
-  document.getElementById('fCastas').value=r.castas||'';
-  document.getElementById('fNotas').value=r.descricao||'';
-  document.getElementById('fEstrelas').value=r.rating_estimado||3;
-  const tipos=TIPOS_V;document.getElementById('fTipo').innerHTML=tipos.map(t=>`<option${t===r.tipo?' selected':''}>${t}</option>`).join('');
-  if(r.harmonizacao?.length){cHarm=[...r.harmonizacao.slice(0,4)];}
-  renderHarm(r.tipo||'Tinto');
-  document.getElementById('drawerTitle').textContent='Vinho Pesquisado';
-  document.getElementById('formPanel').classList.add('open');document.body.style.overflow='hidden';
-  setView('vinhos');
-}
-async function searchWineInForm(){
-  const q=document.getElementById('wsInput').value.trim();if(!q)return;
-  const res=document.getElementById('wsResults');res.innerHTML='<div style="color:var(--muted2);font-size:.72rem;">A pesquisar...</div>';
-  try{
-    const data=await callProxy({enable_web_search:true,model:'claude-haiku-4-5',max_tokens:800,messages:[{role:'user',content:`Pesquisa na Internet informação verificável sobre o vinho "${q}". Prioriza fontes oficiais e não inventes dados. Responde APENAS em JSON válido:\n{"resultados":[{"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto","regiao":"","castas":"","descricao":"","rating_estimado":3}]}`}]});
-    const raw=data.content?.map(c=>c.text||'').join('')||'';
-    let p;try{p=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{p=null;}
-    if(!p||!p.resultados?.length){res.innerHTML='<div style="color:var(--muted2);font-size:.72rem;">Sem resultados.</div>';return;}
-    window._wsFormResults=p.resultados;
-    res.innerHTML=p.resultados.slice(0,3).map((r,i)=>`<div class="wr-item" onclick="fillFromSearch(${i})"><div class="wr-name">${r.nome}</div><div class="wr-meta">${[r.produtor,r.regiao,r.ano,r.tipo].filter(Boolean).join(' · ')}</div></div>`).join('');
-  }catch{res.innerHTML='<div style="color:var(--red);font-size:.72rem;">Erro na pesquisa.</div>';}
-}
-function fillFromSearch(i){
-  const r=window._wsFormResults[i];
-  document.getElementById('fNome').value=r.nome||'';
-  document.getElementById('fProdutor').value=r.produtor||'';
-  document.getElementById('fAno').value=r.ano||'';
-  document.getElementById('fRegiao').value=r.regiao||'';
-  document.getElementById('fCastas').value=r.castas||'';
-  if(r.descricao)document.getElementById('fNotas').value=r.descricao;
-  document.getElementById('fEstrelas').value=r.rating_estimado||3;
-  const tipos=TIPOS_V;document.getElementById('fTipo').innerHTML=tipos.map(t=>`<option${t===r.tipo?' selected':''}>${t}</option>`).join('');
-  renderHarm(r.tipo||'Tinto');
-  document.getElementById('wsResults').innerHTML='<div style="color:var(--green);font-size:.72rem;font-weight:700;">✅ Campos preenchidos!</div>';
-}
-
 /* ══ HISTORY ══ */
 function openHist(idx){
   histIdx=idx;const item=dados[view][idx];
@@ -2094,77 +1946,6 @@ async function askSommelier(){
   }catch(err){result.textContent='Não foi possível contactar o Sommelier IA. '+(err.message||'Verifica a ligação e tenta novamente.');}
   finally{btn.disabled=false;btn.textContent='Analisar harmonização completa ✨';}
 }
-/* ══ SCANNER ══ */
-async function openScanModal(){scanData=null;document.getElementById('scanRes').style.display='none';document.getElementById('scanUseBtn').style.display='none';openModal('scanModal');try{scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});const v=document.getElementById('scanVideo');v.srcObject=scanStream;v.style.display='block';document.getElementById('scanPh').style.display='none';}catch{}}
-function closeScan(){if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}const v=document.getElementById('scanVideo');v.srcObject=null;v.style.display='none';document.getElementById('scanPh').style.display='block';closeModal('scanModal');}
-async function scanCapture(){const v=document.getElementById('scanVideo');if(!v.srcObject){document.getElementById('scanUpload').click();return;}const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);await analyseLabel(c.toDataURL('image/jpeg',.8).split(',')[1]);}
-async function scanFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>await analyseLabel(ev.target.result.split(',')[1]);r.readAsDataURL(f);}
-async function prepareWineImage(file){
-  if(!file||!file.type?.startsWith('image/'))throw new Error('Seleciona um ficheiro de imagem válido.');
-  let bitmap;
-  try{bitmap=await createImageBitmap(file);}catch{throw new Error('Não foi possível abrir esta imagem. Experimenta JPG ou PNG.');}
-  try{
-    const max=1400,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
-    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-    const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Não foi possível preparar a fotografia.');
-    ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-    let dataUrl=canvas.toDataURL('image/jpeg',.82);
-    if(dataUrl.length>7_500_000)dataUrl=canvas.toDataURL('image/jpeg',.65);
-    if(dataUrl.length>8_000_000)throw new Error('A imagem continua demasiado grande. Escolhe uma fotografia mais pequena.');
-    return {dataUrl,base64:dataUrl.split(',')[1],mediaType:'image/jpeg'};
-  }finally{bitmap.close?.();}
-}
-function scanFile(e){
-  const f=e.target.files?.[0];if(!f)return;
-  const rd=document.getElementById('scanRes');rd.style.display='block';rd.textContent='A preparar fotografia…';
-  prepareWineImage(f).then(img=>analyseLabel(img.base64)).catch(err=>{rd.textContent='❌ '+(err.message||'Não foi possível ler a imagem.');});
-  e.target.value='';
-}
-async function analyseLabel(b64){
-  const rd=document.getElementById('scanRes');rd.style.display='block';rd.innerHTML='<div style="color:rgba(255,255,255,.4);font-size:.76rem;">🔍 A analisar etiqueta…</div>';document.getElementById('scanUseBtn').style.display='none';
-  try{
-    const data=await callProxy({model:'claude-haiku-4-5',max_tokens:900,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'Lê cuidadosamente a etiqueta desta garrafa. Extrai apenas informação legível ou identificável com confiança. Não inventes colheita, produtor, região ou castas. Responde APENAS JSON sem markdown: {"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto/Licoroso","regiao":"","castas":"","notas":"","confianca":"alta/media/baixa"} . Se não for possível identificar o vinho, usa {"nome":"NÃO RECONHECIDO","motivo":"..."}. Distingue o nome comercial do produtor.'}]}]});
-    const raw=data.content?.map(c=>c.text||'').join('')||'';let p;
-    try{p=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());}catch{p=null;}
-    if(!p||!p.nome||p.nome==='NÃO RECONHECIDO'){rd.innerHTML='<div style="color:rgba(255,100,100,.85);font-size:.76rem;">❌ Não consegui identificar o vinho com segurança. Tenta uma fotografia frontal, nítida e com a etiqueta completa.</div>';return;}
-    scanData=p;
-    rd.innerHTML='<div style="color:var(--gold2);font-weight:700;font-size:.86rem;margin-bottom:.35rem;">'+atlasEsc(p.nome)+'</div><div style="color:rgba(255,255,255,.65);font-size:.7rem;line-height:1.7;">'+[[p.produtor,'🏡'],[p.ano,'📅'],[p.tipo,'🍷'],[p.regiao,'📍'],[p.castas,'🌿']].filter(x=>x[0]).map(x=>x[1]+' '+atlasEsc(x[0])).join('<br>')+'</div><div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.35rem;">Identificação: '+atlasEsc(p.confianca||'não indicada')+'. Confirma os dados antes de guardar.</div>';
-    document.getElementById('scanUseBtn').style.display='block';
-  }catch(err){rd.innerHTML='<div style="color:rgba(255,100,100,.85);font-size:.76rem;">❌ '+atlasEsc(err.message||'Erro na análise da imagem.')+'</div>';}
-}
-function useScan(){
-  if(!scanData)return;closeScan();resetForm();
-  document.getElementById('fNome').value=scanData.nome||'';document.getElementById('fProdutor').value=scanData.produtor||'';document.getElementById('fAno').value=scanData.ano||'';document.getElementById('fRegiao').value=scanData.regiao||'';document.getElementById('fCastas').value=scanData.castas||'';document.getElementById('fNotas').value=scanData.notas||'';document.getElementById('fEstrelas').value=scanData.avaliacao_estimada||3;
-  document.getElementById('fTipo').innerHTML=TIPOS_V.map(t=>`<option${t===scanData.tipo?' selected':''}>${t}</option>`).join('');renderHarm(scanData.tipo||'Tinto');
-  document.getElementById('drawerTitle').textContent='Vinho Identificado pela IA';
-  document.getElementById('formPanel').classList.add('open');document.body.style.overflow='hidden';setView('vinhos');
-}
-
-/* ══ FORM SCANNER ══ */
-async function formScanPhoto(e){
-  const f=e.target.files?.[0];if(!f)return;
-  const st=document.getElementById('formScanStatus');st.style.display='block';st.style.color='var(--muted2)';
-  st.textContent='A preparar fotografia…';
-  try{
-    const img=await prepareWineImage(f);
-    st.textContent='A analisar etiqueta…';
-    const data=await callProxy({model:'claude-haiku-4-5',max_tokens:900,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:img.mediaType,data:img.base64}},{type:'text',text:'Lê cuidadosamente a etiqueta desta garrafa. Extrai apenas informação legível ou identificável com confiança. Não inventes colheita, produtor, região ou castas. Responde APENAS JSON sem markdown: {"nome":"","produtor":"","ano":"","tipo":"Tinto/Branco/Verde/Rosé/Espumante/Porto/Licoroso","regiao":"","castas":"","nota_degustacao":"","confianca":"alta/media/baixa"}. Se não for etiqueta ou não for possível identificar: {"nome":"NÃO RECONHECIDO","motivo":"..."}. Distingue nome comercial e produtor.'}]}]});
-    const raw=data.content?.map(c=>c.text||'').join('')||'';let p;
-    try{p=JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());}catch{p=null;}
-    if(!p||!p.nome||p.nome==='NÃO RECONHECIDO'){st.style.color='var(--red)';st.textContent='❌ Não consegui identificar a etiqueta. Tenta uma fotografia frontal e nítida.';return;}
-    if(p.nome)document.getElementById('fNome').value=p.nome;
-    if(p.produtor)document.getElementById('fProdutor').value=p.produtor;
-    if(p.ano)document.getElementById('fAno').value=p.ano;
-    if(p.regiao)document.getElementById('fRegiao').value=p.regiao;
-    if(p.castas)document.getElementById('fCastas').value=p.castas;
-    if(p.nota_degustacao)document.getElementById('fNotas').value=p.nota_degustacao;
-    if(p.tipo){document.getElementById('fTipo').innerHTML=TIPOS_V.map(t=>'<option'+(t===p.tipo?' selected':'')+'>'+t+'</option>').join('');renderHarm(p.tipo);}
-    document.getElementById('fFotoB64').value=img.dataUrl;document.getElementById('photoPrev').src=img.dataUrl;document.getElementById('photoPrev').style.display='block';document.getElementById('photoLbl').textContent='✅ Foto da etiqueta';
-    st.style.color='var(--green)';st.textContent='✅ '+p.nome+' identificado. Confirma os dados antes de guardar.';
-  }catch(err){st.style.color='var(--red)';st.textContent='❌ '+(err.message||'Erro na análise.');}
-  finally{e.target.value='';}
-}
-
 /* ══ SHARE ══ */
 async function shareCard(idx){
   const item=dados[view][idx];const canvas=document.getElementById('shareCanvas');const ctx=canvas.getContext('2d');
@@ -2276,7 +2057,7 @@ async function exportPDF(){
 
 /* ══ MODAL HELPERS ══ */
 function openModal(id){history.pushState({modal:id},'');document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
-function closeModal(id){document.getElementById(id).classList.remove('open');if(id==='scanModal')closeScan();document.body.style.overflow='';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
 function moreMenu(){openModal('moreModal');}
 function openSearch(){document.getElementById('searchWrap').classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),100);}
 function closeSearch(){document.getElementById('searchWrap').classList.remove('open');document.getElementById('searchInput').value='';renderList();}
