@@ -52,7 +52,11 @@ export default async function handler(req, res) {
         }
       }
     }
-    const body = JSON.stringify({ model: input.model, max_tokens: maxTokens, messages: input.messages });
+    const requestBody = { model: input.model, max_tokens: maxTokens, messages: input.messages };
+    if (input.enable_web_search === true) {
+      requestBody.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }];
+    }
+    const body = JSON.stringify(requestBody);
     const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body });
     const data = await response.json();
     return res.status(response.status).json(data);
